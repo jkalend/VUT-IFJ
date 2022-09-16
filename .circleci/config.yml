@@ -8,11 +8,6 @@ environment:
 orbs:
   codecov: codecov/codecov@3.2.2
 
-parameters:
-  codecov_token:
-    type: env_var_name
-    default: CODECOV_TOKEN
-
 commands:
   prepare_env:
     steps:
