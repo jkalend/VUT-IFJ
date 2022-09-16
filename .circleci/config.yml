@@ -30,6 +30,7 @@ commands:
     steps:
       - codecov/upload:
           xtra_args: '--gcov'
+          token: << parameters.token >>
 
 
 # Define a job to be invoked later in a workflow.
