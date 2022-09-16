@@ -15,8 +15,11 @@ jobs:
     steps:
       - checkout
       - run:
+          name: "Create bin directory"
+          command: "mkdir -p bin"
+      - run:
           name: "Compile"
-          command: "gcc src/hello_world.c -o bin/hello_world"
+          command: "clang src/hello_world.c -o bin/hello_world"
       - run:
             name: "Run"
             command: "bin/hello_world"
