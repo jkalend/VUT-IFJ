@@ -6,7 +6,7 @@ environment:
   CODECOV_TOKEN: "08f6afd7-6b12-41b3-8922-a06b44826d96"
 
 orbs:
-  codecov: codecov/codecov@3.2.2
+  codecov: codecov/codecov@3.2.3
 
 commands:
   prepare_env:
