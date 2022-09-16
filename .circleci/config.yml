@@ -2,9 +2,6 @@
 # See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
 
-environment:
-  CODECOV_TOKEN: "08f6afd7-6b12-41b3-8922-a06b44826d96"
-
 orbs:
   codecov: codecov/codecov@3.2.3
 
@@ -21,6 +18,8 @@ commands:
             sudo apt-get install -y clang
 
   coverage:
+    context:
+        - codecov_token
     steps:
       - codecov/upload:
           xtra_args: '--gcov'
