@@ -23,7 +23,6 @@ commands:
           name: "Install lcov"
           command: |
               sudo apt-get install -y lcov
-              sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-7 90
       - run:
           name: "Update gcov"
           command: |
