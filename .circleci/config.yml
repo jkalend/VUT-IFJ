@@ -18,14 +18,11 @@ commands:
             sudo apt-get install -y clang
 
   coverage:
-    parameters:
-      token:
-        type: string
-        default: "08f6afd7-6b12-41b3-8922-a06b44826d96"
+    environment:
+      CODECOV_TOKEN: "08f6afd7-6b12-41b3-8922-a06b44826d96"
     steps:
       - codecov/upload:
           xtra_args: '--gcov'
-          token: << parameters.token >>
 
 
 # Define a job to be invoked later in a workflow.
