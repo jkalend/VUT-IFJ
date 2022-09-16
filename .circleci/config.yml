@@ -19,19 +19,11 @@ commands:
           command: |
             sudo apt-get update
             sudo apt-get install -y clang
-      - run:
-          name: "Install lcov"
-          command: |
-              sudo apt-get install -y lcov
-      - run:
-          name: "Update gcov"
-          command: |
-            sudo apt-get install gcov
 
   coverage:
     steps:
       - codecov/upload:
-          xtra_args: -g
+          xtra_args: '--gcov'
 
 
 # Define a job to be invoked later in a workflow.
@@ -49,7 +41,7 @@ jobs:
       - prepare_env
       - run:
           name: "Compile"
-          command: "clang --coverage src/hello_world.c -o bin/hello_world"
+          command: "gcc --coverage src/hello_world.c -o bin/hello_world"
       - run:
             name: "Run"
             command: "bin/hello_world"
