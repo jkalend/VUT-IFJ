@@ -18,8 +18,7 @@ commands:
             sudo apt-get install -y clang
 
   coverage:
-    context:
-        - codecov_token
+    context: codecov_token
     steps:
       - codecov/upload:
           xtra_args: '--gcov'
