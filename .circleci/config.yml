@@ -19,6 +19,16 @@ commands:
           command: |
             sudo apt-get update
             sudo apt-get install -y clang
+      - run:
+          name: "Install lcov"
+          command: |
+              sudo apt-get install -y lcov
+              sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-7 90
+      - run:
+          name: "Update gcov"
+          command: |
+            sudo apt-get install gcov
+
   coverage:
     steps:
       - codecov/upload:
