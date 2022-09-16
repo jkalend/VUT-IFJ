@@ -19,8 +19,8 @@ commands:
 
   coverage:
     steps:
+      - context: codecov_token
       - codecov/upload:
-          context: codecov_token
           xtra_args: '--gcov'
 
 
