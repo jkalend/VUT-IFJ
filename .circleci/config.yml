@@ -2,6 +2,19 @@
 # See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
 
+commands:
+  prepare_env:
+    steps:
+      - run:
+          name: "Create bin directory"
+          command: "mkdir -p bin"
+      - run:
+          name: "Install clang"
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y clang
+
+
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
@@ -14,9 +27,7 @@ jobs:
     # See: https://circleci.com/docs/2.0/configuration-reference/#steps
     steps:
       - checkout
-      - run:
-          name: "Create bin directory"
-          command: "mkdir -p bin"
+      - prepare_env
       - run:
           name: "Compile"
           command: "clang src/hello_world.c -o bin/hello_world"
