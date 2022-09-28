@@ -11,10 +11,10 @@
 
 int main()
 {
-    TData *a = malloc(sizeof(TData*));
+    TData *a = malloc(sizeof(TData));
     a->x = 5;
-    TData *check = malloc(sizeof(TData*));
-    TStack *S = malloc(sizeof(TStack*));
+    TData *check = malloc(sizeof(TData));
+    TStack *S = malloc(sizeof(TStack));
 
     stack_init(S);//SUKSESS I GUESS
 

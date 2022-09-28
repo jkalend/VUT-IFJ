@@ -15,7 +15,7 @@ void stack_init(TStack *stack)
 
 void stack_push(TStack *stack, TData *data)
 {
-    TElement *newElement = malloc(sizeof(TElement*));
+    TElement *newElement = malloc(sizeof(TElement));
     if(newElement == NULL)
     {
         //SOME ERROR HANDLING FEATURE TBD
