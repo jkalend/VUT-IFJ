@@ -6,6 +6,7 @@
 #ifndef __STACK_H__
 #define __STACK_H__
 #include <stdbool.h>
+#include <stdlib.h>
 
 //PLACEHOLDER STRUCT
 typedef struct tdata {
@@ -23,10 +24,13 @@ typedef struct tstack{
     TElement *topPtr;
 }TStack;
 
-void stack_init();
-void stack_push();
-void stack_pop();
-TData stack_top();
-bool stack_isEmpty();
+void stack_init(TStack *stack);
+
+void stack_push(TStack *stack, TData *data);
+//Removes one element from stack
+void stack_pop(TStack *stack);
+//Reads element from stack without removing it
+TData *stack_top(TStack *stack);
+bool stack_isEmpty(TStack *stack);
 
 #endif  // __STACK_H__
