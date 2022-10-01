@@ -26,16 +26,16 @@ commands:
           command: |
             sudo apt-get update
             sudo apt-get install -y cmake
-      - run:
-          name: "Update Cmake"
-          command: |
-            curl -OL https://github.com/Kitware/CMake/releases/download/v3.24.2/cmake-3.24.2.tar.gz
-            tar -xzf cmake-3.24.2.tar.gz
-            cd cmake-3.24.2
-            cmake .
-            make
-            sudo make install
-          when: never
+#      - run:
+#          name: "Update Cmake"
+#          command: |
+#            curl -OL https://github.com/Kitware/CMake/releases/download/v3.24.2/cmake-3.24.2.tar.gz
+#            tar -xzf cmake-3.24.2.tar.gz
+#            cd cmake-3.24.2
+#            cmake .
+#            make
+#            sudo make install
+#          when: never
 
   coverage:
     steps:
