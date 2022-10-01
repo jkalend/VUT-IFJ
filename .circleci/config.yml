@@ -56,4 +56,4 @@ jobs:
 workflows:
   say-hello-workflow:
     jobs:
-      - say-hello
+      - stack_test_cmake
