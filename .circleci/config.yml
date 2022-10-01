@@ -59,7 +59,7 @@ jobs:
           command: "cmake -B build -S . && cmake --build build"
       - run:
           name: "Run tests"
-          command: "ctest -C Debug -T test --force-new-ctest-process"
+          command: "cd build && ctest -C Debug -T test"
       - run:
           name: "Get Coverage"
           command: "gcov stack.c stack.h stack_test.c"
