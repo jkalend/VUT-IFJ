@@ -26,10 +26,17 @@ commands:
           command: |
             sudo apt-get update
             sudo apt-get install -y cmake
+            curl -OL https://github.com/Kitware/CMake/releases/download/v3.24.2/cmake-3.24.2.tar.gz
+            tar -xzf cmake-3.24.2.tar.gz
+            cd cmake-3.24.2
+            cmake .
+            make
+            sudo make install
 
   coverage:
     steps:
-      - codecov/upload
+      - codecov/upload:
+          xtra_args: '--gcov'
 
 
 # Define a job to be invoked later in a workflow.
@@ -48,7 +55,10 @@ jobs:
           command: "cmake -B build -S . && cmake --build build"
       - run:
           name: "Run tests"
-          command: "ctest -C Debug -T test --output-junit ../../test_results.xml --force-new-ctest-process"
+          command: "ctest -C Debug -T test --output-junit test_results.xml --force-new-ctest-process --coverage"
+      - run:
+          name: "Get Coverage"
+          command: "gcov src/stack.c"
       - coverage
 
 # Invoke jobs via workflows

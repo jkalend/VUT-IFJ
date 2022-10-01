@@ -1,7 +1,9 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.23)
 project(IFJ C)
 
 set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_COMPILER gcc)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage -g -O0 -pedantic -Wall -Wextra")
 
 include_directories(.)
 include_directories(src)
