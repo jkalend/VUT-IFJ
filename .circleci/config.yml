@@ -48,7 +48,7 @@ jobs:
           command: "cmake -B build -S . && cmake --build build"
       - run:
           name: "Run tests"
-          command: "ctest -C Debug -T test --output-junit test_results.xml"
+          command: "ctest -C Debug -T test --output-junit ../../test_results.xml --force-new-ctest-process"
       - coverage
 
 # Invoke jobs via workflows
