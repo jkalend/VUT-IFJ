@@ -50,7 +50,6 @@ jobs:
           name: "Run tests"
           command: "ctest -C Debug -T test --output-junit test_results.xml"
       - coverage
-    when: always
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
