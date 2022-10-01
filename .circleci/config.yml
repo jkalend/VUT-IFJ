@@ -26,7 +26,6 @@ commands:
           command: |
             sudo apt-get update
             sudo apt-get install -y cmake
-
       - run:
           name: "Update Cmake"
           command: |
@@ -63,7 +62,7 @@ jobs:
           command: "ctest -C Debug -T test --force-new-ctest-process"
       - run:
           name: "Get Coverage"
-          command: "gcov src/stack.c"
+          command: "gcov stack.c"
       - coverage
 
 # Invoke jobs via workflows
