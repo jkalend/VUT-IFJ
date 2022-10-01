@@ -1,0 +1,58 @@
+//
+// Created by Kalenda, Jan on 01.10.2022.
+//
+
+#include "stack.h"
+#include <assert.h>
+
+
+int test1(TStack*S, TData *a, TData *b, TData *c) {
+    stack_init(S);
+    assert(stack_isEmpty(S));
+    stack_push(S, a);
+    assert(!stack_isEmpty(S));
+    assert(stack_top(S) == a);
+    stack_push(S, b);
+    assert(!stack_isEmpty(S));
+    assert(stack_top(S) == b);
+    stack_push(S, c);
+    assert(!stack_isEmpty(S));
+    assert(stack_top(S) == c);
+    return 0;
+}
+
+int test2(TStack*S, TData *a, TData *b, TData *c) {
+    stack_init(S);
+    assert(stack_isEmpty(S));
+    stack_push(S, a);
+    assert(!stack_isEmpty(S));
+    assert(stack_top(S) == a);
+    stack_push(S, b);
+    assert(!stack_isEmpty(S));
+    assert(stack_top(S) == b);
+    stack_push(S, c);
+    assert(!stack_isEmpty(S));
+    assert(stack_top(S) == c);
+    stack_pop(S);
+    assert(!stack_isEmpty(S));
+    assert(stack_top(S) == b);
+    stack_pop(S);
+    assert(!stack_isEmpty(S));
+    assert(stack_top(S) == a);
+    stack_pop(S);
+    assert(stack_isEmpty(S));
+    return 0;
+}
+
+int main() {
+    TStack *S = malloc(sizeof(TStack));
+    TData *a = malloc(sizeof(TData));
+    TData *b = malloc(sizeof(TData));
+    TData *c = malloc(sizeof(TData));
+    a->x = 5;
+    b->x = 6;
+    c->x = 7;
+
+
+    return test1(S, a, b, c) || test2(S, a, b, c);
+}
