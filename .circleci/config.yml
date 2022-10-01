@@ -26,12 +26,17 @@ commands:
           command: |
             sudo apt-get update
             sudo apt-get install -y cmake
+
+      - run:
+          name: "Update Cmake"
+          command: |
             curl -OL https://github.com/Kitware/CMake/releases/download/v3.24.2/cmake-3.24.2.tar.gz
             tar -xzf cmake-3.24.2.tar.gz
             cd cmake-3.24.2
             cmake .
             make
             sudo make install
+          when: never
 
   coverage:
     steps:
@@ -55,7 +60,7 @@ jobs:
           command: "cmake -B build -S . && cmake --build build"
       - run:
           name: "Run tests"
-          command: "ctest -C Debug -T test --output-junit test_results.xml --force-new-ctest-process --coverage"
+          command: "ctest -C Debug -T test --force-new-ctest-process"
       - run:
           name: "Get Coverage"
           command: "gcov src/stack.c"
