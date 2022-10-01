@@ -62,7 +62,7 @@ jobs:
           command: "ctest -C Debug -T test --force-new-ctest-process"
       - run:
           name: "Get Coverage"
-          command: "gcov stack.c"
+          command: "gcov stack.c stack.h stack_test.c"
       - coverage
 
 # Invoke jobs via workflows
