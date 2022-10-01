@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 project(IFJ C)
 
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/externals/CMake-codecov/cmake" ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/externals" ${CMAKE_MODULE_PATH})
 find_package(codecov)
 
 
