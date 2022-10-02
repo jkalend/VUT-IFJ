@@ -101,7 +101,7 @@ int test2(TStack*S, TData *a, TData *b, TData *c) {
     return 0;
 }
 
-int main() {
+int main(void) {
     TStack *S = malloc(sizeof(TStack));
     TData *a = malloc(sizeof(TData));
     TData *b = malloc(sizeof(TData));

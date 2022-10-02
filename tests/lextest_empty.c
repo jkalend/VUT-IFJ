@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
-int main(void) {
+int test_empty(void) {
     stream = fopen("empty_test_file.txt", "w");
     fclose(stream);
     stream = fopen("empty_test_file.txt", "r");
@@ -16,4 +16,11 @@ int main(void) {
     assert(token->type == T_EOF);
     free(token);
     fclose(stream);
+    return 0;
 }
+
+#ifndef LEX_ALL
+int main(void) {
+    return test_empty();
+}
+#endif //LEX_ALL
