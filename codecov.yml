@@ -1,42 +1,29 @@
 coverage:
   range: 60..80
   status:
-    project:
-      scanner:
-        paths:
-          - src/scanner*
-          - tests/lex*
-        flags:
-          - scanner
-        target: 80%
-        threshold: 15%
-      stack:
-        paths:
-          - tests/stack*
-          - src/stack*
-        flags:
-          - stack
-        target: 80%
-        threshold: 5%
-    patch:
-      default:
-        enabled: true
-        target: 90%
-        threshold: 5%
-        if_ci_failed: error
-        if_not_found: error
-        if_unhealthy: error
-        if_no_uploads: error
-        informational: true
+    project: off
+    patch: off
+    changes: off
 
+comment:
+  graph: sunburst
+  layout: header, diff, changes, sunburst, flags, files, footer
+  behavior: default
+  require_changes: false
 
 flags:
   scanner:
     paths:
       - src/scanner*
       - tests/lex*
+    target: 80%
+    threshold: 5%
     carryforward: true
   stack:
     paths:
       - tests/stack*
       - src/stack*
+    target: 80%
+    threshold: 5%
+    informational: true
+    carryforward: true
