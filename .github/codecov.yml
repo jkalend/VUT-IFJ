@@ -11,6 +11,8 @@ coverage:
         if_no_uploads: error
         informational: false
     project:
+      target: 80%
+      threshold: 5%
       scanner:
         paths:
           - src/scanner*
