@@ -11,4 +11,3 @@ int get_token(Token *token) {
     }
     return 0;
 }
-
