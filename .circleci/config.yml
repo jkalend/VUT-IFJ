@@ -13,26 +13,26 @@ parameters:
 commands:
   prepare_env:
     steps:
-#      - run:
-#          name: "Install clang"
-#          command: |
-#            sudo apt-get update
-#            sudo apt-get install -y clang
+      #      - run:
+      #          name: "Install clang"
+      #          command: |
+      #            sudo apt-get update
+      #            sudo apt-get install -y clang
       - run:
           name: "Install cmake"
           command: |
             sudo apt-get update
             sudo apt-get install -y cmake
-#      - run:
-#          name: "Update Cmake"
-#          command: |
-#            curl -OL https://github.com/Kitware/CMake/releases/download/v3.24.2/cmake-3.24.2.tar.gz
-#            tar -xzf cmake-3.24.2.tar.gz
-#            cd cmake-3.24.2
-#            cmake .
-#            make
-#            sudo make install
-#          when: never
+  #      - run:
+  #          name: "Update Cmake"
+  #          command: |
+  #            curl -OL https://github.com/Kitware/CMake/releases/download/v3.24.2/cmake-3.24.2.tar.gz
+  #            tar -xzf cmake-3.24.2.tar.gz
+  #            cd cmake-3.24.2
+  #            cmake .
+  #            make
+  #            sudo make install
+  #          when: never
 
   coverage:
     steps:
@@ -40,8 +40,6 @@ commands:
           xtra_args: '--gcov'
 
 
-# Define a job to be invoked later in a workflow.
-# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
   stack_test_cmake:
     docker:
@@ -77,11 +75,9 @@ jobs:
           command: "cd build && ctest -C Debug -T test -R lexer"
       - run:
           name: "Get Coverage"
-          command: "gcov stack.c stack.h stack_test.c"
+          command: "gcov scanner.c scanner.h lextest_empty.c"
       - coverage
 
-# Invoke jobs via workflows
-# See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
   Tests:
     jobs:
