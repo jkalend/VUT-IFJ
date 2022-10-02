@@ -1,5 +1,7 @@
 coverage:
   status:
+    patch:
+      threshold: 5%
     project:
       scanner:
         paths:
