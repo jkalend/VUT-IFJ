@@ -23,6 +23,11 @@ commands:
           command: |
             sudo apt-get update
             sudo apt-get install -y cmake
+      - run:
+          name: "Install lcov"
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y lcov
   #      - run:
   #          name: "Update Cmake"
   #          command: |
@@ -36,8 +41,7 @@ commands:
 
   coverage:
     steps:
-      - codecov/upload:
-          xtra_args: '--gcov'
+      - codecov/upload
 
 jobs:
   cppcheck:
@@ -73,7 +77,10 @@ jobs:
           command: "cd build && ctest -C Debug -T test -R stack_test"
       - run:
           name: "Get Coverage"
-          command: "gcov stack.c stack.h stack_test.c"
+          command: |
+            lcov --directory . --capture --output-file coverage.info
+            lcov --remove coverage.info '/usr/*' "${HOME}"'/.cache/*' --output-file coverage.info
+            lcov --list coverage.info
       - coverage
 
   scanner_test_granular_cmake:
@@ -92,7 +99,10 @@ jobs:
           command: "cd build && ctest -C Debug -T test -R lexer -E all"
       - run:
           name: "Get Coverage"
-          command: "gcov scanner.c scanner.h lextest_empty.c"
+          command: |
+            lcov --directory . --capture --output-file coverage.info
+            lcov --remove coverage.info '/usr/*' "${HOME}"'/.cache/*' --output-file coverage.info
+            lcov --list coverage.info
       - coverage
 
   all_scanner_tests_cmake:
@@ -111,7 +121,10 @@ jobs:
           command: "cd build && ctest -C Debug -T test -R all_tests_lexer"
       - run:
           name: "Get Coverage"
-          command: "gcov scanner.c scanner.h lextest_empty.c"
+          command: |
+            lcov --directory . --capture --output-file coverage.info
+            lcov --remove coverage.info '/usr/*' "${HOME}"'/.cache/*' --output-file coverage.info
+            lcov --list coverage.info
       - coverage
 
 workflows:

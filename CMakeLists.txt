@@ -4,8 +4,6 @@ project(IFJ C)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/externals" ${CMAKE_MODULE_PATH})
 find_package(codecov)
 
-
-
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_COMPILER gcc)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage -g -O0 -pedantic -Wall -Wextra")
@@ -18,7 +16,7 @@ set(SCANNER src/scanner.c src/scanner.h src/error.h)
 set(LEX_ALL tests/lextest_empty.c tests/lex_all.c tests/lex_all.h)
 
 add_executable(test_stack
-        tests/stack_test.c src/stack.h src/stack.c tests/stack_test.c)
+        tests/stack_test.c src/stack.h src/stack.c)
 add_coverage(test_stack)
 
 add_executable(all_tests_lexer

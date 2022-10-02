@@ -5,6 +5,7 @@
 #include "scanner.h"
 #include "error.h"
 #include <stdlib.h>
+#include <assert.h>
 
 int test_empty(void) {
     stream = fopen("empty_test_file.txt", "w");
@@ -12,9 +13,7 @@ int test_empty(void) {
     stream = fopen("empty_test_file.txt", "r");
     Token *token = malloc(sizeof(Token));
     int result = get_token(token);
-    if (result != 0) {
-        return 1;
-    }
+    assert(result == 0);
     if (token->type != T_EOF) {
         return 1;
     }
