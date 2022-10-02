@@ -53,6 +53,5 @@ int main() {
     b->x = 6;
     c->x = 7;
 
-
     return test1(S, a, b, c) || test2(S, a, b, c);
 }

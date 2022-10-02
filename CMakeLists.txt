@@ -19,6 +19,16 @@ add_executable(test_stack
         tests/stack_test.c src/stack.h src/stack.c tests/stack_test.c)
 add_coverage(test_stack)
 
+add_executable(all_tests_lexer
+        tests/lextest_empty.c src/scanner.h src/scanner.c src/error.h)
+add_coverage(all_tests_lexer)
+
+add_executable(lex_empty
+        tests/lextest_empty.c src/scanner.h src/scanner.c src/error.h)
+add_coverage(lex_empty)
+
 enable_testing()
 
 add_test(NAME stack_test COMMAND $<TARGET_FILE:test_stack>)
+add_test(NAME all_tests_lexer COMMAND $<TARGET_FILE:all_tests_lexer>)
+add_test(NAME lexer_test_empty COMMAND $<TARGET_FILE:lex_empty>)
