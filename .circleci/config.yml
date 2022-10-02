@@ -39,19 +39,35 @@ commands:
       - codecov/upload:
           xtra_args: '--gcov'
 
-
 jobs:
+  cppcheck:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - checkout
+      - prepare_env
+      - run:
+          name: "Install cppcheck"
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y cppcheck
+      - run:
+          name: "Run cppcheck"
+          command: "cppcheck src"
+
   stack_test_cmake:
     docker:
       - image: cimg/base:stable
     environment:
       CODECOV_TOKEN: << pipeline.parameters.codecov_token >>
+    resource_class: small
     steps:
       - checkout
       - prepare_env
       - run:
           name: "Compile"
-          command: "cmake -B build -S . && cmake --build build"
+          command: "cmake -B build -S . && cmake --build build --target test_stack"
       - run:
           name: "Run tests"
           command: "cd build && ctest -C Debug -T test -R stack_test"
@@ -59,6 +75,7 @@ jobs:
           name: "Get Coverage"
           command: "gcov stack.c stack.h stack_test.c"
       - coverage
+
   scanner_test_cmake:
     docker:
       - image: cimg/base:stable
@@ -79,6 +96,9 @@ jobs:
       - coverage
 
 workflows:
+  Static Analysis:
+    jobs:
+      - cppcheck
   Tests:
     jobs:
       - stack_test_cmake

@@ -14,5 +14,6 @@ int main(void) {
     Token *token = malloc(sizeof(Token));
     assert(get_token(token) == BAD_SYNTAX);
     assert(token->type == T_EOF);
+    free(token);
     fclose(stream);
 }
