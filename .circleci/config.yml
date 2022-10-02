@@ -41,7 +41,8 @@ commands:
 
   coverage:
     steps:
-      - codecov/upload
+      - codecov/upload:
+          flags: << parameters.flags >>
 
 jobs:
   cppcheck:
@@ -65,6 +66,10 @@ jobs:
       - image: cimg/base:stable
     environment:
       CODECOV_TOKEN: << pipeline.parameters.codecov_token >>
+    parameters:
+      flags:
+        type: string
+        default: "stack"
     resource_class: small
     steps:
       - checkout
@@ -110,6 +115,10 @@ jobs:
       - image: cimg/base:stable
     environment:
       CODECOV_TOKEN: << pipeline.parameters.codecov_token >>
+    parameters:
+      flags:
+        type: string
+        default: "scanner"
     steps:
       - checkout
       - prepare_env

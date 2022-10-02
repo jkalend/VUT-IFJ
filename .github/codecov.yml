@@ -36,3 +36,15 @@ coverage:
         if_unhealthy: error
         if_no_uploads: error
         informational: false
+
+
+flags:
+    scanner:
+        paths:
+        - src/scanner*
+        - tests/lex*
+        carryforward: true
+    stack:
+        paths:
+        - tests/stack*
+        - src/stack*
