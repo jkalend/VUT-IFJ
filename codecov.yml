@@ -3,27 +3,27 @@ coverage:
   status:
     project: off
     patch: off
-    changes: off
 
 comment:
-  graph: sunburst
   layout: header, diff, changes, sunburst, flags, files, footer
   behavior: default
   require_changes: false
 
-flags:
-  scanner:
-    paths:
-      - src/scanner*
-      - tests/lex*
-    target: 80%
-    threshold: 5%
+flag_management:
+  default_rules:
     carryforward: true
-  stack:
-    paths:
-      - tests/stack*
-      - src/stack*
-    target: 80%
-    threshold: 5%
-    informational: true
-    carryforward: true
+    statuses:
+      - type: patch
+        target: 85%
+        threshold: 10%
+      - type: project
+        target: 80%
+  individual_flags:
+    - name: scanner
+      paths:
+        - src/scanner
+        - tests/lex
+    - name: stack
+      paths:
+        - src/stack
+        - tests/stack
