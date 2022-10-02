@@ -12,7 +12,7 @@ int test_empty(void) {
     fclose(stream);
     stream = fopen("empty_test_file.txt", "r");
     Token *token = malloc(sizeof(Token));
-    assert(get_token(token) == BAD_SYNTAX);
+    assert(get_token(token) == 0);
     assert(token->type == T_EOF);
     free(token);
     fclose(stream);

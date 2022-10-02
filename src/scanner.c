@@ -7,7 +7,7 @@ int get_token(Token *token) {
     int c = fgetc(stream);
     if (c == EOF) {
         token->type = T_EOF;
-        return BAD_SYNTAX;
+        return 0;
     }
     return 0;
 }
