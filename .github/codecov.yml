@@ -1,0 +1,19 @@
+coverage:
+  status:
+    project:
+      scanner:
+        paths:
+          - src/scanner*
+          - tests/lex*
+        flags:
+          - scanner
+        target: 80%
+        threshold: 15%
+      stack:
+        paths:
+          - tests/stack*
+          - src/stack*
+        flags:
+          - stack
+        target: 80%
+        threshold: 5%
