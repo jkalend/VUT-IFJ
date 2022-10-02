@@ -76,7 +76,7 @@ jobs:
           command: "gcov stack.c stack.h stack_test.c"
       - coverage
 
-  scanner_test_cmake:
+  scanner_test_granular_cmake:
     docker:
       - image: cimg/base:stable
     environment:
@@ -89,7 +89,26 @@ jobs:
           command: "cmake -B build -S . && cmake --build build"
       - run:
           name: "Run tests"
-          command: "cd build && ctest -C Debug -T test -R lexer"
+          command: "cd build && ctest -C Debug -T test -R lexer -E all"
+      - run:
+          name: "Get Coverage"
+          command: "gcov scanner.c scanner.h lextest_empty.c"
+      - coverage
+
+  all_scanner_tests_cmake:
+    docker:
+      - image: cimg/base:stable
+    environment:
+      CODECOV_TOKEN: << pipeline.parameters.codecov_token >>
+    steps:
+      - checkout
+      - prepare_env
+      - run:
+          name: "Compile"
+          command: "cmake -B build -S . && cmake --build build"
+      - run:
+          name: "Run tests"
+          command: "cd build && ctest -C Debug -T test -R all_tests_lexer"
       - run:
           name: "Get Coverage"
           command: "gcov scanner.c scanner.h lextest_empty.c"
@@ -102,4 +121,5 @@ workflows:
   Tests:
     jobs:
       - stack_test_cmake
-      - scanner_test_cmake
+      - scanner_test_granular_cmake
+      - all_scanner_tests_cmake
