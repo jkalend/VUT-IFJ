@@ -1,18 +1,15 @@
 coverage:
   status:
-    patch:
+    project:
       default:
         enabled: true
         target: auto
-        threshold: 5%
+        threshold: 15%
         if_ci_failed: error
-        if_not_found: error
+        if_not_found: failure
         if_unhealthy: error
         if_no_uploads: error
         informational: false
-    project:
-      target: 80%
-      threshold: 5%
       scanner:
         paths:
           - src/scanner*
@@ -29,3 +26,13 @@ coverage:
           - stack
         target: 80%
         threshold: 5%
+    patch:
+      default:
+        enabled: true
+        target: auto
+        threshold: 15%
+        if_ci_failed: error
+        if_not_found: error
+        if_unhealthy: error
+        if_no_uploads: error
+        informational: false
