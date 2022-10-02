@@ -86,7 +86,8 @@ jobs:
             lcov --directory . --capture --output-file coverage.info
             lcov --remove coverage.info '/usr/*' "${HOME}"'/.cache/*' --output-file coverage.info
             lcov --list coverage.info
-      - coverage
+      - coverage:
+          flags: << parameters.flags >>
 
   scanner_test_granular_cmake:
     docker:
@@ -108,7 +109,8 @@ jobs:
             lcov --directory . --capture --output-file coverage.info
             lcov --remove coverage.info '/usr/*' "${HOME}"'/.cache/*' --output-file coverage.info
             lcov --list coverage.info
-      - coverage
+      - coverage:
+          flags: "scanner"
 
   all_scanner_tests_cmake:
     docker:
@@ -134,7 +136,8 @@ jobs:
             lcov --directory . --capture --output-file coverage.info
             lcov --remove coverage.info '/usr/*' "${HOME}"'/.cache/*' --output-file coverage.info
             lcov --list coverage.info
-      - coverage
+      - coverage:
+          flags: << parameters.flags >>
 
 workflows:
   Static Analysis:
