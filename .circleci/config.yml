@@ -40,6 +40,10 @@ commands:
   #          when: never
 
   coverage:
+    parameters:
+      flags:
+        type: string
+        default: ""
     steps:
       - codecov/upload:
           flags: << parameters.flags >>
