@@ -31,7 +31,8 @@ typedef union {
     Keyword keyword;
     char *identifier;
     char *string;
-    double number;
+    double number_float;
+    long long number_int;
 }Value;
 
 typedef enum {
