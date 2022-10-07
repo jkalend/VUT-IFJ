@@ -6,53 +6,42 @@
 
 #include "stack.h"
 
-void stack_init(TStack *stack)
-{
-    stack->topPtr = NULL;
+void stack_init(TStack *stack) {
+    stack = malloc(sizeof(TStack));
 }
 
-
-
-void stack_push(TStack *stack, TData *data)
-{
+void stack_push(TStack *stack, TData *data) {
     TElement *newElement = malloc(sizeof(TElement));
-    if(newElement == NULL)
-    {
-        //SOME ERROR HANDLING FEATURE TBD
+    if(newElement == NULL) {
         exit(1);
     }
-    newElement->data = data; //PLACEHOLDER 
+    newElement->data = data;
     newElement->nextPtr = stack->topPtr;
     stack->topPtr = newElement;
 }
 
-void stack_pop(TStack *stack)
-{
-    if(stack->topPtr != NULL)
-    {
-    TElement *temp = stack->topPtr->nextPtr;
-    stack->topPtr = temp->nextPtr;
-    free(temp);
+TData *stack_pop(TStack *stack) {
+    if(!stack_isEmpty(stack)) {
+        TData *data = stack->topPtr->data;
+        TElement *temp = stack->topPtr;
+        stack->topPtr = temp->nextPtr;
+        free(temp);
+        return data;
     }
 }
 
-TData *stack_top(TStack *stack)
-{
-    if(stack->topPtr != NULL)
-    {
+/*TData *stack_top(TStack *stack){
+    if(stack->topPtr != NULL){
     return stack->topPtr->data;
     }
-    else 
-    {
+    else {
         //PLACEHOLDER ERRORHANDLING TBD
         return NULL;
     }
-}
+}*/
 
-bool stack_isEmpty(TStack *stack)
-{
-    if(stack->topPtr == NULL)
-    {
+bool stack_isEmpty(TStack *stack){
+    if(stack->topPtr == NULL) {
         return true;
     }
     return false;
