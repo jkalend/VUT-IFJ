@@ -16,8 +16,9 @@ int test1(TStack *S, TData *a, TData *b, TData *c) {
 //    if (stack_isEmpty(S)) {
 //        return 1;
 //    }
-    assert(stack_pop(S) == a);
-//    if (stack_top(S) != a) {
+    stack_push(S, c);
+    assert(!stack_isEmpty(S));
+//    if (stack_isEmpty(S)) {
 //        return 1;
 //    }
     stack_push(S, b);
@@ -26,15 +27,14 @@ int test1(TStack *S, TData *a, TData *b, TData *c) {
 //        return 1;
 //    }
     assert(stack_pop(S) == b);
-//    if (stack_top(S) != b) {
-//        return 1;
-//    }
-    stack_push(S, c);
-    assert(!stack_isEmpty(S));
-//    if (stack_isEmpty(S)) {
+//    if (stack_top(S) != a) {
 //        return 1;
 //    }
     assert(stack_pop(S) == c);
+//    if (stack_top(S) != b) {
+//        return 1;
+//    }
+    assert(stack_pop(S) == a);
 //    if (stack_top(S) != c) {
 //        return 1;
 //    }
