@@ -24,7 +24,10 @@ typedef struct tstack{
 }TStack;
 
 //allocates memory for stack
-void stack_init(TStack *stack);
+TStack* stack_init(TStack *stack);
+
+//frees stack 
+void stack_free(TStack *stack);
 
 //adds new element to stack
 void stack_push(TStack *stack, TData *data);

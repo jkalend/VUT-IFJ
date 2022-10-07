@@ -6,8 +6,13 @@
 
 #include "stack.h"
 
-void stack_init(TStack *stack) {
+TStack *stack_init(TStack *stack) {
     stack = malloc(sizeof(TStack));
+    return stack;
+}
+
+void stack_free(TStack *stack) {
+    free(stack);
 }
 
 void stack_push(TStack *stack, TData *data) {
@@ -41,7 +46,7 @@ TData *stack_pop(TStack *stack) {
 }*/
 
 bool stack_isEmpty(TStack *stack){
-    if(stack->topPtr == NULL) {
+    if(!stack->topPtr) {
         return true;
     }
     return false;
