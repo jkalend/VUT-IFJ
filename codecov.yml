@@ -1,0 +1,29 @@
+coverage:
+  range: 60..80
+  status:
+    project: off
+    patch: off
+
+comment:
+  layout: header, diff, changes, sunburst, flags, files, footer
+  behavior: default
+  require_changes: false
+
+flag_management:
+  default_rules:
+    carryforward: true
+    statuses:
+      - type: patch
+        target: 85%
+        threshold: 10%
+      - type: project
+        target: 80%
+  individual_flags:
+    - name: scanner
+      paths:
+        - src/scanner
+        - tests/lex
+    - name: stack
+      paths:
+        - src/stack
+        - tests/stack

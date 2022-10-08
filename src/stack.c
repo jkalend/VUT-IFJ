@@ -6,6 +6,7 @@
 
 #include "stack.h"
 
+
 TStack *stack_init(TStack *stack) {
     stack = malloc(sizeof(TStack));
     return stack;
@@ -25,6 +26,7 @@ void stack_push(TStack *stack, TData *data) {
     stack->topPtr = newElement;
 }
 
+
 TData *stack_pop(TStack *stack) {
     if(!stack_isEmpty(stack)) {
         TData *data = stack->topPtr->data;
@@ -34,16 +36,6 @@ TData *stack_pop(TStack *stack) {
         return data;
     }
 }
-
-/*TData *stack_top(TStack *stack){
-    if(stack->topPtr != NULL){
-    return stack->topPtr->data;
-    }
-    else {
-        //PLACEHOLDER ERRORHANDLING TBD
-        return NULL;
-    }
-}*/
 
 bool stack_isEmpty(TStack *stack){
     if(!stack->topPtr) {

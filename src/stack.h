@@ -8,6 +8,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+
 //PLACEHOLDER DATA STRUCT
 typedef struct tdata {
     int x;
