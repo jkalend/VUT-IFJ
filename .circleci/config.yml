@@ -93,8 +93,11 @@ jobs:
       - run:
           name: "Run tests"
           command: |
-            cd build
-            ctest -C Debug -T test -R lexer -E all
+              cd build
+              ctest -C Debug -T test -R lexer -E all
+              lcov --directory . --capture --output-file coverage.info
+              lcov --remove coverage.info '/usr/*' "${HOME}"'/.cache/*' --output-file coverage.info
+              lcov --list coverage.info
 
       - run:
             name: "Get Coverage"
