@@ -24,7 +24,7 @@ int NAME() {                                                                   \
     fclose(STREAM);                                                            \
     remove(FILE);                                                              \
     printf("\n");                                                              \
-    return STATUS;                                                             \
+    return STATUS ? 1 : 0;                                                     \
 }
 
 #define FAIL(REASON) printf("[FAILED] %s\n", REASON)
