@@ -17,14 +17,14 @@ int NAME() {                                                                   \
         PASS("Assertion suceeded: " #CONDITION);                               \
     } else {                                                                   \
         FAIL("Assertion failed: " #CONDITION);                                 \
-        STATUS += 1;                                                           \
+        STATUS = 1;                                                            \
     }
 
 #define ENDTEST(STREAM, FILE)                                                  \
     fclose(STREAM);                                                            \
     remove(FILE);                                                              \
     printf("\n");                                                              \
-    return STATUS ? 1 : 0;                                                     \
+    return STATUS;                                                             \
 }
 
 #define FAIL(REASON) printf("[FAILED] %s\n", REASON)
