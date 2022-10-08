@@ -45,13 +45,9 @@ typedef enum {
     T_VAR,
     T_TYPE,
     T_PLUS,
-    //T_INCREMENT,
     T_MINUS,
-    //T_DECREMENT,
     T_MULTIPLY,
-    //T_MULTIPLY_ASSIGN,
     T_DIVIDE,
-    //T_DIVIDE_ASSIGN,
     T_LESS,
     T_LESS_EQUAL,
     T_GREATER,
@@ -59,7 +55,6 @@ typedef enum {
     T_EQUAL,
     T_NOT_EQUAL,
     T_CONCATENATE,
-    //T_CONCATENATE_ASSIGN,
     T_ASSIGN,
     T_SEMICOLON,
     T_COMMA,
@@ -68,8 +63,6 @@ typedef enum {
     T_RIGHT_BRACKET,
     T_LEFT_BRACE,
     T_RIGHT_BRACE,
-    //T_LEFT_SQUARE_BRACKET,
-    //T_RIGHT_SQUARE_BRACKET,
     T_AND,
     T_OR,
     T_EOF,
@@ -80,7 +73,7 @@ typedef struct {
     Value value;
     Type type;
     int line;
-    int column;
+    int column[2];
 }Token;
 
 int get_token(Token *token);
