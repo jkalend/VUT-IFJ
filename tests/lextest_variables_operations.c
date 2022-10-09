@@ -15,7 +15,7 @@ TEST(test_prologue_declare_variable_string, "Test prologue declare variable stri
     }
     Token *token = malloc(sizeof(Token));
     for(int i = 0; i < 8; i++) {
-        if(!get_token(token)){
+        if(get_token(token)){
             return 1;
         }
     }
@@ -42,7 +42,7 @@ TEST(test_prologue_declare_variable_string, "Test prologue declare variable stri
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_SEMICOLON)
-    TEST_ASSERT(token->line == 2)
+    TEST_ASSERT(token->line == 3)
     TEST_ASSERT(token->column[0] == 12)
     TEST_ASSERT(token->column[1] == 13)
 
@@ -53,13 +53,13 @@ ENDTEST(stream, "prologue_declare_variable_string.php")
 
 TEST(test_prologue_declare_variable_int, "Test prologue declare variable int")
     int check = write_file("prologue_declare_variable_int.php",
-                           "<?php\ndeclare(strict_types=1);\n$a = 7");
+                           "<?php\ndeclare(strict_types=1);\n$a = 7;");
     if (check != 0) {
         return 1;
     }
     Token *token = malloc(sizeof(Token));
     for(int i = 0; i < 8; i++) {
-        if(!get_token(token)){
+        if(get_token(token)){
             return 1;
         }
     }
@@ -85,9 +85,9 @@ TEST(test_prologue_declare_variable_int, "Test prologue declare variable int")
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_SEMICOLON)
-    TEST_ASSERT(token->line == 2)
-    TEST_ASSERT(token->column[0] == 6)
-    TEST_ASSERT(token->column[1] == 7)
+    TEST_ASSERT(token->line == 3)
+    TEST_ASSERT(token->column[0] == 7)
+    TEST_ASSERT(token->column[1] == 8)
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_EOF)
@@ -102,7 +102,7 @@ TEST(test_prologue_declare_variable_float, "Test prologue declare variable float
     }
     Token *token = malloc(sizeof(Token));
     for(int i = 0; i < 8; i++) {
-        if(!get_token(token)){
+        if(get_token(token)){
             return 1;
         }
     }
@@ -128,7 +128,7 @@ TEST(test_prologue_declare_variable_float, "Test prologue declare variable float
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_SEMICOLON)
-    TEST_ASSERT(token->line == 2)
+    TEST_ASSERT(token->line == 3)
     TEST_ASSERT(token->column[0] == 10)
     TEST_ASSERT(token->column[1] == 11)
 
@@ -145,7 +145,7 @@ TEST(test_prologue_declare_variable_float_as_string, "Test prologue declare vari
     }
     Token *token = malloc(sizeof(Token));
     for(int i = 0; i < 8; i++) {
-        if(!get_token(token)){
+        if(get_token(token)){
             return 1;
         }
     }
@@ -172,7 +172,7 @@ TEST(test_prologue_declare_variable_float_as_string, "Test prologue declare vari
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_SEMICOLON)
-    TEST_ASSERT(token->line == 2)
+    TEST_ASSERT(token->line == 3)
     TEST_ASSERT(token->column[0] == 12)
     TEST_ASSERT(token->column[1] == 13)
 
@@ -189,7 +189,7 @@ TEST(test_prologue_declare_variable_int_as_string, "Test prologue declare variab
     }
     Token *token = malloc(sizeof(Token));
     for(int i = 0; i < 8; i++) {
-        if(!get_token(token)){
+        if(get_token(token)){
             return 1;
         }
     }
@@ -216,7 +216,7 @@ TEST(test_prologue_declare_variable_int_as_string, "Test prologue declare variab
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_SEMICOLON)
-    TEST_ASSERT(token->line == 2)
+    TEST_ASSERT(token->line == 3)
     TEST_ASSERT(token->column[0] == 9)
     TEST_ASSERT(token->column[1] == 10)
 
@@ -233,7 +233,7 @@ TEST(test_prologue_declare_variable_float_with_exp, "Test prologue declare varia
     }
     Token *token = malloc(sizeof(Token));
     for(int i = 0; i < 8; i++) {
-        if(!get_token(token)){
+        if(get_token(token)){
             return 1;
         }
     }
@@ -259,7 +259,7 @@ TEST(test_prologue_declare_variable_float_with_exp, "Test prologue declare varia
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_SEMICOLON)
-    TEST_ASSERT(token->line == 2)
+    TEST_ASSERT(token->line == 3)
     TEST_ASSERT(token->column[0] == 12)
     TEST_ASSERT(token->column[1] == 13)
 
@@ -276,7 +276,7 @@ TEST(test_prologue_declare_variable_float_with_exp_as_string, "Test prologue dec
     }
     Token *token = malloc(sizeof(Token));
     for(int i = 0; i < 8; i++) {
-        if(!get_token(token)){
+        if(get_token(token)){
             return 1;
         }
     }
@@ -302,7 +302,7 @@ TEST(test_prologue_declare_variable_float_with_exp_as_string, "Test prologue dec
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_SEMICOLON)
-    TEST_ASSERT(token->line == 2)
+    TEST_ASSERT(token->line == 3)
     TEST_ASSERT(token->column[0] == 14)
     TEST_ASSERT(token->column[1] == 15)
 
