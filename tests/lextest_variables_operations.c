@@ -316,7 +316,7 @@ int main(void) {
     int tests_failed = 0;
     tests_failed += test_prologue_declare_variable_string();
     tests_failed += test_prologue_declare_variable_int();
-    tests_failed += test_prologue_declare_variable_float();();
+    tests_failed += test_prologue_declare_variable_float();
     tests_failed += test_prologue_declare_variable_int_as_string();
     tests_failed += test_prologue_declare_variable_float_as_string();
     tests_failed += test_prologue_declare_variable_float_with_exp();
