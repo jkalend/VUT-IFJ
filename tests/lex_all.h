@@ -63,4 +63,18 @@ int test_only_prologue_with_multiline_block_comment(void);
 
 int test_only_prologue_with_declare(void);
 
+int test_prologue_declare_variable_string(void);
+
+int test_prologue_declare_variable_int(void);
+
+int test_prologue_declare_variable_float(void);
+
+int test_prologue_declare_variable_int_as_string(void);
+
+int test_prologue_declare_variable_float_as_string(void);
+
+int test_prologue_declare_variable_float_with_exp(void);
+
+int test_prologue_declare_variable_float_with_exp_as_string(void);
+
 #endif //IFJ_LEX_ALL_H

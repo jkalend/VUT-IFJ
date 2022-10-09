@@ -36,6 +36,13 @@ int main(void) {
     tests_failed += test_only_prologue_with_newline_and_block_comments_and_newline_and_spaces_and_comment();
     tests_failed += test_only_prologue_with_multiline_block_comment();
     tests_failed += test_only_prologue_with_declare(); //TODO SIGSEGVs as of now due to strcmp
+    tests_failed += test_prologue_declare_variable_string();
+    tests_failed += test_prologue_declare_variable_int();
+    tests_failed += test_prologue_declare_variable_float();
+    tests_failed += test_prologue_declare_variable_int_as_string();
+    tests_failed += test_prologue_declare_variable_float_as_string();
+    tests_failed += test_prologue_declare_variable_float_with_exp();
+    tests_failed += test_prologue_declare_variable_float_with_exp_as_string();
     return tests_failed ? 1 : 0;
 }
 #endif //LEX_ALL
