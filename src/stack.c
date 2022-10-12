@@ -43,6 +43,7 @@ TData *stack_pop(TStack *stack) {
 		free(temp);
 		return data;
 	}
+	return NULL;
 }
 
 bool stack_isEmpty(TStack *stack) {
