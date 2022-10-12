@@ -3,21 +3,21 @@
 //
 
 #include "scanner.h"
+#include "lex_all.h"
 #include "error.h"
 #include <stdlib.h>
-#include <assert.h>
 
-int test_empty(void) {
-	stream = fopen("empty_test_file.txt", "w");
-	fclose(stream);
-	stream = fopen("empty_test_file.txt", "r");
-	Token *token = malloc(sizeof(Token));
-	assert(get_token(token) == 0);
-	assert(token->type == T_EOF);
-	free(token);
-	fclose(stream);
-	return 0;
-}
+TEST(test_empty , "Test empty file")
+    int check = write_file("empty_test_file.php", "");
+    if (check != 0) {
+        return 1;
+    }
+    stream = fopen("empty_test_file.php", "r");
+    Token *token = malloc(sizeof(Token));
+    TEST_ASSERT(get_token(token) == 0)
+    TEST_ASSERT(token->type == T_EOF)
+    free(token);
+ENDTEST(stream, "empty_test_file.php")
 
 #ifndef LEX_ALL
 int main(void) {

@@ -36,52 +36,45 @@ typedef union {
 } Value;
 
 typedef enum {
-	T_VALID,
-	T_KEYWORD,
-	T_IDENTIFIER,
-	T_STRING,
-	T_INT,
-	T_FLOAT,
-	T_VAR,
-	T_TYPE,
-	T_PLUS,
-	//T_INCREMENT,
-	T_MINUS,
-	//T_DECREMENT,
-	T_MULTIPLY,
-	//T_MULTIPLY_ASSIGN,
-	T_DIVIDE,
-	//T_DIVIDE_ASSIGN,
-	T_LESS,
-	T_LESS_EQUAL,
-	T_GREATER,
-	T_GREATER_EQUAL,
-	T_EQUAL,
-	T_NOT_EQUAL,
-	T_CONCATENATE,
-	//T_CONCATENATE_ASSIGN,
-	T_ASSIGN,
-	T_SEMICOLON,
-	T_COMMA,
-	T_DOUBLE_DOT,
-	T_LEFT_BRACKET,
-	T_RIGHT_BRACKET,
-	T_LEFT_BRACE,
-	T_RIGHT_BRACE,
-	//T_LEFT_SQUARE_BRACKET,
-	//T_RIGHT_SQUARE_BRACKET,
-	T_AND,
-	T_OR,
-	T_EOF,
-	T_ERROR,
-} Type;
+    T_VALID,
+    T_KEYWORD,
+    T_IDENTIFIER,
+    T_STRING,
+    T_INT,
+    T_FLOAT,
+    T_VAR,
+    T_TYPE,
+    T_PLUS,
+    T_MINUS,
+    T_MULTIPLY,
+    T_DIVIDE,
+    T_LESS,
+    T_LESS_EQUAL,
+    T_GREATER,
+    T_GREATER_EQUAL,
+    T_EQUAL,
+    T_NOT_EQUAL,
+    T_CONCATENATE,
+    T_ASSIGN,
+    T_SEMICOLON,
+    T_COMMA,
+    T_DOUBLE_DOT,
+    T_LEFT_BRACKET,
+    T_RIGHT_BRACKET,
+    T_LEFT_BRACE,
+    T_RIGHT_BRACE,
+    T_AND,
+    T_OR,
+    T_EOF,
+    T_ERROR,
+}Type;
 
 typedef struct {
-	Value value;
-	Type type;
-	int line;
-	int column;
-} Token;
+    Value value;
+    Type type;
+    int line;
+    int column[2];
+}Token;
 
 int get_token(Token *token);
 
