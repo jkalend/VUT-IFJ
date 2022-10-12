@@ -45,4 +45,4 @@ int main(void) {
     tests_failed += test_prologue_declare_variable_float_with_exp_as_string();
     return tests_failed ? 1 : 0;
 }
-#endif //LEX_ALL
+#endif	//LEX_ALL

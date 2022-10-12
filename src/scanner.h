@@ -12,28 +12,28 @@
 FILE *stream;
 
 typedef enum {
-    KW_ELSE,
-    KW_IF,
-    KW_INT,
-    KW_RETURN,
-    KW_VOID,
-    KW_WHILE,
-    KW_FLOAT,
-    KW_STRING,
-    //KW_FOR,
-    KW_FUNCTION,
-    KW_NULL,
-    //KW_GLOBAL,
-    //KW_BOOLEAN,
-}Keyword;
+	KW_ELSE,
+	KW_IF,
+	KW_INT,
+	KW_RETURN,
+	KW_VOID,
+	KW_WHILE,
+	KW_FLOAT,
+	KW_STRING,
+	//KW_FOR,
+	KW_FUNCTION,
+	KW_NULL,
+	//KW_GLOBAL,
+	//KW_BOOLEAN,
+} Keyword;
 
 typedef union {
-    Keyword keyword;
-    char *identifier;
-    char *string;
-    double number_float;
-    long long number_int;
-}Value;
+	Keyword keyword;
+	char *identifier;
+	char *string;
+	double number_float;
+	long long number_int;
+} Value;
 
 typedef enum {
     T_VALID,
@@ -78,4 +78,4 @@ typedef struct {
 
 int get_token(Token *token);
 
-#endif //IFJ_SCANNER_H
+#endif	//IFJ_SCANNER_H
