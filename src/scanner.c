@@ -4,10 +4,10 @@
 #include <stdio.h>
 
 int get_token(Token *token) {
-    int c = fgetc(stream);
-    if (c == EOF) {
-        token->type = T_EOF;
-        return 0;
-    }
-    return 0;
+	int c = fgetc(stream);
+	if (c == EOF) {
+		token->type = T_EOF;
+		return 0;
+	}
+	return 0;
 }

@@ -15,4 +15,4 @@
 #define BAD_OTHER_SEMANTIC 8
 #define BAD_INTERNAL 99
 
-#endif //IFJ_ERROR_H
+#endif	//IFJ_ERROR_H

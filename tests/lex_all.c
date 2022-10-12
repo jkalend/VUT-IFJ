@@ -10,6 +10,6 @@
 
 #ifdef LEX_ALL
 int main(void) {
-    return test_empty();
+	return test_empty();
 }
-#endif //LEX_ALL
+#endif	//LEX_ALL

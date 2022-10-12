@@ -7,4 +7,4 @@
 
 int test_empty(void);
 
-#endif //IFJ_LEX_ALL_H
+#endif	//IFJ_LEX_ALL_H
