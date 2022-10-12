@@ -84,6 +84,31 @@ int test2(TStack *S, TData *a, TData *b, TData *c) {
 	return 0;
 }
 
+int test3(TStack *S, TData *a, TData *b, TData *c) {
+    assert(stack_isEmpty(S));
+    //    if (!stack_isEmpty(S)) {
+    //        return 1;
+    //    }
+    stack_push(S, a);
+    assert(!stack_isEmpty(S));
+    //    if (stack_isEmpty(S)) {
+    //        return 1;
+    //    }
+    stack_push(S, b);
+    assert(!stack_isEmpty(S));
+    //    if (stack_isEmpty(S)) {
+    //        return 1;
+    //    }
+    stack_push(S, c);
+    assert(!stack_isEmpty(S));
+    //    if (stack_isEmpty(S)) {
+    //        return 1;
+    //    }
+    stack_dispose(S);
+    assert(stack_isEmpty(S));
+    return 0;
+}
+
 int main(void) {
 	TStack *S;	//= malloc(sizeof(TStack));
 	TData *a = malloc(sizeof(TData));
@@ -96,5 +121,6 @@ int main(void) {
 	S = stack_init(S);
 	test1(S, a, b, c);
 	test2(S, a, b, c);
+    test3(S, a, b, c);
 	stack_free(S);
 }
