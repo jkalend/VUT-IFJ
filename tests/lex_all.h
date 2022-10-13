@@ -7,25 +7,25 @@
 
 #include <string.h>
 
-#define TEST(NAME, DESCRIPTION)                                                \
-int NAME() {                                                                   \
-    int STATUS = 0;                                                            \
-    printf("\n[%s] %s\n\n", #NAME, DESCRIPTION);                               \
+#define TEST(NAME, DESCRIPTION)                                                                    \
+	int NAME() {                                                                                   \
+		int STATUS = 0;                                                                            \
+		printf("\n[%s] %s\n\n", #NAME, DESCRIPTION);
 
-#define TEST_ASSERT(CONDITION)                                                 \
-    if (CONDITION) {                                                           \
-        PASS("Assertion suceeded: " #CONDITION);                               \
-    } else {                                                                   \
-        FAIL("Assertion failed: " #CONDITION);                                 \
-        STATUS = 1;                                                            \
-    }
+#define TEST_ASSERT(CONDITION)                                                                     \
+	if (CONDITION) {                                                                               \
+		PASS("Assertion suceeded: " #CONDITION);                                                   \
+	} else {                                                                                       \
+		FAIL("Assertion failed: " #CONDITION);                                                     \
+		STATUS = 1;                                                                                \
+	}
 
-#define ENDTEST(STREAM, FILE)                                                  \
-    fclose(STREAM);                                                            \
-    remove(FILE);                                                              \
-    printf("\n");                                                              \
-    return STATUS;                                                             \
-}
+#define ENDTEST(STREAM, FILE)                                                                      \
+	fclose(STREAM);                                                                                \
+	remove(FILE);                                                                                  \
+	printf("\n");                                                                                  \
+	return STATUS;                                                                                 \
+	}
 
 #define FAIL(REASON) printf("[FAILED] %s\n", REASON)
 
@@ -63,4 +63,24 @@ int test_only_prologue_with_multiline_block_comment(void);
 
 int test_only_prologue_with_declare(void);
 
+<<<<<<< Updated upstream
 #endif //IFJ_LEX_ALL_H
+=======
+int test_prologue_declare_variable_string(void);
+
+int test_prologue_declare_variable_int(void);
+
+int test_prologue_declare_variable_float(void);
+
+int test_prologue_declare_variable_int_as_string(void);
+
+int test_prologue_declare_variable_float_as_string(void);
+
+int test_prologue_declare_variable_float_with_exp(void);
+
+int test_prologue_declare_variable_float_with_exp_as_string(void);
+
+int test_arithmetic_addition_1(void);
+
+#endif	//IFJ_LEX_ALL_H
+>>>>>>> Stashed changes
