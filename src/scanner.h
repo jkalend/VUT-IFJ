@@ -8,21 +8,23 @@
 #include "error.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#include <ctype.h>
 
 FILE *stream;
 
 typedef enum {
     KW_ELSE,
+    KW_FLOAT,
+    KW_FUNCTION,
     KW_IF,
     KW_INT,
+    KW_NULL,
     KW_RETURN,
+    KW_STRING,
     KW_VOID,
     KW_WHILE,
-    KW_FLOAT,
-    KW_STRING,
     //KW_FOR,
-    KW_FUNCTION,
-    KW_NULL,
     //KW_GLOBAL,
     //KW_BOOLEAN,
 }Keyword;
@@ -77,5 +79,9 @@ typedef struct {
 }Token;
 
 int get_token(Token *token);
+long long convert_str_to_int(char*);
+double convert_str_to_float(char*);
+int kw_check(char*);
+int free_memory(char*, int);
 
 #endif //IFJ_SCANNER_H
