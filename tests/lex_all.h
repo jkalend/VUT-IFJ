@@ -63,9 +63,6 @@ int test_only_prologue_with_multiline_block_comment(void);
 
 int test_only_prologue_with_declare(void);
 
-<<<<<<< Updated upstream
-#endif //IFJ_LEX_ALL_H
-=======
 int test_prologue_declare_variable_string(void);
 
 int test_prologue_declare_variable_int(void);
@@ -83,4 +80,3 @@ int test_prologue_declare_variable_float_with_exp_as_string(void);
 int test_arithmetic_addition_1(void);
 
 #endif	//IFJ_LEX_ALL_H
->>>>>>> Stashed changes
