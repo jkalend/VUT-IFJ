@@ -26,7 +26,9 @@ typedef enum {
     KW_WHILE,
     //KW_FOR,
     //KW_GLOBAL,
-    //KW_BOOLEAN,
+    KW_BOOLEAN,
+    KW_TRUE,
+    KW_FALSE,
 }Keyword;
 
 typedef union {
@@ -67,6 +69,7 @@ typedef enum {
     T_RIGHT_BRACE,
     T_AND,
     T_OR,
+    T_NOT,
     T_EOF,
     T_ERROR,
 }Type;
