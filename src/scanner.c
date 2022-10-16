@@ -40,6 +40,7 @@ int get_token(Token *token) {
                         }
                     }
                     column = 0;
+                    break;
                 } else if (c2 == '*') {
                     c2 = fgetc(stream);
                     column++;
@@ -126,9 +127,108 @@ int get_token(Token *token) {
                             c2 = fgetc(stream);
                             column++;
                             if (c2 == 'p'){
-                                flag_valid = 1; //TODO
+                                //flag_valid = 1; //TODO
+                                while(true) {
+                                    c2 = fgetc(stream);
+                                    column++;
+                                    if (c2 == '\n') {
+                                        line++;
+                                        column = 0;
+                                    }
+                                    if (isspace(c) != 0) {
+                                        continue;
+                                    }
+                                    switch (c2) {
+                                        case EOF: {
+                                            token->type = T_ERROR;
+                                            return LEX_OK;
+                                        }
+                                        case '/': {
+                                            c2 = fgetc(stream);
+                                            column++;
+                                            if (c2 == '/') {
+                                                while (c2 != '\n') {
+                                                    c2 = fgetc(stream);
+                                                    column++;
+                                                    if (c2 == EOF) {
+                                                        token->type = T_ERROR;
+                                                        token->line = line;
+                                                        token->column[0] = column;
+                                                        token->column[1] = column + 1;
+                                                        return LEX_OK;
+                                                    }
+                                                }
+                                                column = 0;
+                                                break;
+                                            } else if (c2 == '*') {
+                                                c2 = fgetc(stream);
+                                                column++;
+                                                loop:
+                                                while (c2 != '*') {
+                                                    c2 = fgetc(stream);
+                                                    column++;
+                                                    if (c2 == '\n') {
+                                                        line++;
+                                                        column = 0;
+                                                    }
+                                                    if (c2 == EOF) {
+                                                        token->type = T_ERROR;
+                                                        token->line = line;
+                                                        token->column[0] = column;
+                                                        token->column[1] = column + 1;
+                                                        return LEX_OK;
+                                                    }
+                                                }
+                                                c2 = fgetc(stream);
+                                                column++;
+                                                if (c2 == EOF) {
+                                                    token->type = T_ERROR;
+                                                    token->line = line;
+                                                    token->column[0] = column;
+                                                    token->column[1] = column + 1;
+                                                    return LEX_OK;
+                                                } else if (c2 == '/') {
+                                                    break;
+                                                } else {
+                                                    if (c2 == '\n') {
+                                                        line++;
+                                                        column = 0;
+                                                    }
+                                                    goto loop;
+                                                }
+                                            }else{
+                                                token->type = T_ERROR;
+                                                token->line = line;
+                                                token->column[0] = column;
+                                                token->column[1] = column + 1;
+                                                return LEX_ERROR;
+                                            }
+                                        }
+                                        case 'd':{//TODO pouzij GOTO (mozna?)
+
+                                        }
+                                    }
+                                }
+                            }else{
+                                token->type = T_ERROR;
+                                token->line = line;
+                                token->column[0] = column;
+                                token->column[1] = column + 1;
+                                return LEX_ERROR;
                             }
+                        }else{
+                            token->type = T_ERROR;
+                            token->line = line;
+                            token->column[0] = column;
+                            token->column[1] = column + 1;
+                            return LEX_ERROR;
                         }
+                    }else{
+                        token->type = T_ERROR;
+                        token->line = line;
+                        token->column[0] = column;
+                        token->column[1] = column + 1;
+                        return LEX_ERROR;
                     }
                 }
                 else {
