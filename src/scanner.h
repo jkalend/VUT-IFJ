@@ -73,7 +73,6 @@ typedef struct {
     Value value;
     Type type;
     int line;
-    int column[2];
 }Token;
 
 int get_token(Token *token);
