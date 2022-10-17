@@ -14,11 +14,8 @@ TEST(test_prologue_declare_variable_string, "Test prologue declare variable stri
         return 1;
     }
     Token *token = malloc(sizeof(Token));
-    for(int i = 0; i < 8; i++) {
-        if(get_token(token)){
-            return 1;
-        }
-    }
+    TEST_ASSERT(get_token(token) == 0)
+    TEST_ASSERT(token->type == T_VALID)
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_IDENTIFIER)
@@ -58,11 +55,8 @@ TEST(test_prologue_declare_variable_int, "Test prologue declare variable int")
         return 1;
     }
     Token *token = malloc(sizeof(Token));
-    for(int i = 0; i < 8; i++) {
-        if(get_token(token)){
-            return 1;
-        }
-    }
+    TEST_ASSERT(get_token(token) == 0)
+    TEST_ASSERT(token->type == T_VALID)
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_IDENTIFIER)
@@ -101,11 +95,8 @@ TEST(test_prologue_declare_variable_float, "Test prologue declare variable float
         return 1;
     }
     Token *token = malloc(sizeof(Token));
-    for(int i = 0; i < 8; i++) {
-        if(get_token(token)){
-            return 1;
-        }
-    }
+    TEST_ASSERT(get_token(token) == 0)
+    TEST_ASSERT(token->type == T_VALID)
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_IDENTIFIER)
@@ -144,11 +135,8 @@ TEST(test_prologue_declare_variable_float_as_string, "Test prologue declare vari
         return 1;
     }
     Token *token = malloc(sizeof(Token));
-    for(int i = 0; i < 8; i++) {
-        if(get_token(token)){
-            return 1;
-        }
-    }
+    TEST_ASSERT(get_token(token) == 0)
+    TEST_ASSERT(token->type == T_VALID)
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_IDENTIFIER)
@@ -188,11 +176,8 @@ TEST(test_prologue_declare_variable_int_as_string, "Test prologue declare variab
         return 1;
     }
     Token *token = malloc(sizeof(Token));
-    for(int i = 0; i < 8; i++) {
-        if(get_token(token)){
-            return 1;
-        }
-    }
+    TEST_ASSERT(get_token(token) == 0)
+    TEST_ASSERT(token->type == T_VALID)
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_IDENTIFIER)
@@ -232,11 +217,8 @@ TEST(test_prologue_declare_variable_float_with_exp, "Test prologue declare varia
         return 1;
     }
     Token *token = malloc(sizeof(Token));
-    for(int i = 0; i < 8; i++) {
-        if(get_token(token)){
-            return 1;
-        }
-    }
+    TEST_ASSERT(get_token(token) == 0)
+    TEST_ASSERT(token->type == T_VALID)
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_IDENTIFIER)
@@ -275,11 +257,8 @@ TEST(test_prologue_declare_variable_float_with_exp_as_string, "Test prologue dec
         return 1;
     }
     Token *token = malloc(sizeof(Token));
-    for(int i = 0; i < 8; i++) {
-        if(get_token(token)){
-            return 1;
-        }
-    }
+    TEST_ASSERT(get_token(token) == 0)
+    TEST_ASSERT(token->type == T_VALID)
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_IDENTIFIER)
