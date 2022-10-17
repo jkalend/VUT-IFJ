@@ -13,6 +13,10 @@
 
 FILE *stream;
 
+int line = 1;
+int column = 0;
+int first_read = 0;
+
 typedef enum {
     KW_ELSE,
     KW_FLOAT,

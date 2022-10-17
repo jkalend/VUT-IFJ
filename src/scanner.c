@@ -6,15 +6,24 @@
 #define true 1
 
 int get_token(Token *token) {
-    int line = 1;
-    int column = 0;
-    int flag_valid = 0;
+    if (first_read == 0){
+        int c = fgetc(stream);
+        if (c != '<'){
+            token->type = T_ERROR;
+            token->line = line;
+            token->column[0] = column;
+            token->column[1] = column + 1;
+            return LEX_ERROR;
+        }
+        first_read = 1;
+    }
     while(true) {
         int c = fgetc(stream);
         column++;
         if(c == '\n') {
             line++;
             column = 0;
+            continue;
         }
         if(isspace(c) != 0){
             continue;
@@ -127,13 +136,15 @@ int get_token(Token *token) {
                             c2 = fgetc(stream);
                             column++;
                             if (c2 == 'p'){
-                                //flag_valid = 1; //TODO
+                                char *arr = malloc(24);
+                                char *slider = arr;
                                 while(true) {
                                     c2 = fgetc(stream);
                                     column++;
                                     if (c2 == '\n') {
                                         line++;
                                         column = 0;
+                                        continue;
                                     }
                                     if (isspace(c) != 0) {
                                         continue;
@@ -141,7 +152,7 @@ int get_token(Token *token) {
                                     switch (c2) {
                                         case EOF: {
                                             token->type = T_ERROR;
-                                            return LEX_OK;
+                                            return LEX_ERROR;
                                         }
                                         case '/': {
                                             c2 = fgetc(stream);
@@ -155,7 +166,7 @@ int get_token(Token *token) {
                                                         token->line = line;
                                                         token->column[0] = column;
                                                         token->column[1] = column + 1;
-                                                        return LEX_OK;
+                                                        return LEX_ERROR;
                                                     }
                                                 }
                                                 column = 0;
@@ -176,7 +187,7 @@ int get_token(Token *token) {
                                                         token->line = line;
                                                         token->column[0] = column;
                                                         token->column[1] = column + 1;
-                                                        return LEX_OK;
+                                                        return LEX_ERROR;
                                                     }
                                                 }
                                                 c2 = fgetc(stream);
@@ -205,7 +216,64 @@ int get_token(Token *token) {
                                             }
                                         }
                                         case 'd':{//TODO pouzij GOTO (mozna?)
-
+                                            ungetc(c, stream);
+                                            fgets(arr, 8, stream);
+                                            slider = slider + 7;
+                                            column = column + 7;
+                                            if (strcmp(arr, "declare") != 0) {
+                                                token->type = T_ERROR;
+                                                token->line = line;
+                                                token->column[0] = column - 7;
+                                                token->column[1] = column + 1;
+                                                return LEX_ERROR;
+                                            }
+                                            break;
+                                        }
+                                        case '(': case '=': case '1':{
+                                            slider[0] = (char) c2;
+                                            slider++;
+                                            break;
+                                        }
+                                        case 's':{
+                                            ungetc(c, stream);
+                                            fgets(slider, 13, stream);
+                                            column = column + 12;
+                                            if (strcmp(arr, "strict_types") != 0) {
+                                                token->type = T_ERROR;
+                                                token->line = line;
+                                                token->column[0] = column - 12;
+                                                token->column[1] = column + 1;
+                                                return LEX_ERROR;
+                                            }
+                                            slider = slider + 12;
+                                            break;
+                                        }
+                                        case ')':{
+                                            slider[0] = (char) c2;
+                                            arr[23] = '\0';
+                                            break;
+                                        }
+                                        case ';':{
+                                            if(strcmp(arr, "declare(strict_types=1)") == 0) {
+                                                token->type = T_VALID;
+                                                token->line = line;
+                                                token->column[0] = column - 23;
+                                                token->column[1] = column + 1;
+                                                return LEX_OK;
+                                            }else{
+                                                token->type = T_ERROR;
+                                                token->line = line;
+                                                token->column[0] = column - 23;
+                                                token->column[1] = column + 1;
+                                                return LEX_ERROR;
+                                            }
+                                        }
+                                        default:{
+                                            token->type = T_ERROR;
+                                            token->line = line;
+                                            token->column[0] = column - 23;
+                                            token->column[1] = column + 1;
+                                            return LEX_ERROR;
                                         }
                                     }
                                 }
