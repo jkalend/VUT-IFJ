@@ -13,8 +13,8 @@
 
 FILE *stream;
 
-int line = 1;
-int first_read = 0;
+extern int line;
+extern int first_read;
 
 typedef enum {
     KW_ELSE,

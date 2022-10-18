@@ -23,7 +23,7 @@ TEST(test_prologue_exreme , "Test extreme prologue")
     if (check != 0) {
         return 1;
     }
-    stream = fopen("only_prologue_with_block_comments_in_declare_test_file.php", "r");
+    stream = fopen("prologue_extreme_test_file.php", "r");
     Token *token = malloc(sizeof(Token));
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_VALID)

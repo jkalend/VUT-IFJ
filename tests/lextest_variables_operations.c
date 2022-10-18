@@ -13,17 +13,18 @@ TEST(test_prologue_declare_variable_string, "Test prologue declare variable stri
     if (check != 0) {
         return 1;
     }
+    stream = fopen("prologue_declare_variable_string.php", "r");
     Token *token = malloc(sizeof(Token));
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_VALID)
 
     TEST_ASSERT(get_token(token) == 0)
-    TEST_ASSERT(token->type == T_IDENTIFIER)
+    TEST_ASSERT(token->type == T_VAR)
     TEST_ASSERT(token->line == 3)
-    TEST_ASSERT(strcmp(token->value.string, "a") == 0)
+    TEST_ASSERT(strcmp(token->value.identifier, "a") == 0)
 
     TEST_ASSERT(get_token(token) == 0)
-    TEST_ASSERT(token->type == T_EQUAL)
+    TEST_ASSERT(token->type == T_ASSIGN)
     TEST_ASSERT(token->line == 3)
 
     TEST_ASSERT(get_token(token) == 0)
@@ -46,18 +47,19 @@ TEST(test_prologue_declare_variable_int, "Test prologue declare variable int")
     if (check != 0) {
         return 1;
     }
+    stream = fopen("prologue_declare_variable_int.php", "r");
     Token *token = malloc(sizeof(Token));
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_VALID)
 
     TEST_ASSERT(get_token(token) == 0)
-    TEST_ASSERT(token->type == T_IDENTIFIER)
+    TEST_ASSERT(token->type == T_VAR)
     TEST_ASSERT(token->line == 3)
 
-    TEST_ASSERT(strcmp(token->value.string, "a") == 0)
+    TEST_ASSERT(strcmp(token->value.identifier, "a") == 0)
 
     TEST_ASSERT(get_token(token) == 0)
-    TEST_ASSERT(token->type == T_EQUAL)
+    TEST_ASSERT(token->type == T_ASSIGN)
     TEST_ASSERT(token->line == 3)
 
     TEST_ASSERT(get_token(token) == 0)
@@ -79,17 +81,18 @@ TEST(test_prologue_declare_variable_float, "Test prologue declare variable float
     if (check != 0) {
         return 1;
     }
+    stream = fopen("prologue_declare_variable_float.php", "r");
     Token *token = malloc(sizeof(Token));
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_VALID)
 
     TEST_ASSERT(get_token(token) == 0)
-    TEST_ASSERT(token->type == T_IDENTIFIER)
+    TEST_ASSERT(token->type == T_VAR)
     TEST_ASSERT(token->line == 3)
-    TEST_ASSERT(strcmp(token->value.string, "a") == 0)
+    TEST_ASSERT(strcmp(token->value.identifier, "a") == 0)
 
     TEST_ASSERT(get_token(token) == 0)
-    TEST_ASSERT(token->type == T_EQUAL)
+    TEST_ASSERT(token->type == T_ASSIGN)
     TEST_ASSERT(token->line == 3)
 
     TEST_ASSERT(get_token(token) == 0)
@@ -111,18 +114,19 @@ TEST(test_prologue_declare_variable_float_as_string, "Test prologue declare vari
     if (check != 0) {
         return 1;
     }
+    stream = fopen("prologue_declare_variable_float_as_string.php", "r");
     Token *token = malloc(sizeof(Token));
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_VALID)
 
     TEST_ASSERT(get_token(token) == 0)
-    TEST_ASSERT(token->type == T_IDENTIFIER)
+    TEST_ASSERT(token->type == T_VAR)
     TEST_ASSERT(token->line == 3)
     
-    TEST_ASSERT(strcmp(token->value.string, "a") == 0)
+    TEST_ASSERT(strcmp(token->value.identifier, "a") == 0)
 
     TEST_ASSERT(get_token(token) == 0)
-    TEST_ASSERT(token->type == T_EQUAL)
+    TEST_ASSERT(token->type == T_ASSIGN)
     TEST_ASSERT(token->line == 3)
 
     TEST_ASSERT(get_token(token) == 0)
@@ -146,17 +150,18 @@ TEST(test_prologue_declare_variable_int_as_string, "Test prologue declare variab
     if (check != 0) {
         return 1;
     }
+    stream = fopen("prologue_declare_variable_int_as_string.php", "r");
     Token *token = malloc(sizeof(Token));
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_VALID)
 
     TEST_ASSERT(get_token(token) == 0)
-    TEST_ASSERT(token->type == T_IDENTIFIER)
+    TEST_ASSERT(token->type == T_VAR)
     TEST_ASSERT(token->line == 3)
-    TEST_ASSERT(strcmp(token->value.string, "a") == 0)
+    TEST_ASSERT(strcmp(token->value.identifier, "a") == 0)
 
     TEST_ASSERT(get_token(token) == 0)
-    TEST_ASSERT(token->type == T_EQUAL)
+    TEST_ASSERT(token->type == T_ASSIGN)
     TEST_ASSERT(token->line == 3)
 
     TEST_ASSERT(get_token(token) == 0)
@@ -179,17 +184,18 @@ TEST(test_prologue_declare_variable_float_with_exp, "Test prologue declare varia
     if (check != 0) {
         return 1;
     }
+    stream = fopen("prologue_declare_variable_float_with_exp.php", "r");
     Token *token = malloc(sizeof(Token));
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_VALID)
 
     TEST_ASSERT(get_token(token) == 0)
-    TEST_ASSERT(token->type == T_IDENTIFIER)
+    TEST_ASSERT(token->type == T_VAR)
     TEST_ASSERT(token->line == 3)
-    TEST_ASSERT(strcmp(token->value.string, "a") == 0)
+    TEST_ASSERT(strcmp(token->value.identifier, "a") == 0)
 
     TEST_ASSERT(get_token(token) == 0)
-    TEST_ASSERT(token->type == T_EQUAL)
+    TEST_ASSERT(token->type == T_ASSIGN)
     TEST_ASSERT(token->line == 3)
 
     TEST_ASSERT(get_token(token) == 0)
@@ -211,22 +217,23 @@ TEST(test_prologue_declare_variable_float_with_exp_as_string, "Test prologue dec
     if (check != 0) {
         return 1;
     }
+    stream = fopen("prologue_declare_variable_float_with_exp_as_string.php", "r");
     Token *token = malloc(sizeof(Token));
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_VALID)
 
     TEST_ASSERT(get_token(token) == 0)
-    TEST_ASSERT(token->type == T_IDENTIFIER)
+    TEST_ASSERT(token->type == T_VAR)
     TEST_ASSERT(token->line == 3)
 
-    TEST_ASSERT(strcmp(token->value.string, "a") == 0)
+    TEST_ASSERT(strcmp(token->value.identifier, "a") == 0)
 
     TEST_ASSERT(get_token(token) == 0)
-    TEST_ASSERT(token->type == T_EQUAL)
+    TEST_ASSERT(token->type == T_ASSIGN)
     TEST_ASSERT(token->line == 3)
 
     TEST_ASSERT(get_token(token) == 0)
-    TEST_ASSERT(token->type == T_FLOAT)
+    TEST_ASSERT(token->type == T_STRING)
     TEST_ASSERT(token->line == 3)
 
     TEST_ASSERT(get_token(token) == 0)

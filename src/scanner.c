@@ -4,6 +4,9 @@
 #define LEX_ERROR 1
 #define true 1
 
+int line = 1;
+int first_read = 0;
+
 int get_token(Token *token) {
     if (first_read == 0){
         int c = fgetc(stream);
@@ -163,7 +166,6 @@ int get_token(Token *token) {
             }
             case '<': {
                 int c2 = fgetc(stream);
-
                 if (c2 == '=') {
                     token->type = T_LESS_EQUAL;
                     token->line = line;
@@ -183,7 +185,7 @@ int get_token(Token *token) {
                                         line++;
                                         continue;
                                     }
-                                    if (isspace(c) != 0) {
+                                    if (isspace(c2) != 0) {
                                         continue;
                                     }
                                     switch (c2) {
@@ -239,7 +241,7 @@ int get_token(Token *token) {
                                             }
                                         }
                                         case 'd':{
-                                            ungetc(c, stream);
+                                            ungetc(c2, stream);
                                             fgets(arr, 8, stream);
                                             slider = slider + 7;
                                             if (strcmp(arr, "declare") != 0) {
@@ -255,9 +257,9 @@ int get_token(Token *token) {
                                             break;
                                         }
                                         case 's':{
-                                            ungetc(c, stream);
+                                            ungetc(c2, stream);
                                             fgets(slider, 13, stream);
-                                            if (strcmp(arr, "strict_types") != 0) {
+                                            if (strcmp(slider, "strict_types") != 0) {
                                                 token->type = T_ERROR;
                                                 token->line = line;
                                                 return LEX_ERROR;
@@ -428,6 +430,11 @@ int get_token(Token *token) {
                     return LEX_ERROR;
                 }
             }
+            case ':':{
+                token->type = T_DOUBLE_DOT;
+                token->line = line;
+                return LEX_OK;
+            }
             case '$':{
                 token->type = T_VAR;
                 token->line = line;
@@ -439,8 +446,7 @@ int get_token(Token *token) {
                 }
                 int size = 40;
                 char *str = malloc(40);
-                str[0] = (char) c2;
-                int i = 1;
+                int i = 0;
                 while((c2 == '_') || (c2 >= '0' && c2 <= '9') || (c2 >= 'A' && c2 <= 'Z') || (c2 >= 'a' && c2 <= 'z')){
                     if(i == size - 10){
                         size *= 2;
@@ -506,8 +512,7 @@ int get_token(Token *token) {
                 }
                 char *str = malloc(40);
                 int size = 40;
-                int i = 1;
-                str[0] = (char) c2;
+                int i = 0;
                 while (true) {
                     if (i == size - 10) {
                         size *= 2;
@@ -532,7 +537,7 @@ int get_token(Token *token) {
                     }
                 }
                 token->value.string = convert_string_for_ifjcode(str);
-                break;
+                return LEX_OK;
             }
             default: {
                 token->type = T_ERROR;

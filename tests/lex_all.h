@@ -10,6 +10,8 @@
 #define TEST(NAME, DESCRIPTION)                                                \
 int NAME() {                                                                   \
     int STATUS = 0;                                                            \
+    line = 1;                                                                  \
+    first_read = 0;                                                            \
     printf("\n[%s] %s\n\n", #NAME, DESCRIPTION);                               \
 
 #define TEST_ASSERT(CONDITION)                                                 \
