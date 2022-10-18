@@ -63,6 +63,18 @@ int test_only_prologue_with_multiline_block_comment(void);
 
 int test_only_prologue_with_declare(void);
 
+int test_only_prologue_with_comments_and_declare(void);
+
+int test_only_prologue_with_block_comments_and_declare(void);
+
+int test_only_prologue_with_more_block_comments_in_declare(void);
+
+int test_only_prologue_with_multiline_block_comments_in_declare(void);
+
+int test_only_prologue_with_multiline_block_comments_before_declare(void);
+
+int test_only_prologue_with_multiline_block_comments_after_declare(void);
+
 int test_prologue_declare_variable_string(void);
 
 int test_prologue_declare_variable_int(void);

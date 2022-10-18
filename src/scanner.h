@@ -35,12 +35,12 @@ typedef enum {
 }Keyword;
 
 typedef union {
-    Keyword keyword;
-    char *identifier;
-    char *string;
-    double number_float;
-    long long number_int;
-}Value;
+	Keyword keyword;
+	char *identifier;
+	char *string;
+	double number_float;
+	long long number_int;
+} Value;
 
 typedef enum {
     T_VALID,
@@ -90,4 +90,4 @@ char convert_esc_to_char(const char*, int);
 int kw_check(char*, Token*);
 int free_memory(char*, int);
 
-#endif //IFJ_SCANNER_H
+#endif	//IFJ_SCANNER_H

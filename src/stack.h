@@ -8,29 +8,37 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-//PLACEHOLDER STRUCT
+//PLACEHOLDER DATA STRUCT
 typedef struct tdata {
-    int x;
-    bool y;
-}TData;
-//END OF PLACEHOLDER
+	int x;
+	bool y;
+} TData;
 
 typedef struct telement {
-    TData *data;
-    struct telement *nextPtr;
-}TElement;
+	TData *data;
+	struct telement *nextPtr;
+} TElement;
 
-typedef struct tstack{
-    TElement *topPtr;
-}TStack;
+typedef struct tstack {
+	TElement *topPtr;
+} TStack;
 
-void stack_init(TStack *stack);
+//allocates memory for stack
+TStack *stack_init(TStack *stack);
 
+//frees stack pointer
+void stack_free(TStack *stack);
+
+//frees all allocated elements
+void stack_dispose(TStack *stack);
+
+//adds new element to stack
 void stack_push(TStack *stack, TData *data);
-//Removes one element from stack
-void stack_pop(TStack *stack);
-//Reads element from stack without removing it
-TData *stack_top(TStack *stack);
+
+//remove element from stack and returns its value
+TData *stack_pop(TStack *stack);
+
+//returns state of stack
 bool stack_isEmpty(TStack *stack);
 
-#endif  // __STACK_H__
+#endif	// __STACK_H__
