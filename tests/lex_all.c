@@ -35,7 +35,13 @@ int main(void) {
     tests_failed += test_only_prologue_with_newline_and_block_comments_and_newline_and_spaces();
     tests_failed += test_only_prologue_with_newline_and_block_comments_and_newline_and_spaces_and_comment();
     tests_failed += test_only_prologue_with_multiline_block_comment();
-    tests_failed += test_only_prologue_with_declare(); //TODO SIGSEGVs as of now due to strcmp
+    tests_failed += test_only_prologue_with_declare();
+    tests_failed += test_only_prologue_with_comments_and_declare();
+    tests_failed += test_only_prologue_with_block_comments_and_declare();
+    tests_failed += test_only_prologue_with_more_block_comments_in_declare();
+    tests_failed += test_only_prologue_with_multiline_block_comments_in_declare();
+    tests_failed += test_only_prologue_with_multiline_block_comments_before_declare();
+    tests_failed += test_only_prologue_with_multiline_block_comments_after_declare();
     tests_failed += test_prologue_declare_variable_string();
     tests_failed += test_prologue_declare_variable_int();
     tests_failed += test_prologue_declare_variable_float();

@@ -14,8 +14,8 @@ TEST(test_empty , "Test empty file")
     }
     stream = fopen("empty_test_file.php", "r");
     Token *token = malloc(sizeof(Token));
-    TEST_ASSERT(get_token(token) == 0)
-    TEST_ASSERT(token->type == T_EOF)
+    TEST_ASSERT(get_token(token) != 0)
+    TEST_ASSERT(token->type == T_ERROR)
     free(token);
 ENDTEST(stream, "empty_test_file.php")
 

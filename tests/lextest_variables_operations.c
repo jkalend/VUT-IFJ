@@ -14,37 +14,32 @@ TEST(test_prologue_declare_variable_string, "Test prologue declare variable stri
         return 1;
     }
     Token *token = malloc(sizeof(Token));
-    for(int i = 0; i < 8; i++) {
-        if(get_token(token)){
-            return 1;
-        }
-    }
+    TEST_ASSERT(get_token(token) == 0)
+    TEST_ASSERT(token->type == T_VALID)
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_IDENTIFIER)
     TEST_ASSERT(token->line == 3)
-    TEST_ASSERT(token->column[0] == 2)
-    TEST_ASSERT(token->column[1] == 3)
+
+
     TEST_ASSERT(strcmp(token->value.string, "a") == 0)
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_EQUAL)
     TEST_ASSERT(token->line == 3)
-    TEST_ASSERT(token->column[0] == 4)
-    TEST_ASSERT(token->column[1] == 5)
+
+
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_STRING)
     TEST_ASSERT(token->line == 3)
-    TEST_ASSERT(token->column[0] == 7)
-    TEST_ASSERT(token->column[1] == 11)
     TEST_ASSERT(strcmp(token->value.string, "ahoj") == 0)
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_SEMICOLON)
     TEST_ASSERT(token->line == 3)
-    TEST_ASSERT(token->column[0] == 12)
-    TEST_ASSERT(token->column[1] == 13)
+
+
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_EOF)
@@ -58,36 +53,33 @@ TEST(test_prologue_declare_variable_int, "Test prologue declare variable int")
         return 1;
     }
     Token *token = malloc(sizeof(Token));
-    for(int i = 0; i < 8; i++) {
-        if(get_token(token)){
-            return 1;
-        }
-    }
+    TEST_ASSERT(get_token(token) == 0)
+    TEST_ASSERT(token->type == T_VALID)
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_IDENTIFIER)
     TEST_ASSERT(token->line == 3)
-    TEST_ASSERT(token->column[0] == 2)
-    TEST_ASSERT(token->column[1] == 3)
+
+
     TEST_ASSERT(strcmp(token->value.string, "a") == 0)
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_EQUAL)
     TEST_ASSERT(token->line == 3)
-    TEST_ASSERT(token->column[0] == 4)
-    TEST_ASSERT(token->column[1] == 5)
+
+
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_INT)
     TEST_ASSERT(token->line == 3)
-    TEST_ASSERT(token->column[0] == 6)
-    TEST_ASSERT(token->column[1] == 7)
+
+
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_SEMICOLON)
     TEST_ASSERT(token->line == 3)
-    TEST_ASSERT(token->column[0] == 7)
-    TEST_ASSERT(token->column[1] == 8)
+
+
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_EOF)
@@ -101,36 +93,33 @@ TEST(test_prologue_declare_variable_float, "Test prologue declare variable float
         return 1;
     }
     Token *token = malloc(sizeof(Token));
-    for(int i = 0; i < 8; i++) {
-        if(get_token(token)){
-            return 1;
-        }
-    }
+    TEST_ASSERT(get_token(token) == 0)
+    TEST_ASSERT(token->type == T_VALID)
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_IDENTIFIER)
     TEST_ASSERT(token->line == 3)
-    TEST_ASSERT(token->column[0] == 2)
-    TEST_ASSERT(token->column[1] == 3)
+
+
     TEST_ASSERT(strcmp(token->value.string, "a") == 0)
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_EQUAL)
     TEST_ASSERT(token->line == 3)
-    TEST_ASSERT(token->column[0] == 4)
-    TEST_ASSERT(token->column[1] == 5)
+
+
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_FLOAT)
     TEST_ASSERT(token->line == 3)
-    TEST_ASSERT(token->column[0] == 6)
-    TEST_ASSERT(token->column[1] == 10)
+
+
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_SEMICOLON)
     TEST_ASSERT(token->line == 3)
-    TEST_ASSERT(token->column[0] == 10)
-    TEST_ASSERT(token->column[1] == 11)
+
+
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_EOF)
@@ -144,37 +133,34 @@ TEST(test_prologue_declare_variable_float_as_string, "Test prologue declare vari
         return 1;
     }
     Token *token = malloc(sizeof(Token));
-    for(int i = 0; i < 8; i++) {
-        if(get_token(token)){
-            return 1;
-        }
-    }
+    TEST_ASSERT(get_token(token) == 0)
+    TEST_ASSERT(token->type == T_VALID)
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_IDENTIFIER)
     TEST_ASSERT(token->line == 3)
-    TEST_ASSERT(token->column[0] == 2)
-    TEST_ASSERT(token->column[1] == 3)
+
+
     TEST_ASSERT(strcmp(token->value.string, "a") == 0)
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_EQUAL)
     TEST_ASSERT(token->line == 3)
-    TEST_ASSERT(token->column[0] == 4)
-    TEST_ASSERT(token->column[1] == 5)
+
+
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_STRING)
     TEST_ASSERT(token->line == 3)
-    TEST_ASSERT(token->column[0] == 7)
-    TEST_ASSERT(token->column[1] == 11)
+
+
     TEST_ASSERT(strcmp(token->value.string, "2.37") == 0)
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_SEMICOLON)
     TEST_ASSERT(token->line == 3)
-    TEST_ASSERT(token->column[0] == 12)
-    TEST_ASSERT(token->column[1] == 13)
+
+
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_EOF)
@@ -188,37 +174,34 @@ TEST(test_prologue_declare_variable_int_as_string, "Test prologue declare variab
         return 1;
     }
     Token *token = malloc(sizeof(Token));
-    for(int i = 0; i < 8; i++) {
-        if(get_token(token)){
-            return 1;
-        }
-    }
+    TEST_ASSERT(get_token(token) == 0)
+    TEST_ASSERT(token->type == T_VALID)
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_IDENTIFIER)
     TEST_ASSERT(token->line == 3)
-    TEST_ASSERT(token->column[0] == 2)
-    TEST_ASSERT(token->column[1] == 3)
+
+
     TEST_ASSERT(strcmp(token->value.string, "a") == 0)
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_EQUAL)
     TEST_ASSERT(token->line == 3)
-    TEST_ASSERT(token->column[0] == 4)
-    TEST_ASSERT(token->column[1] == 5)
+
+
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_STRING)
     TEST_ASSERT(token->line == 3)
-    TEST_ASSERT(token->column[0] == 7)
-    TEST_ASSERT(token->column[1] == 8)
+
+
     TEST_ASSERT(strcmp(token->value.string, "7") == 0)
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_SEMICOLON)
     TEST_ASSERT(token->line == 3)
-    TEST_ASSERT(token->column[0] == 9)
-    TEST_ASSERT(token->column[1] == 10)
+
+
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_EOF)
@@ -232,36 +215,33 @@ TEST(test_prologue_declare_variable_float_with_exp, "Test prologue declare varia
         return 1;
     }
     Token *token = malloc(sizeof(Token));
-    for(int i = 0; i < 8; i++) {
-        if(get_token(token)){
-            return 1;
-        }
-    }
+    TEST_ASSERT(get_token(token) == 0)
+    TEST_ASSERT(token->type == T_VALID)
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_IDENTIFIER)
     TEST_ASSERT(token->line == 3)
-    TEST_ASSERT(token->column[0] == 2)
-    TEST_ASSERT(token->column[1] == 3)
+
+
     TEST_ASSERT(strcmp(token->value.string, "a") == 0)
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_EQUAL)
     TEST_ASSERT(token->line == 3)
-    TEST_ASSERT(token->column[0] == 4)
-    TEST_ASSERT(token->column[1] == 5)
+
+
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_FLOAT)
     TEST_ASSERT(token->line == 3)
-    TEST_ASSERT(token->column[0] == 6)
-    TEST_ASSERT(token->column[1] == 12)
+
+
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_SEMICOLON)
     TEST_ASSERT(token->line == 3)
-    TEST_ASSERT(token->column[0] == 12)
-    TEST_ASSERT(token->column[1] == 13)
+
+
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_EOF)
@@ -275,36 +255,33 @@ TEST(test_prologue_declare_variable_float_with_exp_as_string, "Test prologue dec
         return 1;
     }
     Token *token = malloc(sizeof(Token));
-    for(int i = 0; i < 8; i++) {
-        if(get_token(token)){
-            return 1;
-        }
-    }
+    TEST_ASSERT(get_token(token) == 0)
+    TEST_ASSERT(token->type == T_VALID)
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_IDENTIFIER)
     TEST_ASSERT(token->line == 3)
-    TEST_ASSERT(token->column[0] == 2)
-    TEST_ASSERT(token->column[1] == 3)
+
+
     TEST_ASSERT(strcmp(token->value.string, "a") == 0)
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_EQUAL)
     TEST_ASSERT(token->line == 3)
-    TEST_ASSERT(token->column[0] == 4)
-    TEST_ASSERT(token->column[1] == 5)
+
+
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_FLOAT)
     TEST_ASSERT(token->line == 3)
-    TEST_ASSERT(token->column[0] == 7)
-    TEST_ASSERT(token->column[1] == 13)
+
+
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_SEMICOLON)
     TEST_ASSERT(token->line == 3)
-    TEST_ASSERT(token->column[0] == 14)
-    TEST_ASSERT(token->column[1] == 15)
+
+
 
     TEST_ASSERT(get_token(token) == 0)
     TEST_ASSERT(token->type == T_EOF)
