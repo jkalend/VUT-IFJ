@@ -27,14 +27,38 @@ int get_token(Token *token) {
         if(isspace(c) != 0){
             continue;
         }
+        if((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '_') {
+            int size = 40;
+            int i = 0;
+            char *identifier = malloc(size * sizeof(char));
+            while(c != EOF && (isalnum(c) || c == '_')) {
+                if(i == size) {
+                    size *= 2;
+                    identifier = realloc(identifier, size * sizeof(char));
+                }
+                identifier[i] = (char) c;
+                i++;
+                c = fgetc(stream);
+            }
+            ungetc(c, stream);
+            identifier[i] = '\0';
+            if (kw_check(identifier, token) != 1){
+                token->line = line;
+                free_memory(identifier, LEX_OK);
+                return LEX_OK;
+            }
+            token->type = T_IDENTIFIER;
+            token->value.identifier = identifier;
+            token->line = line;
+            return LEX_OK;
+        }
         if(c >= '0' && c <= '9'){
             int size = 40;
             char *str = malloc(size);
-            int i = 1;
+            int i = 0;
             int e = 0;
             int plus_minus = 0;
             int dot = 0;
-            str[0] = (char) c;
             while ((c >= '0' && c <= '9') || c == '.' || c == 'e' || c == 'E' || c == '+' || c == '-'){
                 if (i == size - 10) {
                     size *= 2;
