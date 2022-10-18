@@ -17,7 +17,7 @@ if (check != 0) {
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
-TEST_ASSERT(token->type == T_IDENTIFIER)
+TEST_ASSERT(token->type == T_VALID)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_IDENTIFIER)
@@ -71,7 +71,7 @@ if (check != 0) {
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
-TEST_ASSERT(token->type == T_IDENTIFIER)
+TEST_ASSERT(token->type == T_VALID)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_IDENTIFIER)
@@ -125,7 +125,7 @@ if (check != 0) {
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
-TEST_ASSERT(token->type == T_IDENTIFIER)
+TEST_ASSERT(token->type == T_VALID)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_IDENTIFIER)
@@ -179,7 +179,7 @@ if (check != 0) {
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
-TEST_ASSERT(token->type == T_IDENTIFIER)
+TEST_ASSERT(token->type == T_VALID)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_INT)
@@ -247,7 +247,7 @@ Token *token = malloc(sizeof(Token));
 
 // prolog
 TEST_ASSERT(get_token(token) == 0)
-TEST_ASSERT(token->type == T_IDENTIFIER)
+TEST_ASSERT(token->type == T_VALID)
 
 // $a
 TEST_ASSERT(get_token(token) == 0)
@@ -304,7 +304,7 @@ if (check != 0) {
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
-TEST_ASSERT(token->type == T_IDENTIFIER)
+TEST_ASSERT(token->type == T_VALID)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_IDENTIFIER)
@@ -358,7 +358,7 @@ if (check != 0) {
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
-TEST_ASSERT(token->type == T_IDENTIFIER)
+TEST_ASSERT(token->type == T_VALID)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_IDENTIFIER)
@@ -413,7 +413,7 @@ if (check != 0) {
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
-TEST_ASSERT(token->type == T_IDENTIFIER)
+TEST_ASSERT(token->type == T_VALID)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_INT)
@@ -480,7 +480,7 @@ if (check != 0) {
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
-TEST_ASSERT(token->type == T_IDENTIFIER)
+TEST_ASSERT(token->type == T_VALID)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_IDENTIFIER)
@@ -534,7 +534,7 @@ if (check != 0) {
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
-TEST_ASSERT(token->type == T_IDENTIFIER)
+TEST_ASSERT(token->type == T_VALID)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_IDENTIFIER)
@@ -588,7 +588,7 @@ if (check != 0) {
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
-TEST_ASSERT(token->type == T_IDENTIFIER)
+TEST_ASSERT(token->type == T_VALID)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_IDENTIFIER)
@@ -643,7 +643,7 @@ if (check != 0) {
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
-TEST_ASSERT(token->type == T_IDENTIFIER)
+TEST_ASSERT(token->type == T_VALID)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_INT)
@@ -710,7 +710,7 @@ if (check != 0) {
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
-TEST_ASSERT(token->type == T_IDENTIFIER)
+TEST_ASSERT(token->type == T_VALID)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_IDENTIFIER)
@@ -764,7 +764,7 @@ if (check != 0) {
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
-TEST_ASSERT(token->type == T_IDENTIFIER)
+TEST_ASSERT(token->type == T_VALID)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_IDENTIFIER)
@@ -818,7 +818,7 @@ if (check != 0) {
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
-TEST_ASSERT(token->type == T_IDENTIFIER)
+TEST_ASSERT(token->type == T_VALID)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_IDENTIFIER)
@@ -872,7 +872,7 @@ if (check != 0) {
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
-TEST_ASSERT(token->type == T_IDENTIFIER)
+TEST_ASSERT(token->type == T_VALID)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_INT)
