@@ -14,7 +14,6 @@
 FILE *stream;
 
 int line = 1;
-int column = 0;
 int first_read = 0;
 
 typedef enum {
@@ -29,7 +28,7 @@ typedef enum {
     KW_VOID,
     KW_WHILE,
     //KW_FOR,
-    //KW_GLOBAL,
+    KW_GLOBAL,
     KW_BOOLEAN,
     KW_TRUE,
     KW_FALSE,
@@ -76,19 +75,19 @@ typedef enum {
     T_NOT,
     T_EOF,
     T_ERROR,
+    T_END,
 }Type;
 
 typedef struct {
     Value value;
     Type type;
     int line;
-    int column[2];
 }Token;
 
-int get_token(Token *token);
-long long convert_str_to_int(char*);
-double convert_str_to_float(char*);
-int kw_check(char*);
+int get_token(Token*);
+char* convert_string_for_ifjcode(char*);
+char convert_esc_to_char(const char*, int);
+int kw_check(char*, Token*);
 int free_memory(char*, int);
 
 #endif //IFJ_SCANNER_H
