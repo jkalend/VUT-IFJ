@@ -25,6 +25,8 @@ typedef enum {
     KW_NULL,
     //KW_GLOBAL,
     //KW_BOOLEAN,
+    KW_FALSE,
+    KW_TRUE,
 }Keyword;
 
 typedef union {

@@ -61,7 +61,7 @@ free(token);
 ENDTEST(stream, "if_1.php")
 
 TEST(test_if_statement_2, "Test if statement 2")
-int check = write_file("if_2.php", "<?php declare(strict_types=1);\nif($temp === 8){\n}");
+int check = write_file("if_2.php", "<?php declare(strict_types=1);\nif($temp >= 8){\n}");
 if (check != 0) {
 	return 1;
 }
@@ -85,7 +85,7 @@ TEST_ASSERT(token->line == 2)
 TEST_ASSERT(strcmp(token->value.identifier, "temp") == 0)
 
 TEST_ASSERT(get_token(token) == 0)
-TEST_ASSERT(token->type == T_EQUAL)
+TEST_ASSERT(token->type == T_GREATER_EQUAL)
 TEST_ASSERT(token->line == 2)
 
 TEST_ASSERT(get_token(token) == 0)
@@ -313,7 +313,7 @@ ENDTEST(stream, "if_else_1.php")
 
 TEST(test_if_else_statement_2, "Test if else statement 2")
 int check = write_file("if_else_2.php",
-					   "<?php declare(strict_types=1);\nif($temp === 8){\n}\nelse { a_h = a+B; }");
+					   "<?php declare(strict_types=1);\nif($temp <= 8){\n}\nelse { a_h = a+B; }");
 if (check != 0) {
 	return 1;
 }
@@ -337,7 +337,7 @@ TEST_ASSERT(token->line == 2)
 TEST_ASSERT(strcmp(token->value.identifier, "temp") == 0)
 
 TEST_ASSERT(get_token(token) == 0)
-TEST_ASSERT(token->type == T_EQUAL)
+TEST_ASSERT(token->type == T_LESS_EQUAL)
 TEST_ASSERT(token->line == 2)
 
 TEST_ASSERT(get_token(token) == 0)
@@ -409,7 +409,7 @@ ENDTEST(stream, "if_else_2.php")
 TEST(test_if_statement_else_3, "Test if else statement 3")
 int check = write_file(
 	"if_else_3.php",
-	"<?phwp declare(strict_types=1);\nif($temp === null){\n$var = \"Hello World!\";\n}\nelse {var = \"I hate the world!\";}");
+	"<?phwp declare(strict_types=1);\nif($temp !== null){\n$var = \"Hello World!\";\n}\nelse {var = \"I hate the world!\";}");
 if (check != 0) {
 	return 1;
 }
@@ -433,7 +433,7 @@ TEST_ASSERT(token->line == 2)
 TEST_ASSERT(strcmp(token->value.string, "temp") == 0)
 
 TEST_ASSERT(get_token(token) == 0)
-TEST_ASSERT(token->type == T_EQUAL)
+TEST_ASSERT(token->type == T_NOT_EQUAL)
 TEST_ASSERT(token->line == 2)
 
 TEST_ASSERT(get_token(token) == 0)

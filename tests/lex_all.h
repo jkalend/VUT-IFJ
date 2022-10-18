@@ -125,4 +125,10 @@ int test_if_else_statement_3(void);
 
 int test_if_else_statement_4(void);
 
+int test_while_1(void);
+
+int test_while_2(void);
+
+int test_while_3(void);
+
 #endif	//IFJ_LEX_ALL_H
