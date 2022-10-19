@@ -131,4 +131,12 @@ int test_while_2(void);
 
 int test_while_3(void);
 
+int test_func_definition_1(void);
+
+int test_func_definition_2(void);
+
+int test_func_definition_3(void);
+
+int test_func_call_1(void);
+
 #endif	//IFJ_LEX_ALL_H

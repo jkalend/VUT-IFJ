@@ -71,6 +71,10 @@ int main(void) {
 	tests_failed += test_while_1();
 	tests_failed += test_while_2();
 	tests_failed += test_while_3();
+	tests_failed += test_func_definition_1();
+	tests_failed += test_func_definition_2();
+	tests_failed += test_func_definition_3();
+	tests_failed += test_func_call_1();
 	return tests_failed ? 1 : 0;
 }
 #endif	//LEX_ALL
