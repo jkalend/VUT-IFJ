@@ -8,24 +8,31 @@
 #include "error.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#include <ctype.h>
 
 FILE *stream;
 
+extern int line;
+extern int first_read;
+
 typedef enum {
-	KW_ELSE,
-	KW_IF,
-	KW_INT,
-	KW_RETURN,
-	KW_VOID,
-	KW_WHILE,
-	KW_FLOAT,
-	KW_STRING,
-	//KW_FOR,
-	KW_FUNCTION,
-	KW_NULL,
-	//KW_GLOBAL,
-	//KW_BOOLEAN,
-} Keyword;
+    KW_ELSE,
+    KW_FLOAT,
+    KW_FUNCTION,
+    KW_IF,
+    KW_INT,
+    KW_NULL,
+    KW_RETURN,
+    KW_STRING,
+    KW_VOID,
+    KW_WHILE,
+    //KW_FOR,
+    KW_GLOBAL,
+    KW_BOOLEAN,
+    KW_TRUE,
+    KW_FALSE,
+}Keyword;
 
 typedef union {
 	Keyword keyword;
@@ -65,8 +72,10 @@ typedef enum {
     T_RIGHT_BRACE,
     T_AND,
     T_OR,
+    T_NOT,
     T_EOF,
     T_ERROR,
+    T_END,
 }Type;
 
 typedef struct {
@@ -75,6 +84,10 @@ typedef struct {
     int line;
 }Token;
 
-int get_token(Token *token);
+int get_token(Token*);
+char* convert_string_for_ifjcode(char*);
+char convert_esc_to_char(const char*, int);
+int kw_check(char*, Token*);
+int free_memory(char*, int);
 
 #endif	//IFJ_SCANNER_H
