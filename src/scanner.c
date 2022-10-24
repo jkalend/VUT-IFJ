@@ -519,6 +519,8 @@ int get_token(Token *token) {
                         return LEX_ERROR;
                     }
                     token->line = line;
+                    token->value.identifier = str;
+                    return LEX_OK;
 
                 } else {
                     token->type = T_ERROR;
