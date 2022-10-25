@@ -579,11 +579,12 @@ char* convert_string_for_ifjcode(char *str) {
     char hex[2];
     char oct[3];
     while(str[i] != '\0'){
-        if(str[i] == '\''){
+        if(str[i] == '\\'){
             if(str[i+1] == 'x'){
                 hex[0] = str[i+2];
                 hex[1] = str[i+3];
                 if(convert_esc_to_char(hex, 16) == -1){
+                    i++;
                     continue;
                 }
                 str[i] = convert_esc_to_char(hex, 2);
@@ -592,11 +593,12 @@ char* convert_string_for_ifjcode(char *str) {
                     str[j+1] = str[j+4];
                     j++;
                 }
-            }else if(str[i+1] >= '0' && str[i+1] <= '3') {
+            }else if((str[i+1] >= '0' && str[i+1] <= '3') && (str[i+2] >= '0' && str[i+2] <= '7') && (str[i+3] >= '0' && str[i+3] <= '7')){
                 oct[0] = str[i+1];
                 oct[1] = str[i+2];
                 oct[2] = str[i+3];
                 if(convert_esc_to_char(oct, 8) == -1){
+                    i++;
                     continue;
                 }
                 str[i] = convert_esc_to_char(oct, 3);
@@ -606,11 +608,73 @@ char* convert_string_for_ifjcode(char *str) {
                     j++;
                 }
             }else{
-                str[i] = str[i+1];
                 int j = i;
-                while (j < (int) len - 2) {
-                    str[j+1] = str[j+2];
-                    j++;
+                switch (str[i+1]) {
+                    case 'n':
+                        str[i] = '\n';
+                        while (j < (int) len - 2) {
+                            str[j + 1] = str[j + 2];
+                            j++;
+                        }
+                        break;
+                    case 't':
+                        str[i] = '\t';
+                        while (j < (int) len - 2) {
+                            str[j + 1] = str[j + 2];
+                            j++;
+                        }
+                        break;
+                    case 'r':
+                        str[i] = '\r';
+                        while (j < (int) len - 2) {
+                            str[j + 1] = str[j + 2];
+                            j++;
+                        }
+                        break;
+                    case 'e':
+                        str[i] = 27;
+                        while (j < (int) len - 2) {
+                            str[j + 1] = str[j + 2];
+                            j++;
+                        }
+                        break;
+                    case 'a':
+                        str[i] = 7;
+                        while (j < (int) len - 2) {
+                            str[j + 1] = str[j + 2];
+                            j++;
+                        }
+                        break;
+                    case 'f':
+                        str[i] = '\f';
+                        while (j < (int) len - 2) {
+                            str[j + 1] = str[j + 2];
+                            j++;
+                        }
+                        break;
+                    case 'v':
+                        str[i] = '\v';
+                        while (j < (int) len - 2) {
+                            str[j + 1] = str[j + 2];
+                            j++;
+                        }
+                        break;
+                    case '\\':
+                        str[i] = '\\';
+                        while (j < (int) len - 2) {
+                            str[j + 1] = str[j + 2];
+                            j++;
+                        }
+                        break;
+                    case '$':
+                        str[i] = '$';
+                        while (j < (int) len - 2) {
+                            str[j + 1] = str[j + 2];
+                            j++;
+                        }
+                        break;
+                    default:
+                        break;
                 }
             }
         }
