@@ -186,124 +186,127 @@ int get_token(Token *token) {
                         if (c2 == 'h'){
                             c2 = fgetc(stream);
                             if (c2 == 'p'){
-								c2 = fgetc(stream);
-								if(isspace(c2)) {
-									char *arr = malloc(24);
-									char *slider = arr;
-									while (true) {
-										c2 = fgetc(stream);
-										if (c2 == '\n') {
-											line++;
-											continue;
-										}
-										if (isspace(c2)) {
-											continue;
-										}
-										switch (c2) {
-											case '/': {
-												c2 = fgetc(stream);
-												if (c2 == '/') {
-													while (c2 != '\n') {
-														c2 = fgetc(stream);
-														if (c2 == EOF) {
-															token->type = T_ERROR;
-															token->line = line;
-															return LEX_ERROR;
-														}
-													}
-													break;
-												} else if (c2 == '*') {
-													c2 = fgetc(stream);
-												loop:
-													while (c2 != '*') {
-														c2 = fgetc(stream);
-
-														if (c2 == '\n') {
-															line++;
-														}
-														if (c2 == EOF) {
-															token->type = T_ERROR;
-															token->line = line;
-															return LEX_ERROR;
-														}
-													}
+								int ok = 0;
+								char *arr = malloc(24);
+								char *slider = arr;
+								while (true) {
+									c2 = fgetc(stream);
+									if (c2 == '\n') {
+										line++;
+										ok = 1;
+										continue;
+									}
+									if (isspace(c2)) {
+										ok = 1;
+										continue;
+									}
+									switch (c2) {
+										case '/': {
+											c2 = fgetc(stream);
+											if (c2 == '/') {
+												ok = 1;
+												while (c2 != '\n') {
 													c2 = fgetc(stream);
 													if (c2 == EOF) {
 														token->type = T_ERROR;
 														token->line = line;
-														return LEX_OK;
-													} else if (c2 == '/') {
-														break;
-													} else {
-														if (c2 == '\n') {
-															line++;
-														}
-														goto loop;
+														return LEX_ERROR;
 													}
-												} else {
-													token->type = T_ERROR;
-													token->line = line;
-													return LEX_ERROR;
-												}
-											}
-											case 'd': {
-												ungetc(c2, stream);
-												fgets(arr, 8, stream);
-												slider = slider + 7;
-												if (strcmp(arr, "declare") != 0) {
-													token->type = T_ERROR;
-													token->line = line;
-													return LEX_ERROR;
 												}
 												break;
-											}
-											case '(':
-											case '=':
-											case '1': {
-												slider[0] = (char)c2;
-												slider++;
-												break;
-											}
-											case 's': {
-												ungetc(c2, stream);
-												fgets(slider, 13, stream);
-												if (strcmp(slider, "strict_types") != 0) {
+											} else if (c2 == '*') {
+												ok = 1;
+												c2 = fgetc(stream);
+											loop:
+												while (c2 != '*') {
+													c2 = fgetc(stream);
+
+													if (c2 == '\n') {
+														line++;
+													}
+													if (c2 == EOF) {
+														token->type = T_ERROR;
+														token->line = line;
+														return LEX_ERROR;
+													}
+												}
+												c2 = fgetc(stream);
+												if (c2 == EOF) {
 													token->type = T_ERROR;
 													token->line = line;
-													return LEX_ERROR;
-												}
-												slider = slider + 12;
-												break;
-											}
-											case ')': {
-												slider[0] = (char)c2;
-												arr[23] = '\0';
-												break;
-											}
-											case ';': {
-												if (strcmp(arr, "declare(strict_types=1)") == 0) {
-													token->type = T_VALID;
-													token->line = line;
-													free_memory(arr, LEX_OK);
 													return LEX_OK;
+												} else if (c2 == '/') {
+													break;
 												} else {
-													token->type = T_ERROR;
-													token->line = line;
-													free_memory(arr, LEX_ERROR);
-													return LEX_ERROR;
+													if (c2 == '\n') {
+														line++;
+													}
+													goto loop;
 												}
-											}
-											default: {
+											} else {
 												token->type = T_ERROR;
 												token->line = line;
 												return LEX_ERROR;
 											}
 										}
+										case 'd': {
+											if(ok == 0){
+												token->type = T_ERROR;
+												token->line = line;
+												return LEX_ERROR;
+											}
+											ungetc(c2, stream);
+											fgets(arr, 8, stream);
+											slider = slider + 7;
+											if (strcmp(arr, "declare") != 0) {
+												token->type = T_ERROR;
+												token->line = line;
+												return LEX_ERROR;
+											}
+											break;
+										}
+										case '(':
+										case '=':
+										case '1': {
+											slider[0] = (char)c2;
+											slider++;
+											break;
+										}
+										case 's': {
+											ungetc(c2, stream);
+											fgets(slider, 13, stream);
+											if (strcmp(slider, "strict_types") != 0) {
+												token->type = T_ERROR;
+												token->line = line;
+												return LEX_ERROR;
+											}
+											slider = slider + 12;
+											break;
+										}
+										case ')': {
+											slider[0] = (char)c2;
+											arr[23] = '\0';
+											break;
+										}
+										case ';': {
+											if (strcmp(arr, "declare(strict_types=1)") == 0) {
+												token->type = T_VALID;
+												token->line = line;
+												free_memory(arr, LEX_OK);
+												return LEX_OK;
+											} else {
+												token->type = T_ERROR;
+												token->line = line;
+												free_memory(arr, LEX_ERROR);
+												return LEX_ERROR;
+											}
+										}
+										default: {
+											token->type = T_ERROR;
+											token->line = line;
+											return LEX_ERROR;
+										}
 									}
-								}else{
-									token->type = T_ERROR;
-									token->line = line;
-									return LEX_ERROR;
 								}
                             }else{
                                 token->type = T_ERROR;
