@@ -1,3 +1,4 @@
+
 // stack.h
 // Řešení: IFJ projekt
 // Autor: Jan Vacula xvacul40, FIT
@@ -9,9 +10,11 @@
 #include <stdlib.h>
 
 //PLACEHOLDER DATA STRUCT
+
+
 typedef struct tdata {
-	int x;
-	bool y;
+	unsigned int value;
+	unsigned int type;
 } TData;
 
 typedef struct telement {

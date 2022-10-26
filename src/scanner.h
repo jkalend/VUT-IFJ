@@ -19,16 +19,21 @@ extern int first_read;
 typedef enum {
     KW_ELSE,
     KW_FLOAT,
-    KW_FUNCTION,
+    // please do not reorder
     KW_IF,
+    KW_WHILE,
+    KW_RETURN,
+    KW_FUNCTION,
+    KW_GLOBAL,
+    
     KW_INT,
     KW_NULL,
-    KW_RETURN,
+    
     KW_STRING,
     KW_VOID,
-    KW_WHILE,
+    
     //KW_FOR,
-    KW_GLOBAL,
+    
     KW_BOOLEAN,
     KW_TRUE,
     KW_FALSE,
@@ -44,17 +49,26 @@ typedef union {
 
 typedef enum {
     T_VALID,
-    T_KEYWORD,
     T_IDENTIFIER,
+    T_KEYWORD,
     T_STRING,
     T_INT,
     T_FLOAT,
+    
+    T_DIVIDE,
+    
     T_VAR,
     T_TYPE,
+    T_SEMICOLON,
+    T_ASSIGN,
+    T_COMMA,
+    T_LEFT_BRACKET,
+    T_EOF,
+    T_END,
+
     T_PLUS,
     T_MINUS,
     T_MULTIPLY,
-    T_DIVIDE,
     T_LESS,
     T_LESS_EQUAL,
     T_GREATER,
@@ -62,20 +76,19 @@ typedef enum {
     T_EQUAL,
     T_NOT_EQUAL,
     T_CONCATENATE,
-    T_ASSIGN,
-    T_SEMICOLON,
-    T_COMMA,
+    
+    
+    
     T_DOUBLE_DOT,
-    T_LEFT_BRACKET,
     T_RIGHT_BRACKET,
     T_LEFT_BRACE,
     T_RIGHT_BRACE,
     T_AND,
     T_OR,
     T_NOT,
-    T_EOF,
+    
     T_ERROR,
-    T_END,
+    
 }Type;
 
 typedef struct {

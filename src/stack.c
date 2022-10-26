@@ -1,3 +1,4 @@
+
 // stack.c
 // Řešení: IFJ projekt
 // Autor: Jan Vacula xvacul40, FIT
