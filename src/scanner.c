@@ -742,7 +742,7 @@ int kw_check(char *s, Token *token){
         return 2;
     }
     if (strcmp(s, "void") == 0) {
-        token->type = T_KEYWORD;
+        token->type = T_TYPE;
         token->value.keyword = KW_VOID;
         return LEX_OK;
     }
