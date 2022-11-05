@@ -62,7 +62,6 @@ typedef enum {
     T_SEMICOLON,
     T_ASSIGN,
     T_COMMA,
-    T_LEFT_BRACKET,
     T_EOF,
     T_END,
 
@@ -76,6 +75,7 @@ typedef enum {
     T_EQUAL,
     T_NOT_EQUAL,
     T_CONCATENATE,
+    T_LEFT_BRACKET,
     
     
     
