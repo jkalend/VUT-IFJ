@@ -13,6 +13,16 @@
 #define AVG_LEN_MAX 15
 #define AVG_LEN_MIN 2
 
+// Typy:
+typedef const char * htab_key_t;        // typ klíče
+typedef int htab_value_t;               // typ hodnoty
+
+// Dvojice dat v tabulce:
+typedef struct htab_pair {
+    htab_key_t    key;          // klíč
+    htab_value_t  value;        // asociovaná hodnota
+} htab_pair_t;                  // typedef podle zadání
+
 // Tabulka:
 typedef struct htab_item
 {
@@ -27,15 +37,6 @@ typedef struct htab
     htab_item_t **arr_ptr;   
 } htab_t;
 
-// Typy:
-typedef const char * htab_key_t;        // typ klíče
-typedef int htab_value_t;               // typ hodnoty
-
-// Dvojice dat v tabulce:
-typedef struct htab_pair {
-    htab_key_t    key;          // klíč
-    htab_value_t  value;        // asociovaná hodnota
-} htab_pair_t;                  // typedef podle zadání
 
 // Rozptylovací (hash) funkce (stejná pro všechny tabulky v programu)
 // Pokud si v programu definujete stejnou funkci, použije se ta vaše.

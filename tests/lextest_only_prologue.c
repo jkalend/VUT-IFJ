@@ -223,7 +223,7 @@ ENDTEST(stream, "only_prologue_with_multiline_block_comment_and_newline_test_fil
 TEST(test_only_prologue_with_comments_and_declare,
      "Test only prologue with comments and declare")
     int check = write_file("only_prologue_with_comments_and_declare_test_file.php",
-                           "<?php\n//comment\ndeclare(strict_types=1);");
+                           "<?php declare(strict_types=1);");
     if (check != 0) {
         return 1;
     }

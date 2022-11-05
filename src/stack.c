@@ -25,7 +25,7 @@ void stack_dispose(TStack *stack) {
 	}
 }
 
-void stack_push(TStack *stack, TData *data) {
+void stack_push(TStack *stack, const TData *data) {
 	TElement *newElement = malloc(sizeof(TElement));
 	if (newElement == NULL) {
 		stack_dispose(stack);
@@ -52,4 +52,11 @@ bool stack_isEmpty(TStack *stack) {
 		return true;
 	}
 	return false;
+}
+
+TData *stack_top(TStack *stack) {
+    if (!stack_isEmpty(stack)) {
+        return stack->topPtr->data;
+    }
+    return NULL;
 }

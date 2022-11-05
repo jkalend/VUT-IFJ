@@ -114,9 +114,9 @@ int main(void) {
 	TData *a = malloc(sizeof(TData));
 	TData *b = malloc(sizeof(TData));
 	TData *c = malloc(sizeof(TData));
-	a->x = 5;
-	b->x = 6;
-	c->x = 7;
+	a->value = 5;
+	b->value = 6;
+	c->value = 7;
 
 	S = stack_init(S);
 	test1(S, a, b, c);

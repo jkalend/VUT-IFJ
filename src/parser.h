@@ -10,6 +10,8 @@ const unsigned int LL_TABLE[11][15] = { {1},
                                         {[11] = 21},
                                         {0, 24, 24, 24, 24, 24, 24, 24, 0, 24, 0, 0, 0, 0, 0} };
 
+extern const unsigned int PREC_TABLE[14][14];
+
 typedef enum {
     N_PROG,
     N_ST_LIST,
@@ -30,3 +32,24 @@ typedef enum {
     T_NONTERM,
     T_KW
 } TermType;
+
+typedef enum {
+    P_MUL,
+    P_DIV,
+    P_ADD,
+    P_SUB,
+    P_CONC,
+    P_I,
+    P_LEFT_BRACKET,
+    P_RIGHT_BRACKET,
+    P_R,
+    P_TYPE_EQ,
+    P_TYPE_NEQ,
+    P_END,
+    P_FN,
+    P_COMMA,
+    P_OPEN,
+    P_CLOSE,
+    P_EQUAL,
+    P_E
+}PrecSyms;

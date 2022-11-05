@@ -13,7 +13,12 @@ include_directories(src)
 include_directories(tests)
 
 set(SCANNER src/scanner.c src/scanner.h src/error.h)
+set(PARSER src/parser.c src/parser.h src/error.h)
 set(LEX_ALL tests/lextest_empty.c tests/lex_all.c tests/lex_all.h tests/lextest_only_prologue.c tests/lextest_variables_operations.c)
+
+add_executable(parser
+        ${PARSER} ${SCANNER} src/stack.h src/stack.c)
+add_coverage(parser)
 
 add_executable(test_stack
         tests/stack_test.c src/stack.h src/stack.c)

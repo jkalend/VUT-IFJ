@@ -3,8 +3,24 @@
 #include "stack.h"
 #include "htab.h"
 
+const unsigned int PREC_TABLE[14][14] = { //TODO
+        {P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_OPEN, P_OPEN, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_OPEN, P_CLOSE},
+        {P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_OPEN, P_OPEN, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_OPEN, P_CLOSE},
+        {P_OPEN,P_OPEN,P_CLOSE, P_CLOSE, P_CLOSE, P_OPEN, P_OPEN, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_OPEN, P_CLOSE},
+        {P_OPEN,P_OPEN,P_CLOSE, P_CLOSE, P_CLOSE, P_OPEN, P_OPEN, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_OPEN, P_CLOSE},
+        {P_OPEN,P_OPEN,P_CLOSE, P_CLOSE, P_CLOSE, P_OPEN, P_OPEN, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_OPEN, P_CLOSE},
+        {P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, [7] = P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, [13] = P_CLOSE},
+        {P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_EQUAL, P_OPEN, P_OPEN, P_OPEN, [12] = P_OPEN, P_EQUAL},
+        {P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, [7] = P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, [13] = P_CLOSE},
+        {P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_CLOSE, [9] = P_CLOSE, P_CLOSE, P_CLOSE, P_OPEN, P_CLOSE},
+        {P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_CLOSE, P_OPEN, [11] = P_CLOSE, P_OPEN, P_CLOSE},
+        {P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_CLOSE, P_OPEN, [11] = P_CLOSE, P_OPEN, P_CLOSE},
+        {P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_OPEN, [8] = P_OPEN, [12] = P_OPEN},
+        {[6] = P_EQUAL},
+        {P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_OPEN,P_OPEN, P_OPEN, P_EQUAL, P_OPEN, [12] = P_OPEN, P_EQUAL}
+};
 
-TData *stack_data(int value, int type){
+TData *stack_data(int value, int type) { //unsigned?
     TData *ptr = malloc(sizeof(TData));
     if (ptr != NULL) {
         ptr->value = value;
@@ -142,14 +158,249 @@ int apply_rule(TStack *stack, unsigned int val) {
     return 1;
 }
 
+void prec_index(const Token *token, unsigned int *rc, int symbol) {
+    if (symbol > -1 && symbol < 15) {
+        *rc = symbol;
+        return;
+    }
+    switch (token->type) {
 
-int main() {
+        case T_IDENTIFIER: //func
+            *rc = 12;
+            break;
+        case T_STRING: case T_INT: case T_FLOAT: case T_VAR:
+            *rc = 5;
+            break;
+        case T_COMMA:
+            *rc = 13;
+            break;
+        case T_EOF: case T_END:
+            //FIXME
+            break;
+        case T_PLUS:
+            *rc = 2;
+            break;
+        case T_MINUS:
+            *rc = 3;
+            break;
+        case T_CONCATENATE:
+            *rc = 4;
+            break;
+        case T_MULTIPLY:
+            *rc = 0;
+            break;
+        case T_DIVIDE:
+            *rc = 1;
+            break;
+        case T_LESS: case T_LESS_EQUAL: case T_GREATER: case T_GREATER_EQUAL:
+            *rc = 8;
+            break;
+        case T_EQUAL:
+            *rc = 9;
+            break;
+        case T_NOT_EQUAL:
+            *rc = 10;
+            break;
+        case T_LEFT_BRACKET:
+            *rc = 6;
+            break;
+        case T_RIGHT_BRACKET:
+            *rc = 7;
+            break;
+        case T_ERROR:
+            //FIXME
+            break;
+        case T_SEMICOLON: case T_LEFT_BRACE:
+            //somehow return the token to the LL stack
+            break;
+        default:
+            exit(1);
+    }
+}
+
+int reduce(TStack *stack, TStack *shelf) {
+
+    if (stack_top(stack)->value == P_E) {
+        stack_push(shelf, stack_pop(stack));
+        if (stack_top(stack)->value == P_END) return -1;
+    }
+    unsigned int res = 0;
+    bool fn = false;
+    while (stack_top(stack)->value != P_OPEN && stack_top(stack)->value != P_END) {
+        const TData *data = stack_pop(stack);
+        stack_push(shelf, data);
+        res += data->value;
+        if (data->value == P_FN) fn = true;
+    }
+    if (stack_top(stack)->value == P_OPEN) {
+        const TData *data = stack_pop(stack);
+        res += data->value;
+        stack_push(shelf, data);
+    } else if (stack_top(stack)->value == P_END) {
+        exit(1); //TODO bad code
+    }
+
+    //could it be simpler? yes, but 3AC gotta go somewhere
+    int cnt = 0;
+    switch (res) {
+        case 30:
+            while (cnt < 3) {stack_pop(shelf); cnt++;}
+            if (cnt != 3) goto cleanup;
+            printf("1p\n");
+            stack_push(stack, stack_data(P_E, P_E));
+            return 1;
+        case 53:
+            while (cnt < 5) {stack_pop(shelf); cnt++;}
+            if (cnt != 5) goto cleanup;
+            printf("2p\n");
+            stack_push(stack, stack_data(P_E, P_E));
+            return 1;
+        case 54:
+            while (cnt < 5) {stack_pop(shelf); cnt++;}
+            if (cnt != 5) goto cleanup;
+            printf("3p\n");
+            stack_push(stack, stack_data(P_E, P_E));
+            return 1;
+        case 55:
+            while (cnt < 5) {stack_pop(shelf); cnt++;}
+            if (cnt != 5) goto cleanup;
+            printf("4p\n");
+            stack_push(stack, stack_data(P_E, P_E));
+            return 1;
+        case 56:
+            while (cnt < 5) {stack_pop(shelf); cnt++;}
+            if (cnt != 5) goto cleanup;
+            printf("5p\n");
+            stack_push(stack, stack_data(P_E, P_E));
+            return 1;
+        case 57:
+            while (cnt < 5) {stack_pop(shelf); cnt++;}
+            if (cnt != 5) goto cleanup;
+            printf("6p\n");
+            stack_push(stack, stack_data(P_E, P_E));
+            return 1;
+        case 61:
+            while (cnt < 5) {stack_pop(shelf); cnt++;}
+            if (cnt != 5) goto cleanup;
+            printf("7p\n");
+            stack_push(stack, stack_data(P_E, P_E));
+            return 1;
+        case 63:
+            while (cnt < 5) {stack_pop(shelf); cnt++;}
+            if (cnt != 5) goto cleanup;
+            printf("8p\n");
+            stack_push(stack, stack_data(P_E, P_E));
+            return 1;
+        default:
+            printf("BAD\n");
+            break;
+    }
+
+    if (fn && res >= 69 /*noice*/) {
+        //symtable should be used here ideally to check for number of args
+        const TData *data = NULL;
+        int brackets = 0;
+        int E = 0;
+
+        while (stack_top(shelf)->value != P_FN) {
+            data = stack_pop(shelf);
+            if (data->value == P_LEFT_BRACKET) brackets--;
+            else if (data->value == P_RIGHT_BRACKET) brackets++;
+            else if (data->value == P_E) E++;
+        }
+        if (brackets != 0) exit(1);
+        // args number check
+        printf("9p\n");
+        stack_push(stack, stack_data(P_E, P_E));
+        return 1;
+    } else {
+        exit(1); //TODO bad code
+    }
+    cleanup:
+    stack_dispose(shelf);
+    return 0;
+}
+
+int precedence(TStack *stack) {
+    stack_push(stack, stack_data(P_END, P_END));
+    Token *lookahead = malloc(sizeof(Token));
+    if (lookahead == NULL)  exit(1); //TODO bad code
+
+    bool end = false;
+    get_token(lookahead);
+    if (lookahead->type == T_ERROR) goto bad_token;
+    if (lookahead->type == T_LEFT_BRACE || lookahead->type == T_SEMICOLON) {
+        end = true;
+        //somehow return it back?
+    }
+
+    while (true) {
+        unsigned int row, column;
+        TStack *shelf = NULL;
+        shelf = stack_init(shelf);
+
+        //only 1 skip needed?
+        if (stack_top(stack)->value == P_E) stack_push(shelf, stack_pop(stack));
+
+        //gets indexes for the table
+        prec_index(NULL, &row,  (int)stack_top(stack)->value);
+        if (!end) {
+            prec_index(lookahead, &column, -1);
+        } else {
+            prec_index(NULL, &column, P_END);
+        }
+
+        unsigned int sym = PREC_TABLE[row][column];
+        if (!sym) exit(1); //TODO bad code
+        if (sym != P_EQUAL && !end) { // skips equal signs
+            stack_push(stack, stack_data((int) sym, (int) sym));
+        }
+        while (!stack_isEmpty(shelf)) {
+            stack_push(stack, stack_pop(shelf));
+        }
+        if (end) stack_push(stack, stack_data(P_CLOSE, P_CLOSE));
+
+        if (sym == P_CLOSE) {
+            int res = reduce(stack, shelf);
+            if (!res || !stack_isEmpty(shelf)) exit(1); //TODO bad code
+            continue;
+        }
+        // if T_VAR is found -> P_I is pushed
+        // if Rel operators are fund -> P_R is pushed
+        // <(=)> is deleted, same for
+        if (!end) {
+            if (lookahead->type == T_IDENTIFIER) {
+                stack_push(stack, stack_data(P_FN, P_FN));
+            } else if (lookahead->type == T_FLOAT || lookahead->type == T_INT || lookahead->type == T_VAR ||
+                       lookahead->type == T_STRING) {
+                stack_push(stack, stack_data(P_I, P_I));
+            } else if (lookahead->type >= T_LESS && lookahead->type <= T_GREATER_EQUAL) {
+                stack_push(stack, stack_data(P_R, P_R));
+            } else {
+                stack_push(stack, stack_data((int) row, (int) row));
+            }
+        } else {
+            while (reduce(stack, shelf) == 1);
+            if (reduce(stack, shelf) != -1) {
+                return 0;
+            } else {
+                return 1;
+            }
+        }
+    }
+
+    bad_token:
+    exit(1); //TODO bad code
+}
+
+int main(void) {
     stream = fopen("test.php", "r");
-    if (stream == NULL) exit(1);
+    if (stream == NULL) exit(1); //TODO bad code
 
-
-    TStack *stack;
+    TStack *stack = NULL;
     stack = stack_init(stack);
+    TStack *prec = NULL;
+    prec = stack_init(prec);
     
     TData *tmp = stack_data(T_EOF, T_TERM);
     TData *tmp2 = stack_data(N_PROG, T_NONTERM);
@@ -157,27 +408,29 @@ int main() {
     stack_push(stack, tmp2);
 
     Token *token = malloc(sizeof(Token));
-    if (token == NULL)  exit(1);
+    if (token == NULL)  exit(1); //TODO bad code
 
-    get_token(token);
+    get_token(token); //check for T_ERROR
     while(1) {
         if (stack_isEmpty(stack)) {
             break;
         }
 
         TData *top = stack_pop(stack);
-        if (top->type == T_TERM && top->value == token->type ||
-            top->type == T_KW && token->type == T_KEYWORD && top->value == token->value.keyword) {
+        if ((top->type == T_TERM && top->value == token->type) ||
+                (top->type == T_KW && token->type == T_KEYWORD && top->value == token->value.keyword)) {
             get_token(token);
             continue;
         }
         else {
             fprintf(stderr, "terms not matching\n");
-            exit(1);
+            //exit(1); //TODO bad code
         }
 
         if (top->type == T_NONTERM && top->value == N_EXPR) {
-            /* call precedential */
+            //printf("hello\n");
+            int result = precedence(prec);
+            if (!result) exit(5); //TODO bad code
         }
         unsigned int col_idx, row_idx;
         
@@ -190,10 +443,11 @@ int main() {
 
         unsigned int val = LL_TABLE[row_idx][col_idx];
        
-        printf("%d ", val);
+        printf("%d\n", val);
         apply_rule(stack, val);
     }
     printf("\n");
     stack_dispose(stack);
+    stack_dispose(prec);
     return 0;
 }
