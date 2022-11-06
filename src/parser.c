@@ -229,60 +229,60 @@ int reduce(TStack *stack, TStack *shelf) {
     //could it be simpler? yes, but 3AC gotta go somewhere
     int cnt = 0;
     switch (res) {
-        case 30:
+        case 34:
             while (cnt < 3) {stack_pop(shelf); cnt++;}
             if (cnt != 3) goto cleanup;
-            printf("1p\n");
-            stack_push(stack, stack_data(P_E, P_E));
-            return 1;
-        case 53:
-            while (cnt < 5) {stack_pop(shelf); cnt++;}
-            if (cnt != 5) goto cleanup;
-            printf("2p\n");
-            stack_push(stack, stack_data(P_E, P_E));
-            return 1;
-        case 54:
-            while (cnt < 5) {stack_pop(shelf); cnt++;}
-            if (cnt != 5) goto cleanup;
-            printf("3p\n");
-            stack_push(stack, stack_data(P_E, P_E));
-            return 1;
-        case 55:
-            while (cnt < 5) {stack_pop(shelf); cnt++;}
-            if (cnt != 5) goto cleanup;
-            printf("4p\n");
-            stack_push(stack, stack_data(P_E, P_E));
-            return 1;
-        case 56:
-            while (cnt < 5) {stack_pop(shelf); cnt++;}
-            if (cnt != 5) goto cleanup;
-            printf("5p\n");
-            stack_push(stack, stack_data(P_E, P_E));
-            return 1;
-        case 57:
-            while (cnt < 5) {stack_pop(shelf); cnt++;}
-            if (cnt != 5) goto cleanup;
-            printf("6p\n");
-            stack_push(stack, stack_data(P_E, P_E));
-            return 1;
-        case 61:
-            while (cnt < 5) {stack_pop(shelf); cnt++;}
-            if (cnt != 5) goto cleanup;
-            printf("7p\n");
+            printf("1p ");
             stack_push(stack, stack_data(P_E, P_E));
             return 1;
         case 63:
             while (cnt < 5) {stack_pop(shelf); cnt++;}
             if (cnt != 5) goto cleanup;
-            printf("8p\n");
+            printf("2p ");
+            stack_push(stack, stack_data(P_E, P_E));
+            return 1;
+        case 64:
+            while (cnt < 5) {stack_pop(shelf); cnt++;}
+            if (cnt != 5) goto cleanup;
+            printf("3p ");
+            stack_push(stack, stack_data(P_E, P_E));
+            return 1;
+        case 65:
+            while (cnt < 5) {stack_pop(shelf); cnt++;}
+            if (cnt != 5) goto cleanup;
+            printf("4p ");
+            stack_push(stack, stack_data(P_E, P_E));
+            return 1;
+        case 66:
+            while (cnt < 5) {stack_pop(shelf); cnt++;}
+            if (cnt != 5) goto cleanup;
+            printf("5p ");
+            stack_push(stack, stack_data(P_E, P_E));
+            return 1;
+        case 67:
+            while (cnt < 5) {stack_pop(shelf); cnt++;}
+            if (cnt != 5) goto cleanup;
+            printf("6p ");
+            stack_push(stack, stack_data(P_E, P_E));
+            return 1;
+        case 76:
+            while (cnt < 5) {stack_pop(shelf); cnt++;}
+            if (cnt != 5) goto cleanup;
+            printf("7p ");
+            stack_push(stack, stack_data(P_E, P_E));
+            return 1;
+        case 71:
+            while (cnt < 5) {stack_pop(shelf); cnt++;}
+            if (cnt != 5) goto cleanup;
+            printf("8p ");
             stack_push(stack, stack_data(P_E, P_E));
             return 1;
         default:
-            printf("BAD\n");
+            printf("BAD ");
             break;
     }
 
-    if (fn && res >= 69 /*noice*/) {
+    if (fn && res >= 84) {
         //symtable should be used here ideally to check for number of args
         const TData *data = NULL;
         int brackets = 0;
@@ -309,27 +309,28 @@ int reduce(TStack *stack, TStack *shelf) {
 
 int precedence(TStack *stack) {
     stack_push(stack, stack_data(P_END, P_END));
-    Token *lookahead = malloc(sizeof(Token));
+    Token *lookahead = malloc(sizeof(Token)); //not wanted
     if (lookahead == NULL)  exit(1); //TODO bad code
 
     bool end = false;
-    get_token(lookahead);
-    if (tmp_token == NULL) get_token(lookahead);
-    else {
-        lookahead = tmp_token;
-        tmp_token = NULL;
-    }
-    if (lookahead->type == T_ERROR) goto bad_token;
-    if (lookahead->type == T_LEFT_BRACE || lookahead->type == T_SEMICOLON) {
-        end = true;
-        //somehow return it back?
-        tmp_token = lookahead;
-    }
 
+    unsigned int row, column;
+    TStack *shelf = NULL;
+    shelf = stack_init(shelf);
     while (true) {
-        unsigned int row, column;
-        TStack *shelf = NULL;
-        shelf = stack_init(shelf);
+        if (tmp_token == NULL) get_token(lookahead);
+        else {
+            lookahead = tmp_token;
+            tmp_token = NULL;
+        }
+        if (lookahead->type == T_ERROR) goto bad_token;
+
+        reduced:
+        if (lookahead->type == T_LEFT_BRACE || lookahead->type == T_SEMICOLON) {
+            end = true;
+            //somehow return it back?
+            tmp_token = lookahead;
+        }
 
         //only 1 skip needed?
         if (stack_top(stack)->value == P_E) stack_push(shelf, stack_pop(stack));
@@ -343,6 +344,7 @@ int precedence(TStack *stack) {
         }
 
         unsigned int sym = PREC_TABLE[row][column];
+        if (end && !sym) return 1;
         if (!sym) exit(1); //TODO bad code
         if (sym != P_EQUAL && !end) { // skips equal signs
             stack_push(stack, stack_data((int) sym, (int) sym));
@@ -355,7 +357,7 @@ int precedence(TStack *stack) {
         if (sym == P_CLOSE) {
             int res = reduce(stack, shelf);
             if (!res || !stack_isEmpty(shelf)) exit(1); //TODO bad code
-            continue;
+            goto reduced;
         }
         // if T_VAR is found -> P_I is pushed
         // if Rel operators are fund -> P_R is pushed
@@ -369,7 +371,7 @@ int precedence(TStack *stack) {
             } else if (lookahead->type >= T_LESS && lookahead->type <= T_GREATER_EQUAL) {
                 stack_push(stack, stack_data(P_R, P_R));
             } else {
-                stack_push(stack, stack_data((int) row, (int) row));
+                stack_push(stack, stack_data((int) column, (int) column));
             }
         } else {
             while (reduce(stack, shelf) == 1);
@@ -385,7 +387,7 @@ int precedence(TStack *stack) {
     exit(1); //TODO bad code
 }
 
-int parse() {
+int parse(void) {
     TStack *stack = NULL;
     stack = stack_init(stack);
     TStack *prec = NULL;
@@ -467,7 +469,7 @@ int parse() {
     return 0;
 }
 
-int main() {
+int main(void) {
     stream = fopen("test.php", "r");
     if (stream == NULL) exit(1);
 
