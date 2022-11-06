@@ -393,10 +393,8 @@ int parse(void) {
     TStack *prec = NULL;
     prec = stack_init(prec);
     
-    TData *tmp = stack_data(T_EOF, T_TERM);
-    TData *tmp2 = stack_data(N_PROG, T_NONTERM);
-    stack_push(stack, tmp);
-    stack_push(stack, tmp2);
+    stack_push(stack, stack_data(T_EOF, T_TERM));
+    stack_push(stack, stack_data(N_PROG, T_NONTERM));
 
     Token *token = malloc(sizeof(Token));
     if (token == NULL)  exit(1);
@@ -406,7 +404,7 @@ int parse(void) {
         if (stack_isEmpty(stack)) {
             break;
         }
-
+        
         TData *top = stack_pop(stack);
         if (top->type == T_TERM) {
             if (top->value == token->type) { 
@@ -443,7 +441,13 @@ int parse(void) {
                 /* CALL PRECEDENTIAL */
                 tmp_token = token;
                 int result = precedence(prec);
+                
                 if (!result) exit(5); //TODO bad code
+                if (tmp_token == NULL) get_token(token);
+                else {
+                    token = tmp_token;
+                    tmp_token = NULL;
+                }
                 continue;
             }
             unsigned int col_idx, row_idx;
