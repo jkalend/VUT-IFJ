@@ -245,6 +245,49 @@ TEST(test_prologue_declare_variable_float_with_exp_as_string, "Test prologue dec
     free(token);
 ENDTEST(stream, "prologue_declare_variable_float_with_exp_as_string.php")
 
+TEST(test_var_eq_expression, "Test variable equals expression")
+int check = write_file("var_eq_expression.php",
+					   "<?php\ndeclare(strict_types=1);\n$a = 5+5;");
+if (check != 0) {
+	return 1;
+}
+stream = fopen("var_eq_expression.php", "r");
+Token *token = malloc(sizeof(Token));
+TEST_ASSERT(get_token(token) == 0)
+TEST_ASSERT(token->type == T_VALID)
+
+TEST_ASSERT(get_token(token) == 0)
+TEST_ASSERT(token->type == T_VAR)
+TEST_ASSERT(token->line == 3)
+TEST_ASSERT(strcmp(token->value.identifier, "a") == 0)
+
+TEST_ASSERT(get_token(token) == 0)
+TEST_ASSERT(token->type == T_ASSIGN)
+TEST_ASSERT(token->line == 3)
+
+TEST_ASSERT(get_token(token) == 0)
+TEST_ASSERT(token->type == T_INT)
+TEST_ASSERT(token->line == 3)
+TEST_ASSERT(token->value.number_int == 5)
+
+TEST_ASSERT(get_token(token) == 0)
+TEST_ASSERT(token->type == T_PLUS)
+TEST_ASSERT(token->line == 3)
+
+TEST_ASSERT(get_token(token) == 0)
+TEST_ASSERT(token->type == T_INT)
+TEST_ASSERT(token->line == 3)
+TEST_ASSERT(token->value.number_int == 5)
+
+TEST_ASSERT(get_token(token) == 0)
+TEST_ASSERT(token->type == T_SEMICOLON)
+TEST_ASSERT(token->line == 3)
+
+TEST_ASSERT(get_token(token) == 0)
+TEST_ASSERT(token->type == T_EOF)
+free(token);
+ENDTEST(stream, "var_eq_expression.php")
+
 #ifndef LEX_ALL
 int main(void) {
     int tests_failed = 0;
@@ -255,6 +298,7 @@ int main(void) {
     tests_failed += test_prologue_declare_variable_float_as_string();
     tests_failed += test_prologue_declare_variable_float_with_exp();
     tests_failed += test_prologue_declare_variable_float_with_exp_as_string();
+	tests_failed += test_var_eq_expression();
     return tests_failed ? 1 : 0;
 }
 #endif //LEX_ALL
