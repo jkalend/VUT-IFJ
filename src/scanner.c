@@ -59,6 +59,7 @@ int get_token(Token *token) {
             int e = 0;
             int plus_minus = 0;
             int dot = 0;
+			c = fgetc(stream);
             while ((c >= '0' && c <= '9') || c == '.' || c == 'e' || c == 'E' || c == '+' || c == '-'){
                 if (i == size - 10) {
                     size *= 2;
@@ -67,6 +68,15 @@ int get_token(Token *token) {
                 str[i] = (char) c;
                 i++;
                 c = fgetc(stream);
+				if((str[i] >= '0' && c <= '9') && (c == '+' || c == '-')){
+					ungetc(c, stream);
+					str[i] = '\0';
+					token->type = T_INT;
+					token->value.number_int = strtoll(str, NULL, 10);
+					token->line = line;
+					free(str);
+					return LEX_OK;
+				}
             }
             ungetc(c, stream);
             str[i] = '\0';
