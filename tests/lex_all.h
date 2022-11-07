@@ -139,4 +139,40 @@ int test_func_definition_3(void);
 
 int test_func_call_1(void);
 
+int test_greater_1(void);
+
+int test_greater_2(void);
+
+int test_greater_3(void);
+
+int test_lesser_1(void);
+
+int test_lesser_2(void);
+
+int test_lesser_3(void);
+
+int test_greater_equal_1(void);
+
+int test_greater_equal_2(void);
+
+int test_greater_equal_3(void);
+
+int test_lesser_equal_1(void);
+
+int test_lesser_equal_2(void);
+
+int test_lesser_equal_3(void);
+
+int test_equal_1(void);
+
+int test_equal_2(void);
+
+int test_equal_3(void);
+
+int test_not_equal_1(void);
+
+int test_not_equal_2(void);
+
+int test_not_equal_3(void);
+
 #endif	//IFJ_LEX_ALL_H

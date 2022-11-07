@@ -75,6 +75,24 @@ int main(void) {
 	tests_failed += test_func_definition_2();
 	tests_failed += test_func_definition_3();
 	tests_failed += test_func_call_1();
+	tests_failed += test_greater_1();
+	tests_failed += test_greater_2();
+	tests_failed += test_greater_3();
+	tests_failed += test_lesser_1();
+	tests_failed += test_lesser_2();
+	tests_failed += test_lesser_3();
+	tests_failed += test_greater_equal_1();
+	tests_failed += test_greater_equal_2();
+	tests_failed += test_greater_equal_3();
+	tests_failed += test_lesser_equal_1();
+	tests_failed += test_lesser_equal_2();
+	tests_failed += test_lesser_equal_3();
+	tests_failed += test_equal_1();
+	tests_failed += test_equal_2();
+	tests_failed += test_equal_3();
+	tests_failed += test_not_equal_1();
+	tests_failed += test_not_equal_2();
+	tests_failed += test_not_equal_3();
 	return tests_failed ? 1 : 0;
 }
 #endif	//LEX_ALL

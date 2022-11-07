@@ -277,7 +277,7 @@ ENDTEST(stream, "func_definition_3.php")
 
 TEST(test_func_call_1, "Test function call 1")
 int check =
-	write_file("func_call_1.php", "<?phwp declare(strict_types=1);\n$result foo($variable);");
+	write_file("func_call_1.php", "<?phwp declare(strict_types=1);\n$result = foo($variable);");
 if (check != 0) {
 	return 1;
 }
@@ -290,6 +290,10 @@ TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_VAR)
 TEST_ASSERT(token->line == 2)
 TEST_ASSERT(strcmp(token->value.identifier, "result") == 0)
+
+TEST_ASSERT(get_token(token) == 0)
+TEST_ASSERT(token->type == T_ASSIGN)
+TEST_ASSERT(token->line == 2)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_IDENTIFIER)
