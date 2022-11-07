@@ -1,5 +1,5 @@
 // lextest_if_statements.c
-// Řešení: Proj_Num, Proj_Name
+// Řešení: IFJ projekt
 // Autor: Jan Vacula xvacul40, FIT
 // Vytvořeno: 16.10.2022
 // Přeloženo: gcc 9.4.0
@@ -114,7 +114,7 @@ ENDTEST(stream, "if_2.php")
 TEST(test_if_statement_3, "Test if statement 3")
 int check =
 	write_file("if_3.php",
-			   "<?phwp declare(strict_types=1);\nif($temp === null){\n$var = \"Hello World!\";\n}");
+			   "<?php declare(strict_types=1);\nif($temp === null){\n$var = \"Hello World!\";\n}");
 if (check != 0) {
 	return 1;
 }
@@ -183,7 +183,7 @@ free(token);
 ENDTEST(stream, "if_3.php")
 
 TEST(test_if_statement_4, "Test if statement 4")
-int check = write_file("if_4.php", "<?phwp declare(strict_types=1);\nif(1){$var = c;}");
+int check = write_file("if_4.php", "<?php declare(strict_types=1);\nif(1){$var = c;}");
 if (check != 0) {
 	return 1;
 }
@@ -409,7 +409,7 @@ ENDTEST(stream, "if_else_2.php")
 TEST(test_if_statement_else_3, "Test if else statement 3")
 int check = write_file(
 	"if_else_3.php",
-	"<?phwp declare(strict_types=1);\nif($temp !== null){\n$var = \"Hello World!\";\n}\nelse {var = \"I hate the world!\";}");
+	"<?php declare(strict_types=1);\nif($temp !== null){\n$var = \"Hello World!\";\n}\nelse {var = \"I hate the world!\";}");
 if (check != 0) {
 	return 1;
 }
@@ -510,7 +510,7 @@ ENDTEST(stream, "if_else_3.php")
 
 TEST(test_if_else_statement_4, "Test if else statement 4")
 int check = write_file(
-	"if_else_4.php", "<?phwp declare(strict_types=1);\nif(1){$var = c}\nelse \n{\n$brrrr = 42; }");
+	"if_else_4.php", "<?php declare(strict_types=1);\nif(1){$var = c}\nelse \n{\n$brrrr = 42; }");
 if (check != 0) {
 	return 1;
 }

@@ -1,5 +1,5 @@
 // lextest_functions.c
-// Řešení: Proj_Num, Proj_Name
+// Řešení: IFJ projekt
 // Autor: Jan Vacula xvacul40, FIT
 // Vytvořeno: 19.10.2022
 // Přeloženo: gcc 9.4.0
