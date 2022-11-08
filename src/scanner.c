@@ -538,8 +538,7 @@ int get_token(Token *token) {
 						token->line = line;
 						return BAD_INTERNAL;					}
                     int size = 40;
-                    int i = 1;
-                    str[0] = (char) c2;
+                    int i = 0;
                     while (c2 >= 'a' && c2 <= 'z') {
                         if (i == size - 10) {
                             size *= 2;
