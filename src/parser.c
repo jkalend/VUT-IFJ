@@ -461,6 +461,7 @@ int parse(void) {
 
             unsigned int val = LL_TABLE[row_idx][col_idx];
             if (val == 0) val = LL_TABLE[row_idx][EPS];
+            printf("t = %d %d\n", col_idx, row_idx);
             printf("%d ", val);
             apply_rule(stack, val);
         }

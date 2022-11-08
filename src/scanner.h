@@ -51,9 +51,10 @@ typedef enum {
     T_VALID,
     T_IDENTIFIER,
     T_KEYWORD,
-    T_STRING,
-    T_INT,
-    T_FLOAT,
+
+    T_DOUBLE_DOT,
+    T_LEFT_BRACE,
+    T_RIGHT_BRACE,
     
     T_DIVIDE,
     
@@ -65,6 +66,13 @@ typedef enum {
     T_EOF,
     T_END,
 
+    T_RIGHT_BRACKET,
+
+    T_STRING,
+    T_INT,
+    T_FLOAT,
+    T_LEFT_BRACKET,
+
     T_PLUS,
     T_MINUS,
     T_MULTIPLY,
@@ -75,17 +83,10 @@ typedef enum {
     T_EQUAL,
     T_NOT_EQUAL,
     T_CONCATENATE,
-    T_LEFT_BRACKET,
-    
-    
-    
-    T_DOUBLE_DOT,
-    T_RIGHT_BRACKET,
-    T_LEFT_BRACE,
-    T_RIGHT_BRACE,
     T_AND,
     T_OR,
     T_NOT,
+    
     
     T_ERROR,
     
