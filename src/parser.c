@@ -265,7 +265,7 @@ int reduce(TStack *stack, TStack *shelf) {
             printf("6p ");
             stack_push(stack, stack_data(P_E, P_E));
             return 1;
-        case 76:
+        case 59:
             while (cnt < 5) {stack_pop(shelf); cnt++;}
             if (cnt != 5) goto cleanup;
             printf("7p ");
@@ -441,6 +441,7 @@ int parse(void) {
                 /* CALL PRECEDENTIAL */
                 tmp_token = token;
                 int result = precedence(prec);
+                stack_dispose(prec);
                 
                 if (!result) exit(5); //TODO bad code
                 if (tmp_token == NULL) get_token(token);
