@@ -1,16 +1,18 @@
 #include "scanner.h"
 
-const unsigned int LL_TABLE[8][15] = {{1},
+const unsigned int LL_TABLE[8][32] = {{1},
                                       {0, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 3, 4},
-                                      {0, 8, 11, 12, 10, 5, 6, 9},
+                                      {0, 7, 11, 12, 10, 5, 6, 9, 0, 7},
                                       {[9] = 13, 14},
-                                      {[8] = 16},
+                                      {[8] = 16, [14] = 22},
                                       {[7] = 17},
                                       {[11] = 19, [14] = 18},
-                                      {0, 20, 20, 20, 20, 20, 20, 20, 0, 0, 0, 0, 0, 0, 21} };
+                                      {0, 20, 20, 20, 20, 0, 20, 20, 0, 0, 0, 0, 0, 0, 21} };
 
 extern const unsigned int PREC_TABLE[14][14];
 extern Token *tmp_token;
+
+#define EPS 14 // eps has column index 14 in ll table
 
 typedef enum {
     N_PROG,
@@ -21,14 +23,14 @@ typedef enum {
     N_PARAM_NAME,
     N_PARAM_LIST,
     N_BODY,
-    N_EPS,
     N_EXPR
 } NonTerm;
 
 typedef enum {
     T_TERM,
     T_NONTERM,
-    T_KW
+    T_KW,
+    T_TOKEN
 } TermType;
 
 typedef enum {

@@ -265,7 +265,7 @@ int reduce(TStack *stack, TStack *shelf) {
             printf("6p ");
             stack_push(stack, stack_data(P_E, P_E));
             return 1;
-        case 76:
+        case 59:
             while (cnt < 5) {stack_pop(shelf); cnt++;}
             if (cnt != 5) goto cleanup;
             printf("7p ");
@@ -441,6 +441,7 @@ int parse(void) {
                 /* CALL PRECEDENTIAL */
                 tmp_token = token;
                 int result = precedence(prec);
+                stack_dispose(prec);
                 
                 if (!result) exit(5); //TODO bad code
                 if (tmp_token == NULL) get_token(token);
@@ -459,7 +460,7 @@ int parse(void) {
             row_idx = top->value;
 
             unsigned int val = LL_TABLE[row_idx][col_idx];
-            if (val == 0) val = LL_TABLE[row_idx][N_EPS];
+            if (val == 0) val = LL_TABLE[row_idx][EPS];
             printf("%d ", val);
             apply_rule(stack, val);
         }
