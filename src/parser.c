@@ -279,6 +279,7 @@ int reduce(TStack *stack, TStack *shelf) {
             stack_push(stack, stack_data(P_E, P_E));
             return 1;
         case 71:
+            if (fn) goto function;
             while (cnt < 5) {stack_pop(shelf); cnt++;}
             if (cnt != 5) goto cleanup;
             printf("8p ");
@@ -289,19 +290,21 @@ int reduce(TStack *stack, TStack *shelf) {
             break;
     }
 
-    if (fn && res >= 84) {
+    function:
+    if (fn && res >= 71) {
         //symtable should be used here ideally to check for number of args
         const TData *data = NULL;
         int brackets = 0;
         int E = 0;
 
-        while (stack_top(shelf)->value != P_FN) {
+        while (stack_top(shelf)->value != P_CLOSE) {
             data = stack_pop(shelf);
             if (data->value == P_LEFT_BRACKET) brackets--;
             else if (data->value == P_RIGHT_BRACKET) brackets++;
             else if (data->value == P_E) E++;
         }
         if (brackets != 0) exit(1);
+        stack_pop(shelf);
         // args number check
         printf("9p\n");
         stack_push(stack, stack_data(P_E, P_E));
@@ -354,6 +357,11 @@ int precedence(TStack *stack, Token **token, bool *keep_token) {
         if (end && !sym) return 1;
         if (!sym) exit(1); //TODO bad code
         if (sym != P_EQUAL && !end) { // skips equal signs
+            if (sym == P_CLOSE) {
+                while (!stack_isEmpty(shelf)) {
+                    stack_push(stack, stack_pop(shelf));
+                }
+            }
             stack_push(stack, stack_data((int) sym, (int) sym));
         }
         while (!stack_isEmpty(shelf)) {
@@ -443,7 +451,7 @@ int parse(void) {
                 keep_prev_token = true;
                 int result = precedence(prec, &token, &keep_prev_token);
                 stack_dispose(prec);
-                
+
                 if (!result) exit(5); //TODO bad code
 
                 get_next_token(&token, &keep_prev_token);
