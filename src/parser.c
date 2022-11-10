@@ -3,7 +3,8 @@
 #include "stack.h"
 #include "htab.h"
 
-Token *tmp_token = NULL;
+Token *tmp_token1 = NULL;
+Token *tmp_token2 = NULL;
 
 const unsigned int PREC_TABLE[14][14] = { //TODO
         {P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_OPEN, P_OPEN, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_OPEN, P_CLOSE},
@@ -31,7 +32,13 @@ TData *stack_data(int value, int type) { //unsigned?
     return ptr;
 }
 
-int apply_rule(TStack *stack, unsigned int val) {
+void get_next_token(Token **token, bool *keep_token) {
+    //Token **token = NULL;
+    if (!(*keep_token)) get_token(*token);
+    *keep_token = false;
+}
+
+int apply_rule(TStack *stack, unsigned int val, bool *keep_token) {
     switch (val) {
         case 0: exit(1); /* syntax error */
         case 1:
@@ -70,9 +77,9 @@ int apply_rule(TStack *stack, unsigned int val) {
             stack_push(stack, stack_data(N_EXPR, T_NONTERM));
             break;
         case 8:
-            stack_push(stack, stack_data(T_SEMICOLON, T_TERM));
-            stack_push(stack, stack_data(N_EXPR, T_NONTERM));
-            stack_push(stack, stack_data(T_IDENTIFIER, T_TERM));
+           // stack_push(stack, stack_data(T_SEMICOLON, T_TERM));
+            //stack_push(stack, stack_data(N_EXPR, T_NONTERM));
+            //stack_push(stack, stack_data(T_IDENTIFIER, T_TERM));
             break;
         case 9:
             stack_push(stack, stack_data(N_SMALL_ST, T_NONTERM));
@@ -195,7 +202,7 @@ void prec_index(const Token *token, unsigned int *rc, int symbol) {
             break;
         case T_SEMICOLON: case T_LEFT_BRACE:
             //somehow return the token to the LL stack
-            tmp_token = token;
+            //tmp_token1 = token;
             break;
         default:
             exit(1);
@@ -307,29 +314,29 @@ int reduce(TStack *stack, TStack *shelf) {
     return 0;
 }
 
-int precedence(TStack *stack) {
+int precedence(TStack *stack, Token **token, bool *keep_token) {
     stack_push(stack, stack_data(P_END, P_END));
-    Token *lookahead = malloc(sizeof(Token)); //not wanted
-    if (lookahead == NULL)  exit(1); //TODO bad code
+    //Token *lookahead = malloc(sizeof(Token)); //not wanted
+    //if (lookahead == NULL)  exit(1); //TODO bad code
 
+    Token *lookahead = *token;
     bool end = false;
 
     unsigned int row, column;
     TStack *shelf = NULL;
     shelf = stack_init(shelf);
     while (true) {
-        if (tmp_token == NULL) get_token(lookahead);
-        else {
-            lookahead = tmp_token;
-            tmp_token = NULL;
-        }
+        get_next_token(&lookahead, keep_token);
+        printf("pr = %d\n", lookahead->type);
         if (lookahead->type == T_ERROR) goto bad_token;
 
         reduced:
         if (lookahead->type == T_LEFT_BRACE || lookahead->type == T_SEMICOLON) {
             end = true;
             //somehow return it back?
-            tmp_token = lookahead;
+            //tmp_token1 = lookahead;
+            *token = lookahead;
+            *keep_token = true;
         }
 
         //only 1 skip needed?
@@ -399,8 +406,10 @@ int parse(void) {
     Token *token = malloc(sizeof(Token));
     if (token == NULL)  exit(1);
 
+    bool keep_prev_token = false;
     get_token(token);
     while(1) {
+        
         if (stack_isEmpty(stack)) {
             break;
         }
@@ -408,12 +417,7 @@ int parse(void) {
         TData *top = stack_pop(stack);
         if (top->type == T_TERM) {
             if (top->value == token->type) { 
-                if (tmp_token == NULL) get_token(token);
-                else {
-                    token = tmp_token;
-                    tmp_token = NULL;
-                }
-                continue;
+                get_next_token(&token, &keep_prev_token);
             }
             else {
                 fprintf(stderr, "terms not matching\n");
@@ -422,11 +426,7 @@ int parse(void) {
         }
         else if (top->type == T_KW) {
             if (token->type == T_KEYWORD && top->value == token->value.keyword) {
-                if (tmp_token == NULL) get_token(token);
-                else {
-                    token = tmp_token;
-                    tmp_token = NULL;
-                }
+                get_next_token(&token, &keep_prev_token);
                 continue;
             }
             else {
@@ -436,21 +436,20 @@ int parse(void) {
 
         }
         else if (top->type == T_NONTERM) {
-            
+
             if (top->value == N_EXPR) {
+
                 /* CALL PRECEDENTIAL */
-                tmp_token = token;
-                int result = precedence(prec);
+                keep_prev_token = true;
+                int result = precedence(prec, &token, &keep_prev_token);
                 stack_dispose(prec);
                 
                 if (!result) exit(5); //TODO bad code
-                if (tmp_token == NULL) get_token(token);
-                else {
-                    token = tmp_token;
-                    tmp_token = NULL;
-                }
+
+                get_next_token(&token, &keep_prev_token);
                 continue;
             }
+
             unsigned int col_idx, row_idx;
             if (token->type == T_KEYWORD) {
                 col_idx = token->value.keyword;
@@ -461,9 +460,9 @@ int parse(void) {
 
             unsigned int val = LL_TABLE[row_idx][col_idx];
             if (val == 0) val = LL_TABLE[row_idx][EPS];
-            printf("t = %d %d\n", col_idx, row_idx);
+
             printf("%d ", val);
-            apply_rule(stack, val);
+            apply_rule(stack, val, &keep_prev_token);
         }
         else {
             fprintf(stderr, "terms not matching\n");
