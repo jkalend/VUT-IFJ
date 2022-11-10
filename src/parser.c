@@ -3,8 +3,7 @@
 #include "stack.h"
 #include "htab.h"
 
-Token *tmp_token1 = NULL;
-Token *tmp_token2 = NULL;
+Token *tmp_token = NULL;
 
 const unsigned int PREC_TABLE[14][14] = { //TODO
         {P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_OPEN, P_OPEN, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_OPEN, P_CLOSE},
@@ -32,13 +31,32 @@ TData *stack_data(int value, int type) { //unsigned?
     return ptr;
 }
 
-void get_next_token(Token **token, bool *keep_token) {
-    //Token **token = NULL;
-    if (!(*keep_token)) get_token(*token);
+void get_next_token(Token **token, bool *keep_token, bool *return_back) {
+    if (*keep_token && *return_back) {
+        Token *tmp = *token;
+        *token = tmp_token;
+        tmp_token = tmp;
+        //*return_back = true;
+    }
+    else if (!(*keep_token) && *return_back) {
+        Token *tmp = *token;
+        *token = tmp_token;
+        tmp_token = tmp;
+        *return_back = false;
+    }
+    else if (!(*keep_token)){
+        /* copy previous token to temporary token */
+        tmp_token->line = (*token)->line;
+        tmp_token->value = (*token)->value;
+        tmp_token->type = (*token)->type;
+
+        /* get new token from scanner */
+        get_token(*token);
+    }
     *keep_token = false;
 }
 
-int apply_rule(TStack *stack, unsigned int val, bool *keep_token) {
+int apply_rule(TStack *stack, unsigned int val) {
     switch (val) {
         case 0: exit(1); /* syntax error */
         case 1:
@@ -139,7 +157,9 @@ int apply_rule(TStack *stack, unsigned int val, bool *keep_token) {
             stack_push(stack, stack_data(N_BODY, T_NONTERM));
             stack_push(stack, stack_data(N_ST, T_NONTERM));
             break;
+        
         case 21:
+        case 22:
             /* eps */
             break;
         default: fprintf(stderr, "no rule found\n");
@@ -202,7 +222,6 @@ void prec_index(const Token *token, unsigned int *rc, int symbol) {
             break;
         case T_SEMICOLON: case T_LEFT_BRACE:
             //somehow return the token to the LL stack
-            //tmp_token1 = token;
             break;
         default:
             exit(1);
@@ -317,11 +336,11 @@ int reduce(TStack *stack, TStack *shelf) {
     return 0;
 }
 
-int precedence(TStack *stack, Token **token, bool *keep_token) {
+int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back) {
     stack_push(stack, stack_data(P_END, P_END));
     //Token *lookahead = malloc(sizeof(Token)); //not wanted
     //if (lookahead == NULL)  exit(1); //TODO bad code
-
+    
     Token *lookahead = *token;
     bool end = false;
 
@@ -329,19 +348,21 @@ int precedence(TStack *stack, Token **token, bool *keep_token) {
     TStack *shelf = NULL;
     shelf = stack_init(shelf);
     while (true) {
-        get_next_token(&lookahead, keep_token);
-        printf("pr = %d\n", lookahead->type);
+        //printf("yoofr = %d %d\n", *keep_token, *return_back);
+        get_next_token(&lookahead, keep_token, return_back);
+        //printf("yoofr = %d %d\n", *keep_token, *return_back);
+        
         if (lookahead->type == T_ERROR) goto bad_token;
-
+        
         reduced:
         if (lookahead->type == T_LEFT_BRACE || lookahead->type == T_SEMICOLON) {
             end = true;
             //somehow return it back?
-            //tmp_token1 = lookahead;
             *token = lookahead;
             *keep_token = true;
         }
 
+        
         //only 1 skip needed?
         if (stack_top(stack)->value == P_E) stack_push(shelf, stack_pop(stack));
 
@@ -352,7 +373,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token) {
         } else {
             prec_index(NULL, &column, P_END);
         }
-
+        
         unsigned int sym = PREC_TABLE[row][column];
         if (end && !sym) return 1;
         if (!sym) exit(1); //TODO bad code
@@ -413,11 +434,14 @@ int parse(void) {
 
     Token *token = malloc(sizeof(Token));
     if (token == NULL)  exit(1);
+    tmp_token = malloc(sizeof(Token));
+    if (tmp_token == NULL) exit(1);
 
     bool keep_prev_token = false;
+    bool return_back = false;
     get_token(token);
+
     while(1) {
-        
         if (stack_isEmpty(stack)) {
             break;
         }
@@ -425,7 +449,7 @@ int parse(void) {
         TData *top = stack_pop(stack);
         if (top->type == T_TERM) {
             if (top->value == token->type) { 
-                get_next_token(&token, &keep_prev_token);
+                get_next_token(&token, &keep_prev_token, &return_back);
             }
             else {
                 fprintf(stderr, "terms not matching\n");
@@ -434,7 +458,7 @@ int parse(void) {
         }
         else if (top->type == T_KW) {
             if (token->type == T_KEYWORD && top->value == token->value.keyword) {
-                get_next_token(&token, &keep_prev_token);
+                get_next_token(&token, &keep_prev_token, &return_back);
                 continue;
             }
             else {
@@ -444,17 +468,19 @@ int parse(void) {
 
         }
         else if (top->type == T_NONTERM) {
-
+            if (top->value == N_SMALL_ST && (token->type != T_ASSIGN && token->type != T_SEMICOLON)) {
+                return_back = true;
+                //keep_prev_token = true;
+            }
             if (top->value == N_EXPR) {
 
                 /* CALL PRECEDENTIAL */
                 keep_prev_token = true;
-                int result = precedence(prec, &token, &keep_prev_token);
+                int result = precedence(prec, &token, &keep_prev_token, &return_back);
                 stack_dispose(prec);
 
                 if (!result) exit(5); //TODO bad code
-
-                get_next_token(&token, &keep_prev_token);
+                get_next_token(&token, &keep_prev_token, &return_back);
                 continue;
             }
 
@@ -470,7 +496,7 @@ int parse(void) {
             if (val == 0) val = LL_TABLE[row_idx][EPS];
 
             printf("%d ", val);
-            apply_rule(stack, val, &keep_prev_token);
+            apply_rule(stack, val);
         }
         else {
             fprintf(stderr, "terms not matching\n");
