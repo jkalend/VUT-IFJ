@@ -9,18 +9,38 @@
 #include <stdbool.h>    // bool
 #include <stdlib.h>
 #include <stdio.h>
+#include "scanner.h"
 
 #define AVG_LEN_MAX 15
 #define AVG_LEN_MIN 2
 
+typedef const char * htab_key_t; 
+
+
 // Typy:
-typedef const char * htab_key_t;        // typ klíče
-typedef int htab_value_t;               // typ hodnoty
+typedef enum {
+    H_CONSTANT,
+    H_FUNC_ID,
+    H_VAR
+} HtabItemType;
+
+typedef enum {
+    D_NONE,
+    D_INT,
+    D_STRING,
+    D_FLOAT,
+    D_VOID
+} DataType;
 
 // Dvojice dat v tabulce:
 typedef struct htab_pair {
-    htab_key_t    key;          // klíč
-    htab_value_t  value;        // asociovaná hodnota
+    HtabItemType type;
+    htab_key_t identifier;
+    Value value;
+    DataType value_type;
+    int param_count;
+    DataType *params;
+    DataType return_type;
 } htab_pair_t;                  // typedef podle zadání
 
 // Tabulka:
@@ -46,11 +66,10 @@ size_t htab_hash_function(htab_key_t str);
 htab_t *htab_init(size_t n);                    // konstruktor tabulky
 size_t htab_size(const htab_t * t);             // počet záznamů v tabulce
 size_t htab_bucket_count(const htab_t * t);     // velikost pole
-void htab_resize(htab_t *t, size_t newn);       // změna velikosti pole
                                                 // (umožňuje rezervaci místa)
 
 htab_pair_t * htab_find(htab_t * t, htab_key_t key);  // hledání
-htab_pair_t * htab_lookup_add(htab_t * t, htab_key_t key);
+htab_pair_t * htab_insert(htab_t * t, Token *token);
 
 bool htab_erase(htab_t * t, htab_key_t key);    // ruší zadaný záznam
 

@@ -9,6 +9,7 @@
 
 TStack *stack_init(TStack *stack) {
 	stack = malloc(sizeof(TStack));
+	stack->topPtr = NULL;
 	return stack;
 }
 

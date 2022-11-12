@@ -3,7 +3,15 @@
 #include "stack.h"
 #include "htab.h"
 
+
+
 Token *tmp_token = NULL;
+htab_t *glob_tab = NULL;
+htab_t *temporary_tab = NULL;
+TStack *local_tabs = NULL;
+htab_pair_t *in_func = NULL;
+htab_pair_t *in_assign = NULL;
+bool in_param_def = false;
 
 const unsigned int PREC_TABLE[14][14] = { //TODO
         {P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_OPEN, P_OPEN, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_OPEN, P_CLOSE},
@@ -22,11 +30,13 @@ const unsigned int PREC_TABLE[14][14] = { //TODO
         {P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_OPEN,P_OPEN, P_OPEN, P_EQUAL, P_OPEN, [12] = P_OPEN, P_EQUAL}
 };
 
+
 TData *stack_data(int value, int type) { //unsigned?
     TData *ptr = malloc(sizeof(TData));
     if (ptr != NULL) {
         ptr->value = value;
         ptr->type = type;
+        ptr->htab = NULL;
     }
     return ptr;
 }
@@ -36,7 +46,6 @@ void get_next_token(Token **token, bool *keep_token, bool *return_back) {
         Token *tmp = *token;
         *token = tmp_token;
         tmp_token = tmp;
-        //*return_back = true;
     }
     else if (!(*keep_token) && *return_back) {
         Token *tmp = *token;
@@ -338,19 +347,16 @@ int reduce(TStack *stack, TStack *shelf) {
 
 int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back) {
     stack_push(stack, stack_data(P_END, P_END));
-    //Token *lookahead = malloc(sizeof(Token)); //not wanted
-    //if (lookahead == NULL)  exit(1); //TODO bad code
+    
     
     Token *lookahead = *token;
     bool end = false;
-
     unsigned int row, column;
     TStack *shelf = NULL;
     shelf = stack_init(shelf);
     while (true) {
-        //printf("yoofr = %d %d\n", *keep_token, *return_back);
+
         get_next_token(&lookahead, keep_token, return_back);
-        //printf("yoofr = %d %d\n", *keep_token, *return_back);
         
         if (lookahead->type == T_ERROR) goto bad_token;
         
@@ -395,6 +401,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
             if (!res || !stack_isEmpty(shelf)) exit(1); //TODO bad code
             goto reduced;
         }
+        
         // if T_VAR is found -> P_I is pushed
         // if Rel operators are fund -> P_R is pushed
         // <(=)> is deleted, same for
@@ -449,7 +456,79 @@ int parse(void) {
         TData *top = stack_pop(stack);
         if (top->type == T_TERM) {
             if (top->value == token->type) { 
+
+                /* add new tab to stack */
+                if (token->type == T_LEFT_BRACE) {
+                    htab_t *new_tab = htab_init(LOCALTAB_SIZE);
+                    TData *ptr = malloc(sizeof(TData));
+                    if (ptr != NULL) {
+                        ptr->value = 0;
+                        ptr->type = 0;
+                        ptr->htab = new_tab;
+                    }
+                    /* push newly created tab to stack */
+                    stack_push(local_tabs, ptr);
+                    temporary_tab = new_tab;
+                }
+                if (token->type == T_RIGHT_BRACE) {
+                    if (stack_isEmpty(local_tabs)) temporary_tab = glob_tab;
+                    else  temporary_tab = stack_pop(local_tabs)->htab;
+                }
+                /* definition of function */
+                if (in_func != NULL) {
+                    if (in_param_def && token->type == T_RIGHT_BRACKET) {
+                        in_param_def = false;
+                    }
+                    else if (!in_param_def && token->type == T_TYPE) {
+                        switch (token->value.keyword) {
+                            case KW_INT:
+                                in_func->return_type = D_INT;
+                                break;
+                            case KW_FLOAT:
+                                in_func->return_type = D_FLOAT;
+                                break;
+                            case KW_STRING:
+                                in_func->return_type = D_STRING;
+                                break;
+                            case KW_VOID:
+                                in_func->return_type = D_VOID;
+                                break;
+                            default:
+                                exit(1); // unknown data type
+                        }
+                        in_func = NULL;
+                    }
+                    else if (in_param_def && token->type == T_TYPE) {
+                        in_func->param_count += 1;
+                        
+                        in_func->params = realloc(in_func->params, sizeof(Value) * in_func->param_count);
+                        if (in_func->params == NULL) exit(1); // realloc failed
+                        
+                        switch (token->value.keyword) {
+                            case KW_INT:
+                                in_func->params[in_func->param_count - 1] = D_INT;
+                                break;
+                            case KW_FLOAT:
+                                in_func->params[in_func->param_count - 1] = D_FLOAT;
+                                break;
+                            case KW_STRING:
+                                in_func->params[in_func->param_count - 1] = D_STRING;
+                                break;
+                            case KW_VOID:
+                                in_func->params[in_func->param_count - 1] = D_VOID;
+                                break;
+                            default:
+                                exit(1); // unknown data type
+                        }
+                    }
+                }
+                
                 get_next_token(&token, &keep_prev_token, &return_back);
+
+                if (token->type == T_ASSIGN && tmp_token->type == T_VAR) {
+                    in_assign = htab_insert(temporary_tab, tmp_token);
+                    in_assign->type = D_NONE;
+                }
             }
             else {
                 fprintf(stderr, "terms not matching\n");
@@ -459,7 +538,16 @@ int parse(void) {
         else if (top->type == T_KW) {
             if (token->type == T_KEYWORD && top->value == token->value.keyword) {
                 get_next_token(&token, &keep_prev_token, &return_back);
-                continue;
+                
+                /* function definition - create new item in tab */
+                if (tmp_token->value.keyword == KW_FUNCTION && token->type == T_IDENTIFIER) { 
+                    in_func = htab_insert(temporary_tab, token);
+                    in_func->param_count = 0;
+                    in_func->params = NULL;
+                    in_func->return_type = D_NONE;
+                    in_param_def = true;
+                }
+                
             }
             else {
                 fprintf(stderr, "terms not matching\n");
@@ -470,7 +558,6 @@ int parse(void) {
         else if (top->type == T_NONTERM) {
             if (top->value == N_SMALL_ST && (token->type != T_ASSIGN && token->type != T_SEMICOLON)) {
                 return_back = true;
-                //keep_prev_token = true;
             }
             if (top->value == N_EXPR) {
 
@@ -512,5 +599,8 @@ int main(void) {
     stream = fopen("test.php", "r");
     if (stream == NULL) exit(1);
 
+    glob_tab = htab_init(GLOBTAB_SIZE);
+    temporary_tab = glob_tab;
+    local_tabs = stack_init(local_tabs);
     return parse();
 }

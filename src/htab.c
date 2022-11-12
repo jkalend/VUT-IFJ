@@ -1,5 +1,17 @@
 #include "htab.h"
 
+size_t htab_hash_function(htab_key_t str) 
+{
+    unsigned int h = 0;     // musí mít 32 bitů
+    const unsigned char *p;
+
+    for(p = (const unsigned char*)str; *p != '\0'; p++)
+        h = 65599 * h + *p;
+        
+    return h;
+}
+
+
 size_t htab_bucket_count(const htab_t * t)
 {
     return t->arr_size;
@@ -14,7 +26,7 @@ void htab_clear(htab_t * t)
         while (head != NULL)
         {
             t->arr_ptr[i] = head->next;
-            free((void *)head->item.key);
+            free((void *)head->item.identifier);
             free(head);
             head = t->arr_ptr[i];
         }
@@ -22,17 +34,17 @@ void htab_clear(htab_t * t)
     t->size = 0;
 }
 
-bool htab_erase(htab_t * t, htab_key_t key)
+bool htab_erase(htab_t * t, htab_key_t identifier)
 {
-    size_t hash = htab_hash_function(key) % t->arr_size;
+    size_t hash = htab_hash_function(identifier) % t->arr_size;
 
     htab_item_t *head = t->arr_ptr[hash];
 
     if (head == NULL) return false;
-    else if (strcmp(head->item.key, key) == 0)
+    else if (strcmp(head->item.identifier, identifier) == 0)
     {
         t->arr_ptr[hash] = head->next;
-        free((void *)head->item.key);
+        free((void *)head->item.identifier);
         free(head);
 
         t->size--;
@@ -43,11 +55,11 @@ bool htab_erase(htab_t * t, htab_key_t key)
         htab_item_t *delete = NULL;
         while (head->next != NULL)
         {
-            if (strcmp(head->next->item.key, key) == 0)
+            if (strcmp(head->next->item.identifier, identifier) == 0)
             {
                 delete = head->next;
                 head->next = head->next->next;
-                free((void *)delete->item.key);
+                free((void *)delete->item.identifier);
                 free(delete);
 
                 t->size--;
@@ -57,30 +69,25 @@ bool htab_erase(htab_t * t, htab_key_t key)
         }
     }
 
-    if (t->size / t->arr_size < AVG_LEN_MIN)
-    {
-        htab_resize(t, t->arr_size / 2);
-    }
-
     return false;
 }
 
-htab_pair_t * htab_find(htab_t * t, htab_key_t key)
+htab_pair_t * htab_find(htab_t * t, htab_key_t identifier)
 {
-    size_t hash = htab_hash_function(key) % t->arr_size;
+    size_t hash = htab_hash_function(identifier) % t->arr_size;
 
     // iterate over all table elements
     htab_item_t *head = t->arr_ptr[hash];
     while (head != NULL)
     {
-        if (strcmp(head->item.key, key) == 0)
+        if (strcmp(head->item.identifier, identifier) == 0)
         {
-            // the key was found
+            // the identifier was found
             return &head->item;
         }
         head = head->next;
     }
-    // key not found
+    // identifier not found
     return NULL;
 }
 
@@ -135,103 +142,56 @@ htab_t *htab_init(size_t n)
 }
 
 
-htab_pair_t * htab_lookup_add(htab_t * t, htab_key_t key)
+htab_pair_t * htab_insert(htab_t * t, Token *token)
 {
-    // check if the key exists in the table
-    htab_pair_t *tmp = htab_find(t, key);
+    // check if the identifier exists in the table
+    htab_pair_t *tmp = htab_find(t, token->value.identifier);
     if (tmp != NULL) 
     {
-        tmp->value++;
         return tmp;
     }
 
-    // if the new table size is greater, than the allowed average, resize it to twice its current size
-    if ((t->size + 1) / t->arr_size > AVG_LEN_MAX)
-    {
-        htab_resize(t, 2 * t->arr_size);
-    }
-    
+        
     //  dynamically allocate a new node
     htab_item_t *new = malloc(sizeof(htab_item_t));
     if (new == NULL)
     {
         return NULL;
     }
-    new->item.key = malloc((strlen(key) + 1) * sizeof(char));
-    if (new->item.key == NULL)
+    new->item.identifier = malloc((strlen(token->value.identifier) + 1) * sizeof(char));
+    if (new->item.identifier == NULL)
     {
         return NULL;
     }
 
     // initialize the new node
-    strcpy((char *)new->item.key, key);
+    strcpy((char *)new->item.identifier, token->value.identifier);
     new->next = NULL;
-    new->item.value = 1;
+
+    switch(token->type) {
+        case T_IDENTIFIER: 
+            new->item.type = H_FUNC_ID;
+            break;
+        case T_VAR:
+            new->item.type = H_VAR;
+            break;
+        case T_INT:
+        case T_STRING:
+        case T_FLOAT:
+            new->item.type = H_CONSTANT;
+            break;
+        default:
+            exit(1); // token of unknown type (not fit for symtab)
+    }
 
     // insert into the table
-    size_t hash = htab_hash_function(key) % t->arr_size;
+    size_t hash = htab_hash_function(token->value.identifier) % t->arr_size;
     new->next = t->arr_ptr[hash];
     t->arr_ptr[hash] = new;
 
     t->size++;
     return &new->item;
 }
-
-void htab_resize(htab_t *t, size_t newn)
-{
-    if (newn <= 0)
-        return;
-        
-    // the new size is bigger than the old, allocate more space
-    if (newn >= t->arr_size)
-    {
-        htab_item_t **tmp = realloc(t->arr_ptr, newn * sizeof(htab_item_t *));
-        if (tmp == NULL) return;
-        t->arr_ptr = tmp;
-
-        // initialize all newly added buckets
-        for (size_t i = t->arr_size; i < newn; i++)
-        {
-            t->arr_ptr[i] = NULL;
-        }
-    }
-
-    size_t old_size = t->arr_size;
-    
-    for (size_t i = 0; i < old_size; i++)
-    {
-        // iterate over all items in the old table and move all, whose hash value changed
-        htab_item_t *head = t->arr_ptr[i];
-        while (head != NULL)
-        {
-            // if the newly generated hash is different from the old one, move the element
-            if ((htab_hash_function(head->item.key) % newn) != i)
-            {    
-                t->arr_size = newn;
-                htab_pair_t *tmp = htab_lookup_add(t, head->item.key);
-                t->size--;
-                tmp->value = head->item.value;
-
-                head = head->next;
-
-                t->arr_size = old_size;
-                htab_erase(t, tmp->key);
-                continue;
-            }
-            head = head->next;
-        }
-    }
-
-    // if the new size is smaller, free all (now redundant) space
-    if (newn < t->arr_size)
-    {
-        htab_item_t **tmp = realloc(t->arr_ptr, newn * sizeof(htab_item_t *));
-        if (tmp == NULL) return;
-        t->arr_ptr = tmp;
-    }
-    t->arr_size = newn;
-}
-
 
 
 size_t htab_size(const htab_t * t)

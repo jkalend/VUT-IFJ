@@ -1,4 +1,8 @@
+#ifndef PARSER_H
+#define PARSER_H
+
 #include "scanner.h"
+#include "htab.h"
 
 const unsigned int LL_TABLE[8][33] = {{1},
                                       {0, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 3, 4, [15] =  2, 2, 2, 2},
@@ -13,6 +17,8 @@ extern const unsigned int PREC_TABLE[14][14];
 extern Token *tmp_token;
 
 #define EPS 14 // eps has column index 14 in ll table
+#define GLOBTAB_SIZE 2003 // num of buckets to allocate for global symtab
+#define LOCALTAB_SIZE 557 // num of buckets to allocate for local symtabs
 
 typedef enum {
     N_PROG,
@@ -53,3 +59,4 @@ typedef enum {
     P_EQUAL,
     P_E
 }PrecSyms;
+#endif // PARSER_H

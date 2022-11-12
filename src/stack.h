@@ -8,6 +8,7 @@
 #define __STACK_H__
 #include <stdbool.h>
 #include <stdlib.h>
+#include "htab.h"
 
 //PLACEHOLDER DATA STRUCT
 
@@ -15,6 +16,7 @@
 typedef struct tdata {
 	unsigned int value;
 	unsigned int type;
+	htab_t * htab;
 } TData;
 
 typedef struct telement {
