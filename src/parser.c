@@ -458,23 +458,23 @@ int parse(void) {
             if (top->value == token->type) { 
 
                 /* add new tab to stack */
-                if (token->type == T_LEFT_BRACE) {
-                    htab_t *new_tab = htab_init(LOCALTAB_SIZE);
-                    TData *ptr = malloc(sizeof(TData));
-                    if (ptr != NULL) {
-                        ptr->value = 0;
-                        ptr->type = 0;
-                        ptr->htab = new_tab;
-                    }
-                    /* push newly created tab to stack */
-                    stack_push(local_tabs, ptr);
-                    temporary_tab = new_tab;
-                }
-                if (token->type == T_RIGHT_BRACE) {
-                    if (stack_isEmpty(local_tabs)) temporary_tab = glob_tab;
-                    else  temporary_tab = stack_pop(local_tabs)->htab;
-                }
-                /* definition of function */
+//                if (token->type == T_LEFT_BRACE) {
+//                    htab_t *new_tab = htab_init(LOCALTAB_SIZE);
+//                    TData *ptr = malloc(sizeof(TData));
+//                    if (ptr != NULL) {
+//                        ptr->value = 0;
+//                        ptr->type = 0;
+//                        ptr->htab = new_tab;
+//                    }
+//                    /* push newly created tab to stack */
+//                    stack_push(local_tabs, ptr);
+//                    temporary_tab = new_tab;
+//                }
+//                if (token->type == T_RIGHT_BRACE) {
+//                    if (stack_isEmpty(local_tabs)) temporary_tab = glob_tab;
+//                    else  temporary_tab = stack_pop(local_tabs)->htab;
+//                }
+                /* definition of a function */
                 if (in_func != NULL) {
                     if (in_param_def && token->type == T_RIGHT_BRACKET) {
                         in_param_def = false;
