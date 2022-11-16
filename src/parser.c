@@ -677,8 +677,13 @@ int parse(void) {
                 get_next_token(&token, &keep_prev_token, &return_back);
 
                 if (token->type == T_ASSIGN && tmp_token->type == T_VAR) {
-                    in_assign = htab_insert(temporary_tab, tmp_token, tmp_token->value.identifier);
-                    in_assign->value_type = D_NONE;
+                    in_assign = htab_find(temporary_tab, tmp_token->value.identifier);
+                    /* add the var if it's not currently in the table */
+                    if (in_assign == NULL) {
+                        in_assign = htab_insert(temporary_tab, tmp_token, tmp_token->value.identifier);
+                        in_assign->value_type = D_NONE;
+                    }
+                    
                 }
             }
             else {
@@ -714,11 +719,13 @@ int parse(void) {
 
                 /* CALL PRECEDENTIAL */
                 keep_prev_token = true;
+    
                 int result = precedence(prec, &token, &keep_prev_token, &return_back);
                 stack_dispose(prec);
 
                 if (!result) exit(5); //TODO bad code
                 in_assign = NULL;
+               
                 get_next_token(&token, &keep_prev_token, &return_back);
                 continue;
             }
