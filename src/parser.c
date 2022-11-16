@@ -21,7 +21,7 @@ htab_pair_t *in_func = NULL;
 htab_pair_t *in_assign = NULL;
 bool in_param_def = false;
 int tmp_counter = 0;
-unsigned int relation_operator = 0;
+unsigned int relation_operator = 100;
 
 const unsigned int PREC_TABLE[14][14] = { //TODO
         {P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_OPEN, P_OPEN, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_OPEN, P_CLOSE},
@@ -383,6 +383,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps) {
             printf("8p ");
             stack_push(temps, data);
             stack_push(stack, stack_data(P_E, P_E));
+            relation_operator = 0;
             return 1;
         default:
             if (fn) goto function;
