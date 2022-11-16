@@ -302,8 +302,8 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps) {
         case 63: // multiplication
             while (cnt < 5) {if(stack_pop(shelf) != NULL) {break;} cnt++;}
             if (cnt != 5) goto cleanup;
-            op_one = stack_pop(temps)->type;
-            op_two = stack_pop(temps)->type;
+            op_one = stack_pop(temps)->bucket->value_type;
+            op_two = stack_pop(temps)->bucket->value_type;
             if (op_one == D_FLOAT || op_two == D_FLOAT) {
                 pair->value_type = D_FLOAT;
             } else if (op_one == D_INT && op_two == D_INT) {
@@ -328,8 +328,8 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps) {
         case 65: // addition
             while (cnt < 5) {stack_pop(shelf); cnt++;}
             if (cnt != 5) goto cleanup;
-            op_one = stack_pop(temps)->type;
-            op_two = stack_pop(temps)->type;
+            op_one = stack_pop(temps)->bucket->value_type;
+            op_two = stack_pop(temps)->bucket->value_type;
             if (op_one == D_FLOAT || op_two == D_FLOAT) {
                 pair->value_type = D_FLOAT;
             } else if (op_one == D_INT && op_two == D_INT) {
@@ -343,8 +343,8 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps) {
         case 66: // subtraction
             while (cnt < 5) {stack_pop(shelf); cnt++;}
             if (cnt != 5) goto cleanup;
-            op_one = stack_pop(temps)->type;
-            op_two = stack_pop(temps)->type;
+            op_one = stack_pop(temps)->bucket->value_type;
+            op_two = stack_pop(temps)->bucket->value_type;
             if (op_one == D_FLOAT || op_two == D_FLOAT) {
                 pair->value_type = D_FLOAT;
             } else if (op_one == D_INT && op_two == D_INT) {
