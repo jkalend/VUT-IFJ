@@ -168,20 +168,24 @@ htab_pair_t * htab_insert(htab_t * t, Token *token, char* key)
     strcpy((char *)new->item.identifier, key);
     new->next = NULL;
 
-    switch(token->type) {
-        case T_IDENTIFIER: 
-            new->item.type = H_FUNC_ID;
-            break;
-        case T_VAR:
-            new->item.type = H_VAR;
-            break;
-        case T_INT:
-        case T_STRING:
-        case T_FLOAT:
-            new->item.type = H_CONSTANT;
-            break;
-        default:
-            exit(1); // token of unknown type (not fit for symtab)
+    if (token == NULL) {
+        new->item.type = H_CONSTANT;
+    } else {
+        switch(token->type) {
+            case T_IDENTIFIER:
+                new->item.type = H_FUNC_ID;
+                break;
+            case T_VAR:
+                new->item.type = H_VAR;
+                break;
+            case T_INT:
+            case T_STRING:
+            case T_FLOAT:
+                new->item.type = H_CONSTANT;
+                break;
+            default:
+                exit(1); // token of unknown type (not fit for symtab)
+        }
     }
 
     // insert into the table

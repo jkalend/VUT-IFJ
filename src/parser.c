@@ -297,6 +297,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps) {
             while (cnt < 3) {stack_pop(shelf); cnt++;}
             if (cnt != 3) goto cleanup;
             stack_push(stack, stack_data(P_E, P_E));
+            printf("1p ");
             return 1;
         case 63: // multiplication
             while (cnt < 5) {if(stack_pop(shelf) != NULL) {break;} cnt++;}
@@ -309,6 +310,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps) {
                 pair->value_type = D_INT;
             }
 
+            printf("2p ");
             stack_push(temps, data);
             stack_push(stack, stack_data(P_E, P_E));
             return 1;
@@ -319,7 +321,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps) {
             stack_pop(temps);
             pair->value_type = D_FLOAT;
 
-
+            printf("3p ");
             stack_push(temps, data);
             stack_push(stack, stack_data(P_E, P_E));
             return 1;
@@ -334,6 +336,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps) {
                 pair->value_type = D_INT;
             }
 
+            printf("4p ");
             stack_push(temps, data);
             stack_push(stack, stack_data(P_E, P_E));
             return 1;
@@ -348,6 +351,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps) {
                 pair->value_type = D_INT;
             }
 
+            printf("5p ");
             stack_push(temps, data);
             stack_push(stack, stack_data(P_E, P_E));
             return 1;
@@ -358,12 +362,14 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps) {
             stack_pop(temps);
             pair->value_type = D_STRING;
 
+            printf("6p ");
             stack_push(temps, data);
             stack_push(stack, stack_data(P_E, P_E));
             return 1;
         case 59: // brackets
             while (cnt < 5) {stack_pop(shelf); cnt++;}
             if (cnt != 5) goto cleanup;
+            printf("7p ");
             stack_push(stack, stack_data(P_E, P_E));
             return 1;
         case 71: // relations or a function
@@ -374,6 +380,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps) {
             stack_pop(temps);
             pair->value_type = D_BOOL;
 
+            printf("8p ");
             stack_push(temps, data);
             stack_push(stack, stack_data(P_E, P_E));
             return 1;
@@ -409,6 +416,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps) {
             if (stack_pop(reversal)->type != last_fn->params[i]) exit(BAD_TYPE_OR_RETURN);
         }
 
+        printf("9p ");
         stack_push(stack, stack_data(P_E, P_E));
         return 1;
     } else {
@@ -484,7 +492,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
         // <(=)> is deleted, same for
         if (!end) {
             long long number_size = (long long)((ceil(log10(tmp_counter))+1)*sizeof(char));
-            char number[100];
+            char *number = malloc(100);
             snprintf(number, number_size, "%d", tmp_counter);
 
             if (lookahead->type == T_IDENTIFIER) {
@@ -548,7 +556,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 stack_push(stack, stack_data(P_I, P_I));
             } else if (lookahead->type == T_VAR) {
                 htab_pair_t *pair = htab_find(temporary_tab, lookahead->value.identifier);
-                if (pair == NULL) {
+                if (pair == NULL || pair->value_type == D_NONE) {
                     exit(BAD_UNDEFINED_VAR);
                 }
                 TData *data = stack_data(P_I, P_I);
