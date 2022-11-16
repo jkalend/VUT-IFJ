@@ -507,11 +507,14 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
             snprintf(number, number_size, "%d", tmp_counter);
 
             if (lookahead->type == T_IDENTIFIER) {
-                htab_pair_t *pair = htab_find(temporary_tab, lookahead->value.identifier);
+                char id[100] = "69";
+                strcat(id, lookahead->value.identifier);
+                htab_pair_t *pair = htab_find(glob_tab, id);
                 TData *data = stack_data(P_FN, P_FN);
                 data->bucket = pair;
                 stack_push(stack, data);
                 if (pair == NULL) {
+                    printf("%s\n", id);
                     exit(BAD_DEFINITION);
                 }
             } else if (lookahead->type == T_FLOAT) {
@@ -711,7 +714,19 @@ int parse(void) {
                 
                 /* function definition - create new item in tab */
                 if (tmp_token->value.keyword == KW_FUNCTION && token->type == T_IDENTIFIER) { 
-                    in_func = htab_insert(temporary_tab, token, token->value.identifier);
+
+                    char id[100] = "69";
+                    strcat(id, token->value.identifier);
+
+                    /* check if the function is not already defined */
+                    in_func = htab_find(temporary_tab, id);
+                    /* redefinition of function -> exit */
+                    if (in_func != NULL) {
+                        exit(BAD_DEFINITION);
+                    }
+                    
+                    /* else insert to tab */
+                    in_func = htab_insert(temporary_tab, token, id);
                     in_func->param_count = 0;
                     in_func->params = NULL;
                     in_func->return_type = D_NONE;

@@ -146,7 +146,7 @@ htab_pair_t * htab_insert(htab_t * t, Token *token, char* key)
 {
     // check if the identifier exists in the table
     if (token != NULL && (token->type == T_VAR || token->type == T_IDENTIFIER)) {
-        htab_pair_t *tmp = htab_find(t, token->value.identifier);
+        htab_pair_t *tmp = htab_find(t, key);
         if (tmp != NULL) {
             return tmp;
         }
@@ -167,7 +167,7 @@ htab_pair_t * htab_insert(htab_t * t, Token *token, char* key)
     // initialize the new node
     strcpy((char *)new->item.identifier, key);
     new->next = NULL;
-
+    
     if (token == NULL) {
         new->item.type = H_CONSTANT;
     } else {
