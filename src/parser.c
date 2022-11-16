@@ -288,7 +288,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps) {
     if (res > 34 && res != 59) {
         tmp_counter++;
         pair = htab_insert(temporary_tab, NULL, tmp);
-        data = stack_data(P_I, P_I);
+        data = stack_data(P_E, P_E);
         data->bucket = pair;
     }
 
@@ -396,15 +396,15 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps) {
         int brackets = 0;
         int E = 0;
         TStack *reversal = NULL;
-        stack_init(reversal);
+        reversal = stack_init(reversal);
 
         while (stack_top(shelf)->value != P_CLOSE) {
-            data = stack_pop(shelf);
-            if (data->value == P_LEFT_BRACKET) brackets--;
-            else if (data->value == P_RIGHT_BRACKET) brackets++;
-            else if (data->value == P_E) {
+             TData *tmp_data = stack_pop(shelf);
+            if (tmp_data->value == P_LEFT_BRACKET) brackets--;
+            else if (tmp_data->value == P_RIGHT_BRACKET) brackets++;
+            else if (tmp_data->value == P_E) {
                 E++;
-                stack_push(reversal, data);
+                stack_push(reversal, stack_pop(temps));
             }
         }
         if (brackets != 0) exit(BAD_SYNTAX);
@@ -414,11 +414,13 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps) {
         if (E != last_fn->param_count) exit(BAD_TYPE_OR_RETURN);
 
         for (int i = 0; i < last_fn->param_count; i++) {
-            if (stack_pop(reversal)->type != last_fn->params[i]) exit(BAD_TYPE_OR_RETURN);
+            if (stack_pop(reversal)->bucket->value_type != last_fn->params[i]) exit(BAD_TYPE_OR_RETURN);
         }
 
         printf("9p ");
         stack_push(stack, stack_data(P_E, P_E));
+        data->bucket->value_type = last_fn->return_type;
+        stack_push(temps, data);
         return 1;
     } else {
         exit(BAD_SYNTAX);
