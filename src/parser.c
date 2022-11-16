@@ -719,13 +719,12 @@ int parse(void) {
 
                 /* CALL PRECEDENTIAL */
                 keep_prev_token = true;
-    
+
                 int result = precedence(prec, &token, &keep_prev_token, &return_back);
                 stack_dispose(prec);
 
                 if (!result) exit(5); //TODO bad code
                 in_assign = NULL;
-               
                 get_next_token(&token, &keep_prev_token, &return_back);
                 continue;
             }
