@@ -91,8 +91,4 @@ int test_prologue_declare_variable_float_with_exp(void);
 
 int test_prologue_declare_variable_float_with_exp_as_string(void);
 
-int test_var_eq_expression(void);
-
-int test_type(void);
-
 #endif //IFJ_LEX_ALL_H
