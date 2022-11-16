@@ -31,19 +31,15 @@ int get_token(Token *token) {
             int i = 0;
             char *identifier = malloc(size * sizeof(char));
 			if(identifier == NULL){
-				token->type = T_ERROR;
-				token->line = line;
-				return BAD_INTERNAL;
+				exit(BAD_INTERNAL);
 			}
             while(c != EOF && (isalnum(c) || c == '_')) {
                 if(i == size) {
                     size *= 2;
 					char *tmp = realloc(identifier, size * sizeof(char));
 					if(tmp == NULL){
-						token->type = T_ERROR;
-						token->line = line;
 						free(identifier);
-						return BAD_INTERNAL;
+						exit(BAD_INTERNAL);
 					}
 					identifier = tmp;
                 }
@@ -67,9 +63,7 @@ int get_token(Token *token) {
             int size = 40;
             char *str = malloc(size);
 			if(str == NULL){
-				token->type = T_ERROR;
-				token->line = line;
-				return BAD_INTERNAL;
+				exit(BAD_INTERNAL);
 			}
             int i = 0;
             int e = 0;
@@ -80,10 +74,8 @@ int get_token(Token *token) {
                     size *= 2;
                     char *tmp = realloc(str, size);
 					if(tmp == NULL){
-						token->type = T_ERROR;
-						token->line = line;
 						free(str);
-						return BAD_INTERNAL;
+						exit(BAD_INTERNAL);
 					}
 					str = tmp;
                 }
@@ -215,9 +207,7 @@ int get_token(Token *token) {
 								int ok = 0;
 								char *arr = malloc(24);
 								if(arr == NULL){
-									token->type = T_ERROR;
-									token->line = line;
-									return BAD_INTERNAL;
+									exit(BAD_INTERNAL);
 								}
 								char *slider = arr;
 								while (true) {
@@ -494,9 +484,7 @@ int get_token(Token *token) {
                 int size = 40;
                 char *str = malloc(40);
 				if(str == NULL){
-					token->type = T_ERROR;
-					token->line = line;
-					return BAD_INTERNAL;
+					exit(BAD_INTERNAL);
 				}
                 int i = 0;
                 while((c2 == '_') || (c2 >= '0' && c2 <= '9') || (c2 >= 'A' && c2 <= 'Z') || (c2 >= 'a' && c2 <= 'z')){
@@ -504,10 +492,8 @@ int get_token(Token *token) {
                         size *= 2;
                         char *tmp = realloc(str, size);
 						if(tmp == NULL){
-							token->type = T_ERROR;
-							token->line = line;
 							free(str);
-							return BAD_INTERNAL;
+							exit(BAD_INTERNAL);
 						}
 						str = tmp;
                     }
@@ -534,9 +520,8 @@ int get_token(Token *token) {
                 } else if (c2 >= 'a' && c2 <= 'z') {
                     char *str = malloc(40);
 					if(str == NULL){
-						token->type = T_ERROR;
-						token->line = line;
-						return BAD_INTERNAL;					}
+						exit(BAD_INTERNAL);
+					}
                     int size = 40;
                     int i = 0;
                     while (c2 >= 'a' && c2 <= 'z') {
@@ -544,10 +529,8 @@ int get_token(Token *token) {
                             size *= 2;
                             char *tmp = realloc(str, size);
 							if(tmp == NULL){
-								token->type = T_ERROR;
-								token->line = line;
 								free(str);
-								return BAD_INTERNAL;
+								exit(BAD_INTERNAL);
 							}
 							str = tmp;
                         }
@@ -582,9 +565,7 @@ int get_token(Token *token) {
                 }
                 char *str = malloc(40);
 				if(str == NULL){
-					token->type = T_ERROR;
-					token->line = line;
-					return BAD_INTERNAL;
+					exit(BAD_INTERNAL);
 				}
                 int size = 40;
                 int i = 0;
@@ -593,10 +574,8 @@ int get_token(Token *token) {
                         size *= 2;
                         char *tmp = realloc(str, size);
 						if(tmp == NULL){
-							token->type = T_ERROR;
-							token->line = line;
 							free(str);
-							return BAD_INTERNAL;
+							exit(BAD_INTERNAL);
 						}
 						str = tmp;
                     }
