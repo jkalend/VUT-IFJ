@@ -14,6 +14,7 @@ int check = write_file("while_1.php", "<?phwp declare(strict_types=1);\nwhile(tr
 if (check != 0) {
 	return 1;
 }
+stream = fopen("while_1.php", "r");
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
@@ -22,7 +23,7 @@ TEST_ASSERT(token->type == T_VALID)
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_KEYWORD)
 TEST_ASSERT(token->line == 2)
-TEST_ASSERT(strcmp(token->value.keyword, KW_WHILE) == 0)
+TEST_ASSERT(token->value.keyword == KW_WHILE)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_LEFT_BRACKET)
@@ -60,7 +61,7 @@ TEST_ASSERT(token->type == T_VALID)
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_KEYWORD)
 TEST_ASSERT(token->line == 2)
-TEST_ASSERT(strcmp(token->value.keyword, KW_WHILE) == 0)
+TEST_ASSERT(token->value.keyword == KW_WHILE)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_LEFT_BRACKET)
@@ -82,7 +83,7 @@ TEST_ASSERT(token->line == 3)
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_KEYWORD)
 TEST_ASSERT(token->line == 3)
-TEST_ASSERT(strcmp(token->value.keyword, KW_IF) == 0)
+TEST_ASSERT(token->value.keyword == KW_IF)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_LEFT_BRACKET)
@@ -113,7 +114,7 @@ TEST_ASSERT(token->line == 4)
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_KEYWORD)
 TEST_ASSERT(token->line == 4)
-TEST_ASSERT(strcmp(token->value.keyword, KW_FALSE) == 0)
+TEST_ASSERT(token->value.keyword == KW_FALSE)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_SEMICOLON)
@@ -147,7 +148,7 @@ TEST_ASSERT(token->type == T_VALID)
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_KEYWORD)
 TEST_ASSERT(token->line == 2)
-TEST_ASSERT(strcmp(token->value.keyword, KW_WHILE) == 0)
+TEST_ASSERT(token->value.keyword == KW_WHILE)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_LEFT_BRACKET)
@@ -165,7 +166,7 @@ TEST_ASSERT(token->line == 2)
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_INT)
 TEST_ASSERT(token->line == 2)
-TEST_ASSERT(strcmp(token->value.number_int, 0) == 0)
+TEST_ASSERT(token->value.number_int == 0)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_RIGHT_BRACKET)
@@ -196,7 +197,7 @@ TEST_ASSERT(token->line == 3)
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_INT)
 TEST_ASSERT(token->line == 2)
-TEST_ASSERT(strcmp(token->value.number_int, 2) == 0)
+TEST_ASSERT(token->value.number_int == 2)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_SEMICOLON)
