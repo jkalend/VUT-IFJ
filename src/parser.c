@@ -466,7 +466,14 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
         }
         
         unsigned int sym = PREC_TABLE[row][column];
-        if (end && !sym) return 1;
+        if (end && !sym) {
+            TData *top = stack_top(temps);
+            if (in_assign != NULL) {
+                in_assign->value_type = top->bucket->value_type;
+                in_assign = NULL;
+            }
+            return 1;
+        }
         if (!sym) exit(BAD_SYNTAX);
         if (sym != P_EQUAL && !end) { // skips equal signs
             if (sym == P_CLOSE) {
@@ -579,6 +586,11 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
             if (reduce(stack, shelf, temps) != -1) {
                 return 0;
             } else {
+                TData *top = stack_top(temps);
+                if (in_assign != NULL) {
+                    in_assign->value_type = top->bucket->value_type;
+                    in_assign = NULL;
+                }   
                 return 1;
             }
         }
@@ -615,23 +627,6 @@ int parse(void) {
         if (top->type == T_TERM) {
             if (top->value == token->type) { 
 
-                /* add new tab to stack */
-//                if (token->type == T_LEFT_BRACE) {
-//                    htab_t *new_tab = htab_init(LOCALTAB_SIZE);
-//                    TData *ptr = malloc(sizeof(TData));
-//                    if (ptr != NULL) {
-//                        ptr->value = 0;
-//                        ptr->type = 0;
-//                        ptr->htab = new_tab;
-//                    }
-//                    /* push newly created tab to stack */
-//                    stack_push(local_tabs, ptr);
-//                    temporary_tab = new_tab;
-//                }
-//                if (token->type == T_RIGHT_BRACE) {
-//                    if (stack_isEmpty(local_tabs)) temporary_tab = glob_tab;
-//                    else  temporary_tab = stack_pop(local_tabs)->htab;
-//                }
                 /* definition of a function */
                 if (in_func != NULL) {
                     if (in_param_def && token->type == T_RIGHT_BRACKET) {
@@ -671,9 +666,6 @@ int parse(void) {
                                 break;
                             case KW_STRING:
                                 in_func->params[in_func->param_count - 1] = D_STRING;
-                                break;
-                            case KW_VOID:
-                                in_func->params[in_func->param_count - 1] = D_VOID;
                                 break;
                             default:
                                 exit(1); // unknown data type
@@ -725,6 +717,7 @@ int parse(void) {
                 stack_dispose(prec);
 
                 if (!result) exit(5); //TODO bad code
+                in_assign = NULL;
                 get_next_token(&token, &keep_prev_token, &return_back);
                 continue;
             }
