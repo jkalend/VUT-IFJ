@@ -22,6 +22,7 @@ htab_pair_t *in_assign = NULL;
 bool in_param_def = false;
 int tmp_counter = 0;
 unsigned int relation_operator = 0;
+bool popframe = false;
 
 const unsigned int PREC_TABLE[14][14] = { //TODO
         {P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_OPEN, P_OPEN, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_OPEN, P_CLOSE},
@@ -674,6 +675,17 @@ int parse(void) {
                                 exit(1); // unknown data type
                         }
                     }
+                    else if (in_param_def && token->type == T_VAR) {
+                        htab_pair_t *frame_item = htab_find(temporary_tab, token->value.identifier);
+                        /* add the var to the table */
+                        if (frame_item != NULL) {
+                            exit(1); // two parameters with the same name
+                        }
+                        else {
+                            frame_item = htab_insert(temporary_tab, token, token->value.identifier);
+                            frame_item->value_type = in_func->params[in_func->param_count - 1];
+                        }
+                    }
                 }
                 
                 get_next_token(&token, &keep_prev_token, &return_back);
@@ -704,6 +716,17 @@ int parse(void) {
                     in_func->params = NULL;
                     in_func->return_type = D_NONE;
                     in_param_def = true;
+
+                    /* create new frame for current function call */
+                    htab_t *new_tab = htab_init(LOCALTAB_SIZE);
+                    TData *new_data = malloc(sizeof(TData));
+                    new_data->bucket = NULL;
+                    new_data->htab = new_tab;
+                    stack_push(local_tabs, new_data);
+                    temporary_tab = new_tab;
+                }
+                if (token->value.keyword == KW_RETURN) {
+                    popframe = true;
                 }
                 
             }
@@ -728,6 +751,11 @@ int parse(void) {
                 if (!result) exit(5); //TODO bad code
                 in_assign = NULL;
                 get_next_token(&token, &keep_prev_token, &return_back);
+                if (popframe) {
+                    stack_pop(local_tabs);
+                    if (stack_isEmpty(local_tabs)) temporary_tab = glob_tab;
+                }
+                popframe = false;
                 continue;
             }
 
