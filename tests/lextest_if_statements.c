@@ -591,3 +591,19 @@ TEST_ASSERT(token->type == T_EOF)
 
 free(token);
 ENDTEST(stream, "if_else_4.php")
+
+#ifndef LEX_ALL
+int main(void)
+{
+    int tests_failed = 0;
+    tests_failed += test_if_statement_1();
+    tests_failed += test_if_statement_2();
+    tests_failed += test_if_statement_3();
+    tests_failed += test_if_statement_4();
+    tests_failed += test_if_else_statement_1();
+    tests_failed += test_if_else_statement_2();
+    tests_failed += test_if_statement_else_3();
+    tests_failed += test_if_else_statement_4();
+    return tests_failed ? 1 : 0;
+}
+#endif // LEX_ALL

@@ -718,3 +718,27 @@ TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_EOF)
 free(token);
 ENDTEST(stream, "division_4.php")
+
+#ifndef LEX_ALL
+int main(void)
+{
+    int tests_failed = 0;
+    tests_failed += test_arithmetic_addition_1();
+    tests_failed += test_arithmetic_addition_2();
+    tests_failed += test_arithmetic_addition_3();
+    tests_failed += test_arithmetic_addition_4();
+    tests_failed += test_arithmetic_subtraction_1();
+    tests_failed += test_arithmetic_subtraction_2();
+    tests_failed += test_arithmetic_subtraction_3();
+    tests_failed += test_arithmetic_subtraction_4();
+    tests_failed += test_arithmetic_multiplication_1();
+    tests_failed += test_arithmetic_multiplication_2();
+    tests_failed += test_arithmetic_multiplication_3();
+    tests_failed += test_arithmetic_multiplication_4();
+    tests_failed += test_arithmetic_division_1();
+    tests_failed += test_arithmetic_division_2();
+    tests_failed += test_arithmetic_division_3();
+    tests_failed += test_arithmetic_division_4();
+    return tests_failed ? 1 : 0;
+}
+#endif // LEX_ALL

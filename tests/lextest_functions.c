@@ -318,3 +318,15 @@ TEST_ASSERT(token->type == T_EOF)
 
 free(token);
 ENDTEST(stream, "func_call_1.php")
+
+#ifndef LEX_ALL
+int main(void)
+{
+    int tests_failed = 0;
+    tests_failed += test_func_definition_1();
+    tests_failed += test_func_definition_2();
+    tests_failed += test_func_definition_3();
+    tests_failed += test_func_call_1();
+    return tests_failed ? 1 : 0;
+}
+#endif // LEX_ALL

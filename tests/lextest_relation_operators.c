@@ -1613,3 +1613,29 @@ TEST_ASSERT(token->type == T_EOF)
 
 free(token);
 ENDTEST(stream, "not_equal_3.php")
+
+#ifndef LEX_ALL
+int main(void)
+{
+    int tests_failed = 0;
+    tests_failed += test_greater_1();
+    tests_failed += test_greater_2();
+    tests_failed += test_greater_3();
+    tests_failed += test_lesser_1();
+    tests_failed += test_lesser_2();
+    tests_failed += test_lesser_3();
+    tests_failed += test_greater_equal_1();
+    tests_failed += test_greater_equal_2();
+    tests_failed += test_greater_equal_3();
+    tests_failed += test_lesser_equal_1();
+    tests_failed += test_lesser_equal_2();
+    tests_failed += test_lesser_equal_3();
+    tests_failed += test_equal_1();
+    tests_failed += test_equal_2();
+    tests_failed += test_equal_3();
+    tests_failed += test_not_equal_1();
+    tests_failed += test_not_equal_2();
+    tests_failed += test_not_equal_3();
+    return tests_failed ? 1 : 0;
+}
+#endif // LEX_ALL

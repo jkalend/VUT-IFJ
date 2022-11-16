@@ -211,3 +211,14 @@ TEST_ASSERT(token->type == T_EOF)
 
 free(token);
 ENDTEST(stream, "while_3.php")
+
+#ifndef LEX_ALL
+int main(void)
+{
+    int tests_failed = 0;
+    tests_failed += test_while_1();
+    tests_failed += test_while_2();
+    tests_failed += test_while_3();
+    return tests_failed ? 1 : 0;
+}
+#endif // LEX_ALL

@@ -66,7 +66,7 @@ int main(void) {
 	tests_failed += test_if_statement_4();
 	tests_failed += test_if_else_statement_1();
 	tests_failed += test_if_else_statement_2();
-	tests_failed += test_if_else_statement_3();
+	tests_failed += test_if_statement_else_3();
 	tests_failed += test_if_else_statement_4();
 	tests_failed += test_while_1();
 	tests_failed += test_while_2();

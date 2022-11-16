@@ -135,7 +135,7 @@ int test_if_else_statement_1(void);
 
 int test_if_else_statement_2(void);
 
-int test_if_else_statement_3(void);
+int test_if_statement_else_3(void);
 
 int test_if_else_statement_4(void);
 
