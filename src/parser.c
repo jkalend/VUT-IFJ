@@ -21,7 +21,7 @@ htab_pair_t *in_func = NULL;
 htab_pair_t *in_assign = NULL;
 bool in_param_def = false;
 int tmp_counter = 0;
-unsigned int relation_operator = 100;
+unsigned int relation_operator = 0;
 
 const unsigned int PREC_TABLE[14][14] = { //TODO
         {P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_OPEN, P_OPEN, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_OPEN, P_CLOSE},
@@ -574,7 +574,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 stack_push(stack, stack_data(P_I, P_I));
             } else if (lookahead->type >= T_LESS && lookahead->type <= T_GREATER_EQUAL) {
                 stack_push(stack, stack_data(P_R, P_R));
-                if (relation_operator != 0) {
+                if (relation_operator == 0) {
                     relation_operator = lookahead->type;
                 } else {
                     exit(BAD_TYPE_COMPATIBILTY);
