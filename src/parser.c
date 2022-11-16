@@ -2,8 +2,16 @@
 #include "scanner.h"
 #include "stack.h"
 #include "htab.h"
+#include "error.h"
+#include "math.h"
 
-
+// TODO
+// TODO
+//
+// we are unable to accept inbuilt functions as of now
+//
+// FIXME
+// FIXME
 
 Token *tmp_token = NULL;
 htab_t *glob_tab = NULL;
@@ -12,6 +20,8 @@ TStack *local_tabs = NULL;
 htab_pair_t *in_func = NULL;
 htab_pair_t *in_assign = NULL;
 bool in_param_def = false;
+int tmp_counter = 0;
+unsigned int relation_operator = 0;
 
 const unsigned int PREC_TABLE[14][14] = { //TODO
         {P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_OPEN, P_OPEN, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_OPEN, P_CLOSE},
@@ -37,6 +47,7 @@ TData *stack_data(int value, int type) { //unsigned?
         ptr->value = value;
         ptr->type = type;
         ptr->htab = NULL;
+        ptr->bucket = NULL;
     }
     return ptr;
 }
@@ -237,109 +248,173 @@ void prec_index(const Token *token, unsigned int *rc, int symbol) {
     }
 }
 
-
-
-int reduce(TStack *stack, TStack *shelf) {
+int reduce(TStack *stack, TStack *shelf, TStack *temps) {
 
     if (stack_top(stack)->value == P_E) {
         stack_push(shelf, stack_pop(stack));
-        if (stack_top(stack)->value == P_END) return -1;
+        if (stack_top(stack)->value == P_END) return -1; //empty expr
     }
     unsigned int res = 0;
     bool fn = false;
+    const htab_pair_t *last_fn;
+
     while (stack_top(stack)->value != P_OPEN && stack_top(stack)->value != P_END) {
         const TData *data = stack_pop(stack);
         stack_push(shelf, data);
         res += data->value;
-        if (data->value == P_FN) fn = true;
+        if (data->value == P_FN) {fn = true; last_fn = data->bucket;}
     }
     if (stack_top(stack)->value == P_OPEN) {
         const TData *data = stack_pop(stack);
         res += data->value;
         stack_push(shelf, data);
     } else if (stack_top(stack)->value == P_END) {
-        exit(1); //TODO bad code
+        exit(BAD_SYNTAX);
     }
 
     //could it be simpler? yes, but 3AC gotta go somewhere
     int cnt = 0;
+    DataType op_one;
+    DataType op_two;
+    char number[100];
+
+    long long number_size = (long long)((ceil(log10(tmp_counter))+1)*sizeof(char));
+    snprintf(number, number_size, "%d", tmp_counter);
+    char tmp[100] = TEMP_VAR_PREFIX;
+    strcat(tmp, number);
+
+    TData *data;
+    htab_pair_t *pair;
+    if (res > 34 && res != 59) {
+        tmp_counter++;
+        pair = htab_insert(temporary_tab, NULL, tmp);
+        data = stack_data(P_I, P_I);
+        data->bucket = pair;
+    }
+
     switch (res) {
         case 34:
             while (cnt < 3) {stack_pop(shelf); cnt++;}
             if (cnt != 3) goto cleanup;
-            printf("1p ");
             stack_push(stack, stack_data(P_E, P_E));
             return 1;
-        case 63:
+        case 63: // multiplication
+            while (cnt < 5) {if(stack_pop(shelf) != NULL) {break;} cnt++;}
+            if (cnt != 5) goto cleanup;
+            op_one = stack_pop(temps)->type;
+            op_two = stack_pop(temps)->type;
+            if (op_one == D_FLOAT || op_two == D_FLOAT) {
+                pair->value_type = D_FLOAT;
+            } else if (op_one == D_INT && op_two == D_INT) {
+                pair->value_type = D_INT;
+            }
+
+            stack_push(temps, data);
+            stack_push(stack, stack_data(P_E, P_E));
+            return 1;
+        case 64: // division
             while (cnt < 5) {stack_pop(shelf); cnt++;}
             if (cnt != 5) goto cleanup;
-            printf("2p ");
+            stack_pop(temps);
+            stack_pop(temps);
+            pair->value_type = D_FLOAT;
+
+
+            stack_push(temps, data);
             stack_push(stack, stack_data(P_E, P_E));
             return 1;
-        case 64:
+        case 65: // addition
             while (cnt < 5) {stack_pop(shelf); cnt++;}
             if (cnt != 5) goto cleanup;
-            printf("3p ");
+            op_one = stack_pop(temps)->type;
+            op_two = stack_pop(temps)->type;
+            if (op_one == D_FLOAT || op_two == D_FLOAT) {
+                pair->value_type = D_FLOAT;
+            } else if (op_one == D_INT && op_two == D_INT) {
+                pair->value_type = D_INT;
+            }
+
+            stack_push(temps, data);
             stack_push(stack, stack_data(P_E, P_E));
             return 1;
-        case 65:
+        case 66: // subtraction
             while (cnt < 5) {stack_pop(shelf); cnt++;}
             if (cnt != 5) goto cleanup;
-            printf("4p ");
+            op_one = stack_pop(temps)->type;
+            op_two = stack_pop(temps)->type;
+            if (op_one == D_FLOAT || op_two == D_FLOAT) {
+                pair->value_type = D_FLOAT;
+            } else if (op_one == D_INT && op_two == D_INT) {
+                pair->value_type = D_INT;
+            }
+
+            stack_push(temps, data);
             stack_push(stack, stack_data(P_E, P_E));
             return 1;
-        case 66:
+        case 67: // concatenation
             while (cnt < 5) {stack_pop(shelf); cnt++;}
             if (cnt != 5) goto cleanup;
-            printf("5p ");
+            stack_pop(temps);
+            stack_pop(temps);
+            pair->value_type = D_STRING;
+
+            stack_push(temps, data);
             stack_push(stack, stack_data(P_E, P_E));
             return 1;
-        case 67:
+        case 59: // brackets
             while (cnt < 5) {stack_pop(shelf); cnt++;}
             if (cnt != 5) goto cleanup;
-            printf("6p ");
             stack_push(stack, stack_data(P_E, P_E));
             return 1;
-        case 59:
-            while (cnt < 5) {stack_pop(shelf); cnt++;}
-            if (cnt != 5) goto cleanup;
-            printf("7p ");
-            stack_push(stack, stack_data(P_E, P_E));
-            return 1;
-        case 71:
+        case 71: // relations or a function
             if (fn) goto function;
             while (cnt < 5) {stack_pop(shelf); cnt++;}
             if (cnt != 5) goto cleanup;
-            printf("8p ");
+            stack_pop(temps);
+            stack_pop(temps);
+            pair->value_type = D_BOOL;
+
+            stack_push(temps, data);
             stack_push(stack, stack_data(P_E, P_E));
             return 1;
         default:
-            printf("BAD ");
+            if (fn) goto function;
             break;
     }
 
     function:
     if (fn && res >= 71) {
         //symtable should be used here ideally to check for number of args
-        const TData *data = NULL;
         int brackets = 0;
         int E = 0;
+        TStack *reversal = NULL;
+        stack_init(reversal);
 
         while (stack_top(shelf)->value != P_CLOSE) {
             data = stack_pop(shelf);
             if (data->value == P_LEFT_BRACKET) brackets--;
             else if (data->value == P_RIGHT_BRACKET) brackets++;
-            else if (data->value == P_E) E++;
+            else if (data->value == P_E) {
+                E++;
+                stack_push(reversal, data);
+            }
         }
-        if (brackets != 0) exit(1);
-        stack_pop(shelf);
+        if (brackets != 0) exit(BAD_SYNTAX);
+        stack_pop(shelf); // pops last bracket
+
         // args number check
-        printf("9p\n");
+        if (E != last_fn->param_count) exit(BAD_TYPE_OR_RETURN);
+
+        for (int i = 0; i < last_fn->param_count; i++) {
+            if (stack_pop(reversal)->type != last_fn->params[i]) exit(BAD_TYPE_OR_RETURN);
+        }
+
         stack_push(stack, stack_data(P_E, P_E));
         return 1;
     } else {
-        exit(1); //TODO bad code
+        exit(BAD_SYNTAX);
     }
+
     cleanup:
     stack_dispose(shelf);
     return 0;
@@ -353,7 +428,9 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
     bool end = false;
     unsigned int row, column;
     TStack *shelf = NULL;
+    TStack *temps = NULL;
     shelf = stack_init(shelf);
+    temps = stack_init(temps);
     while (true) {
 
         get_next_token(&lookahead, keep_token, return_back);
@@ -382,7 +459,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
         
         unsigned int sym = PREC_TABLE[row][column];
         if (end && !sym) return 1;
-        if (!sym) exit(1); //TODO bad code
+        if (!sym) exit(BAD_SYNTAX);
         if (sym != P_EQUAL && !end) { // skips equal signs
             if (sym == P_CLOSE) {
                 while (!stack_isEmpty(shelf)) {
@@ -397,7 +474,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
         if (end) stack_push(stack, stack_data(P_CLOSE, P_CLOSE));
 
         if (sym == P_CLOSE) {
-            int res = reduce(stack, shelf);
+            int res = reduce(stack, shelf, temps);
             if (!res || !stack_isEmpty(shelf)) exit(1); //TODO bad code
             goto reduced;
         }
@@ -406,19 +483,92 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
         // if Rel operators are fund -> P_R is pushed
         // <(=)> is deleted, same for
         if (!end) {
+            long long number_size = (long long)((ceil(log10(tmp_counter))+1)*sizeof(char));
+            char number[100];
+            snprintf(number, number_size, "%d", tmp_counter);
+
             if (lookahead->type == T_IDENTIFIER) {
-                stack_push(stack, stack_data(P_FN, P_FN));
-            } else if (lookahead->type == T_FLOAT || lookahead->type == T_INT || lookahead->type == T_VAR ||
-                       lookahead->type == T_STRING) {
+                htab_pair_t *pair = htab_find(temporary_tab, lookahead->value.identifier);
+                TData *data = stack_data(P_FN, P_FN);
+                data->bucket = pair;
+                stack_push(stack, data);
+                if (pair == NULL) {
+                    exit(BAD_DEFINITION);
+                }
+            } else if (lookahead->type == T_FLOAT) {
+                char tmp[100] = TEMP_VAR_PREFIX;
+                strcat(tmp, number);
+
+                htab_pair_t *pair = htab_find(temporary_tab, tmp);
+                if (pair == NULL) {
+                    tmp_counter++;
+                    pair = htab_insert(temporary_tab, NULL, tmp);
+                    pair->value.string = lookahead->value.string;
+                    pair->value_type = D_FLOAT;
+                }
+
+                TData *data = stack_data(P_I, P_I);
+                data->bucket = pair;
+
+                stack_push(temps, data);
+                stack_push(stack, stack_data(P_I, P_I));
+            } else if (lookahead->type == T_INT) {
+                char tmp[100] = TEMP_VAR_PREFIX;
+                strcat(tmp, number);
+
+                htab_pair_t *pair = htab_find(temporary_tab, tmp);
+                if (pair == NULL) {
+                    tmp_counter++;
+                    pair = htab_insert(temporary_tab, NULL, tmp);
+                    pair->value.number_int = lookahead->value.number_int;
+                    pair->value_type = D_INT;
+                }
+
+                TData *data = stack_data(P_I, P_I);
+                data->bucket = pair;
+
+                stack_push(temps, data);
+                stack_push(stack, stack_data(P_I, P_I));
+            } else if (lookahead->type == T_STRING) {
+                char tmp[100] = TEMP_VAR_PREFIX;
+                strcat(tmp, number);
+
+                htab_pair_t *pair = htab_find(temporary_tab, tmp);
+                if (pair == NULL) {
+                    tmp_counter++;
+                    pair = htab_insert(temporary_tab, NULL, tmp);
+                    pair->value.string = lookahead->value.string;
+                    pair->value_type = D_STRING;
+                }
+
+                TData *data = stack_data(P_I, P_I);
+                data->bucket = pair;
+
+                stack_push(temps, data);
+                stack_push(stack, stack_data(P_I, P_I));
+            } else if (lookahead->type == T_VAR) {
+                htab_pair_t *pair = htab_find(temporary_tab, lookahead->value.identifier);
+                if (pair == NULL) {
+                    exit(BAD_UNDEFINED_VAR);
+                }
+                TData *data = stack_data(P_I, P_I);
+                data->bucket = pair;
+
+                stack_push(temps, data);
                 stack_push(stack, stack_data(P_I, P_I));
             } else if (lookahead->type >= T_LESS && lookahead->type <= T_GREATER_EQUAL) {
                 stack_push(stack, stack_data(P_R, P_R));
+                if (relation_operator != 0) {
+                    relation_operator = lookahead->type;
+                } else {
+                    exit(BAD_TYPE_COMPATIBILTY);
+                }
             } else {
                 stack_push(stack, stack_data((int) column, (int) column));
             }
         } else {
-            while (reduce(stack, shelf) == 1);
-            if (reduce(stack, shelf) != -1) {
+            while (reduce(stack, shelf, temps) == 1);
+            if (reduce(stack, shelf, temps) != -1) {
                 return 0;
             } else {
                 return 1;
@@ -427,7 +577,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
     }
 
     bad_token:
-    exit(1); //TODO bad code
+    exit(BAD_LEXEM);
 }
 
 int parse(void) {
@@ -526,8 +676,8 @@ int parse(void) {
                 get_next_token(&token, &keep_prev_token, &return_back);
 
                 if (token->type == T_ASSIGN && tmp_token->type == T_VAR) {
-                    in_assign = htab_insert(temporary_tab, tmp_token);
-                    in_assign->type = D_NONE;
+                    in_assign = htab_insert(temporary_tab, tmp_token, tmp_token->value.identifier);
+                    in_assign->value_type = D_NONE;
                 }
             }
             else {
@@ -541,7 +691,7 @@ int parse(void) {
                 
                 /* function definition - create new item in tab */
                 if (tmp_token->value.keyword == KW_FUNCTION && token->type == T_IDENTIFIER) { 
-                    in_func = htab_insert(temporary_tab, token);
+                    in_func = htab_insert(temporary_tab, token, token->value.identifier);
                     in_func->param_count = 0;
                     in_func->params = NULL;
                     in_func->return_type = D_NONE;

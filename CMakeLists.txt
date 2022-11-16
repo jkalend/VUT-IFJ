@@ -12,7 +12,7 @@ include_directories(.)
 include_directories(src)
 include_directories(tests)
 
-set(PARSER src/parser.c src/parser.h src/error.h)
+set(PARSER src/parser.c src/parser.h src/error.h src/htab.h src/htab.c)
 set(SCANNER src/scanner.c src/scanner.h src/error.h)
 set(LEX_ALL tests/lextest_empty.c tests/lex_all.c tests/lex_all.h tests/lextest_only_prologue.c tests/lextest_variables_operations.c)
 

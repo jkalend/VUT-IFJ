@@ -3,6 +3,7 @@
 
 #include "scanner.h"
 #include "htab.h"
+#include "stack.h"
 
 const unsigned int LL_TABLE[8][33] = {{1},
                                       {0, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 3, 4, [15] =  2, 2, 2, 2},
@@ -16,6 +17,7 @@ const unsigned int LL_TABLE[8][33] = {{1},
 extern const unsigned int PREC_TABLE[14][14];
 extern Token *tmp_token;
 
+#define TEMP_VAR_PREFIX "$_^/$Zz*zZ$\\^_::tmp"
 #define EPS 14 // eps has column index 14 in ll table
 #define GLOBTAB_SIZE 2003 // num of buckets to allocate for global symtab
 #define LOCALTAB_SIZE 557 // num of buckets to allocate for local symtabs
@@ -59,4 +61,22 @@ typedef enum {
     P_EQUAL,
     P_E
 }PrecSyms;
+
+typedef struct {
+    Token *tmp_token;
+    htab_t *glob_tab;
+    htab_t *temporary_tab;
+    TStack *local_tabs;
+    htab_pair_t *in_func;
+    htab_pair_t *in_assign;
+    bool in_param_def;
+    char relation_operator; // 0 for < 1 for > 2 for <= 3 for >=
+} parser_t;
+
+// * float > int, str is always converted
+// / always float
+// + float > int, str is always converted
+// - float > int, str is always converted
+// . always string
+
 #endif // PARSER_H

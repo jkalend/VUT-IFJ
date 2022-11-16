@@ -142,15 +142,15 @@ htab_t *htab_init(size_t n)
 }
 
 
-htab_pair_t * htab_insert(htab_t * t, Token *token)
+htab_pair_t * htab_insert(htab_t * t, Token *token, char* key)
 {
     // check if the identifier exists in the table
-    htab_pair_t *tmp = htab_find(t, token->value.identifier);
-    if (tmp != NULL) 
-    {
-        return tmp;
+    if (token != NULL && (token->type == T_VAR || token->type == T_IDENTIFIER)) {
+        htab_pair_t *tmp = htab_find(t, token->value.identifier);
+        if (tmp != NULL) {
+            return tmp;
+        }
     }
-
         
     //  dynamically allocate a new node
     htab_item_t *new = malloc(sizeof(htab_item_t));
@@ -158,14 +158,14 @@ htab_pair_t * htab_insert(htab_t * t, Token *token)
     {
         return NULL;
     }
-    new->item.identifier = malloc((strlen(token->value.identifier) + 1) * sizeof(char));
+    new->item.identifier = malloc((strlen(key) + 1) * sizeof(char));
     if (new->item.identifier == NULL)
     {
         return NULL;
     }
 
     // initialize the new node
-    strcpy((char *)new->item.identifier, token->value.identifier);
+    strcpy((char *)new->item.identifier, key);
     new->next = NULL;
 
     switch(token->type) {
@@ -185,7 +185,7 @@ htab_pair_t * htab_insert(htab_t * t, Token *token)
     }
 
     // insert into the table
-    size_t hash = htab_hash_function(token->value.identifier) % t->arr_size;
+    size_t hash = htab_hash_function(key) % t->arr_size;
     new->next = t->arr_ptr[hash];
     t->arr_ptr[hash] = new;
 

@@ -10,13 +10,12 @@
 #include <stdlib.h>
 #include "htab.h"
 
-//PLACEHOLDER DATA STRUCT
-
 
 typedef struct tdata {
 	unsigned int value;
 	unsigned int type;
 	htab_t * htab;
+    htab_pair_t *bucket;
 } TData;
 
 typedef struct telement {
