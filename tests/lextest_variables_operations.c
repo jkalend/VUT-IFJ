@@ -255,8 +255,6 @@ int main(void) {
     tests_failed += test_prologue_declare_variable_float_as_string();
     tests_failed += test_prologue_declare_variable_float_with_exp();
     tests_failed += test_prologue_declare_variable_float_with_exp_as_string();
-	tests_failed += test_var_eq_expression();
-	tests_failed += test_type();
     return tests_failed ? 1 : 0;
 }
 #endif //LEX_ALL
