@@ -6,8 +6,8 @@
 #include "stack.h"
 
 const unsigned int LL_TABLE[8][33] = {{1},
-                                      {0, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 3, 4, [15] =  2, 2, 2, 2},
-                                      {0, 7, 11, 12, 10, 5, 6, 9, 0, 7, [15] =  7, 7, 7, 7},
+                                      {0, 2, 2, 2, 2, 2, 2, 2, 0, 2, 0, 0, 3, 4, [15] =  2, 2, 2, 2},
+                                      {0, 7, 11, 12, 10, 5, 6, 9, 0, 8, [15] =  7, 7, 7, 7},
                                       {[9] = 13, 14, [19] = 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15},
                                       {[8] = 16, [14] = 22},
                                       {[7] = 17},
@@ -71,6 +71,7 @@ typedef struct {
     htab_pair_t *in_assign;
     bool in_param_def;
     bool empty_expr;
+    bool allow_expr_empty;
     bool popframe;
     char relation_operator; // 0 for < 1 for > 2 for <= 3 for >=
     int tmp_counter;

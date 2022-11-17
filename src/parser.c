@@ -119,9 +119,7 @@ int apply_rule(TStack *stack, unsigned int val) {
             stack_push(stack, stack_data(N_EXPR, T_NONTERM));
             break;
         case 8:
-           // stack_push(stack, stack_data(T_SEMICOLON, T_TERM));
-            //stack_push(stack, stack_data(N_EXPR, T_NONTERM));
-            //stack_push(stack, stack_data(T_IDENTIFIER, T_TERM));
+            stack_push(stack, stack_data(T_SEMICOLON, T_TERM));
             break;
         case 9:
             stack_push(stack, stack_data(N_SMALL_ST, T_NONTERM));
@@ -719,6 +717,7 @@ int parse(void) {
             if (token->type == T_KEYWORD && top->value == token->value.keyword) {
                 if (token->value.keyword == KW_RETURN) {
                     parser.popframe = true;
+                    parser.allow_expr_empty = true;
                 }
 
                 get_next_token(&token, &keep_prev_token, &return_back);
@@ -773,6 +772,7 @@ int parse(void) {
                 stack_dispose(prec);
 
                 if (!result) exit(5); //TODO bad code
+                else if (parser.empty_expr && !parser.allow_expr_empty) exit(5);
                 parser.in_assign = NULL;
                 get_next_token(&token, &keep_prev_token, &return_back);
 
@@ -787,6 +787,7 @@ int parse(void) {
                     else parser.temporary_tab = stack_top(parser.local_tabs)->htab;
                 }
                 parser.popframe = false;
+                parser.allow_expr_empty = false;
                 continue;
             }
 
@@ -829,6 +830,7 @@ int main(void) {
     parser.in_assign = NULL;
     parser.in_param_def = false;
     parser.empty_expr = false;
+    parser.allow_expr_empty = false;
     parser.tmp_counter = 0;
     parser.relation_operator = 0;
     parser.popframe = false;
