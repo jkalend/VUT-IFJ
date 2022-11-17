@@ -828,6 +828,7 @@ int main(void) {
     parser.in_func = NULL;
     parser.in_assign = NULL;
     parser.in_param_def = false;
+    parser.empty_expr = false;
     parser.tmp_counter = 0;
     parser.relation_operator = 0;
     parser.popframe = false;
