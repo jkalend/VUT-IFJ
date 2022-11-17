@@ -280,7 +280,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps) {
     int cnt = 0;
     DataType op_one;
     DataType op_two;
-    char number[100];
+    char *number = malloc(sizeof(char) * 100);
 
     long long number_size = (long long)((ceil(log10(parser.tmp_counter))+1)*sizeof(char));
     snprintf(number, number_size, "%d", parser.tmp_counter);
@@ -475,8 +475,11 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
         unsigned int sym = PREC_TABLE[row][column];
         if (end && !sym) {
             TData *top = stack_top(temps);
-            if (parser.in_assign != NULL) {
+            if (parser.in_assign != NULL && top != NULL) {
                 parser.in_assign->value_type = top->bucket->value_type;
+                parser.in_assign = NULL;
+            } else if (parser.in_assign != NULL && top == NULL) {
+                parser.in_assign->value_type = D_NONE;
                 parser.in_assign = NULL;
             }
             return 1;
@@ -600,7 +603,10 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 if (parser.in_assign != NULL) {
                     parser.in_assign->value_type = top->bucket->value_type;
                     parser.in_assign = NULL;
-                }   
+                } else if (parser.in_assign != NULL && top == NULL) {
+                    parser.in_assign->value_type = D_NONE;
+                    parser.in_assign = NULL;
+                }
                 return 1;
             }
         }
