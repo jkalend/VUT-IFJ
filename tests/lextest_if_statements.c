@@ -184,7 +184,7 @@ free(token);
 ENDTEST(stream, "if_3.php")
 
 TEST(test_if_statement_4, "Test if statement 4")
-int check = write_file("if_4.php", "<?php declare(strict_types=1);\nif(1){$var = c;}");
+int check = write_file("if_4.php", "<?php declare(strict_types=1);\nif(1){$var = $c;}");
 if (check != 0) {
 	return 1;
 }
@@ -314,7 +314,7 @@ ENDTEST(stream, "if_else_1.php")
 
 TEST(test_if_else_statement_2, "Test if else statement 2")
 int check = write_file("if_else_2.php",
-					   "<?php declare(strict_types=1);\nif($temp <= 8){\n}\nelse { a_h = a+B; }");
+					   "<?php declare(strict_types=1);\nif($temp <= 8){\n}\nelse { $a_h = $a+$B; }");
 if (check != 0) {
 	return 1;
 }
@@ -410,7 +410,7 @@ ENDTEST(stream, "if_else_2.php")
 TEST(test_if_statement_else_3, "Test if else statement 3")
 int check = write_file(
 	"if_else_3.php",
-	"<?php declare(strict_types=1);\nif($temp !== null){\n$var = \"Hello World!\";\n}\nelse {var = \"I hate the world!\";}");
+	"<?php declare(strict_types=1);\nif($temp !== null){\n$var = \"Hello World!\";\n}\nelse {$var = \"I hate the world!\";}");
 if (check != 0) {
 	return 1;
 }
@@ -511,7 +511,7 @@ ENDTEST(stream, "if_else_3.php")
 
 TEST(test_if_else_statement_4, "Test if else statement 4")
 int check = write_file(
-	"if_else_4.php", "<?php declare(strict_types=1);\nif(1){$var = c}\nelse \n{\n$brrrr = 42; }");
+	"if_else_4.php", "<?php declare(strict_types=1);\nif(1){$var = $c}\nelse \n{\n$brrrr = 42; }");
 if (check != 0) {
 	return 1;
 }

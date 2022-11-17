@@ -75,7 +75,7 @@ ENDTEST(stream, "func_definition_1.php")
 TEST(test_func_definition_2, "Test function definition 2")
 int check = write_file(
 	"func_definition_2.php",
-	"<?phwp declare(strict_types=1);\nfunction foo(int $n) : int {\nGandalf = \"The Gray Wizard\";\nreturn 1;}");
+	"<?phwp declare(strict_types=1);\nfunction foo(int $n) : int {\n$Gandalf = \"The Gray Wizard\";\nreturn 1;}");
 if (check != 0) {
 	return 1;
 }
@@ -166,7 +166,7 @@ ENDTEST(stream, "func_definition_2.php")
 TEST(test_func_definition_3, "Test function definition 3")
 int check = write_file(
 	"func_definition_3.php",
-	"<?phwp declare(strict_types=1);\nfunction foo(int $n) : string {\nGandalf = \"The Gray Wizard\"\ntemp = n;\nreturn $Gandalf;\n}");
+	"<?phwp declare(strict_types=1);\nfunction foo(int $n) : string {\n$Gandalf = \"The Gray Wizard\"\n$temp = $n;\nreturn $Gandalf;\n}");
 if (check != 0) {
 	return 1;
 }

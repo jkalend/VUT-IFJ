@@ -10,7 +10,7 @@
 #include <stdlib.h>
 
 TEST(test_arithmetic_addition_1, "Test addition 1")
-int check = write_file("addition_1.php", "<?php\ndeclare(strict_types=1);\n$a = a + 5;");
+int check = write_file("addition_1.php", "<?php\ndeclare(strict_types=1);\n$a = $a + 5;");
 if (check != 0) {
 	return 1;
 }
@@ -53,7 +53,7 @@ free(token);
 ENDTEST(stream, "addition_1.php")
 
 TEST(test_arithmetic_addition_2, "Test addition 2")
-int check = write_file("addition_2.php", "<?php\ndeclare(strict_types=1);\n$a = a + c;");
+int check = write_file("addition_2.php", "<?php\ndeclare(strict_types=1);\n$a = $a + c;");
 if (check != 0) {
 	return 1;
 }
@@ -95,7 +95,7 @@ free(token);
 ENDTEST(stream, "addition_2.php")
 
 TEST(test_arithmetic_addition_3, "Test addition 3")
-int check = write_file("addition_3.php", "<?php\ndeclare(strict_types=1);\n$a=a+101;");
+int check = write_file("addition_3.php", "<?php\ndeclare(strict_types=1);\n$a=$a+101;");
 if (check != 0) {
 	return 1;
 }
@@ -137,7 +137,7 @@ free(token);
 ENDTEST(stream, "addition_3.php")
 
 TEST(test_arithmetic_addition_4, "Test addition 4")
-int check = write_file("addition_4.php", "<?php\ndeclare(strict_types=1);\n$a = 1+a    +    19;");
+int check = write_file("addition_4.php", "<?php\ndeclare(strict_types=1);\n$a = 1+$a    +    19;");
 if (check != 0) {
 	return 1;
 }
@@ -188,7 +188,7 @@ free(token);
 ENDTEST(stream, "addition_4.php")
 
 TEST(test_arithmetic_subtraction_1, "Test subtraction 1")
-int check = write_file("subtraction_1.php", "<?php\ndeclare(strict_types=1);\n$a = a - 5;");
+int check = write_file("subtraction_1.php", "<?php\ndeclare(strict_types=1);\n$a = $a - 5;");
 if (check != 0) {
 	return 1;
 }
@@ -230,7 +230,7 @@ free(token);
 ENDTEST(stream, "subtraction_1.php")
 
 TEST(test_arithmetic_subtraction_2, "Test subtraction 2")
-int check = write_file("subtraction_2.php", "<?php\ndeclare(strict_types=1);\n$a = a - c;");
+int check = write_file("subtraction_2.php", "<?php\ndeclare(strict_types=1);\n$a = $a - $c;");
 if (check != 0) {
 	return 1;
 }
@@ -272,7 +272,7 @@ free(token);
 ENDTEST(stream, "subtraction_2.php")
 
 TEST(test_arithmetic_subtraction_3, "Test subtraction 3")
-int check = write_file("subtraction_3.php", "<?php\ndeclare(strict_types=1);\n$a=a-101;");
+int check = write_file("subtraction_3.php", "<?php\ndeclare(strict_types=1);\n$a=$a-101;");
 if (check != 0) {
 	return 1;
 }
@@ -315,7 +315,7 @@ ENDTEST(stream, "subtraction_3.php")
 
 TEST(test_arithmetic_subtraction_4, "Test subtraction 4")
 int check =
-	write_file("subtraction_4.php", "<?php\ndeclare(strict_types=1);\n$a = 1-a    -    19;");
+	write_file("subtraction_4.php", "<?php\ndeclare(strict_types=1);\n$a = 1-$a    -    19;");
 if (check != 0) {
 	return 1;
 }
@@ -366,7 +366,7 @@ free(token);
 ENDTEST(stream, "subtraction_4.php")
 
 TEST(test_arithmetic_multiplication_1, "Test multiplication 1")
-int check = write_file("multiplication_1.php", "<?php\ndeclare(strict_types=1);\n$a = a * 5;");
+int check = write_file("multiplication_1.php", "<?php\ndeclare(strict_types=1);\n$a = $a * 5;");
 if (check != 0) {
 	return 1;
 }
@@ -408,7 +408,7 @@ free(token);
 ENDTEST(stream, "multiplication_1.php")
 
 TEST(test_arithmetic_multiplication_2, "Test multiplication 2")
-int check = write_file("multiplication_2.php", "<?php\ndeclare(strict_types=1);\n$a = a * c;");
+int check = write_file("multiplication_2.php", "<?php\ndeclare(strict_types=1);\n$a = $a * $c;");
 if (check != 0) {
 	return 1;
 }
@@ -450,7 +450,7 @@ free(token);
 ENDTEST(stream, "multiplication_2.php")
 
 TEST(test_arithmetic_multiplication_3, "Test multiplication 3")
-int check = write_file("multiplication_3.php", "<?php\ndeclare(strict_types=1);\n$a=a*101;");
+int check = write_file("multiplication_3.php", "<?php\ndeclare(strict_types=1);\n$a=$a*101;");
 if (check != 0) {
 	return 1;
 }
@@ -493,7 +493,7 @@ ENDTEST(stream, "multiplication_3.php")
 
 TEST(test_arithmetic_multiplication_4, "Test multiplication 4")
 int check =
-	write_file("multiplication_4.php", "<?php\ndeclare(strict_types=1);\n$a = 1*a    *    19;");
+	write_file("multiplication_4.php", "<?php\ndeclare(strict_types=1);\n$a = 1*$a    *    19;");
 if (check != 0) {
 	return 1;
 }
@@ -544,7 +544,7 @@ free(token);
 ENDTEST(stream, "multiplication_4.php")
 
 TEST(test_arithmetic_division_1, "Test division 1")
-int check = write_file("division_1.php", "<?php\ndeclare(strict_types=1);\n$a = a / 5;");
+int check = write_file("division_1.php", "<?php\ndeclare(strict_types=1);\n$a = $a / 5;");
 if (check != 0) {
 	return 1;
 }
@@ -586,7 +586,7 @@ free(token);
 ENDTEST(stream, "division_1.php")
 
 TEST(test_arithmetic_division_2, "Test division 2")
-int check = write_file("division_2.php", "<?php\ndeclare(strict_types=1);\n$a = a / c;");
+int check = write_file("division_2.php", "<?php\ndeclare(strict_types=1);\n$a = $a / $c;");
 if (check != 0) {
 	return 1;
 }
@@ -628,7 +628,7 @@ free(token);
 ENDTEST(stream, "division_2.php")
 
 TEST(test_arithmetic_division_3, "Test division 3")
-int check = write_file("division_3.php", "<?php\ndeclare(strict_types=1);\n$a=a/101;");
+int check = write_file("division_3.php", "<?php\ndeclare(strict_types=1);\n$a=$a/101;");
 if (check != 0) {
 	return 1;
 }
@@ -670,7 +670,7 @@ free(token);
 ENDTEST(stream, "division_3.php")
 
 TEST(test_arithmetic_division_4, "Test division 4")
-int check = write_file("division_4.php", "<?php\ndeclare(strict_types=1);\n$a = 1/a    /    19;");
+int check = write_file("division_4.php", "<?php\ndeclare(strict_types=1);\n$a = 1/$a    /    19;");
 if (check != 0) {
 	return 1;
 }
