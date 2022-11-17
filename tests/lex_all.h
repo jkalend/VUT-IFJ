@@ -91,4 +91,114 @@ int test_prologue_declare_variable_float_with_exp(void);
 
 int test_prologue_declare_variable_float_with_exp_as_string(void);
 
-#endif //IFJ_LEX_ALL_H
+int test_arithmetic_addition_1(void);
+
+int test_arithmetic_addition_2(void);
+
+int test_arithmetic_addition_3(void);
+
+int test_arithmetic_addition_4(void);
+
+int test_arithmetic_subtraction_1(void);
+
+int test_arithmetic_subtraction_2(void);
+
+int test_arithmetic_subtraction_3(void);
+
+int test_arithmetic_subtraction_4(void);
+
+int test_arithmetic_multiplication_1(void);
+
+int test_arithmetic_multiplication_2(void);
+
+int test_arithmetic_multiplication_3(void);
+
+int test_arithmetic_multiplication_4(void);
+
+int test_arithmetic_division_1(void);
+
+int test_arithmetic_division_2(void);
+
+int test_arithmetic_division_3(void);
+
+int test_arithmetic_division_4(void);
+
+int test_if_statement_1(void);
+
+int test_if_statement_2(void);
+
+int test_if_statement_3(void);
+
+int test_if_statement_4(void);
+
+int test_if_else_statement_1(void);
+
+int test_if_else_statement_2(void);
+
+int test_if_statement_else_3(void);
+
+int test_if_else_statement_4(void);
+
+int test_while_1(void);
+
+int test_while_2(void);
+
+int test_while_3(void);
+
+int test_func_definition_1(void);
+
+int test_func_definition_2(void);
+
+int test_func_definition_3(void);
+
+int test_func_call_1(void);
+
+int test_greater_1(void);
+
+int test_greater_2(void);
+
+int test_greater_3(void);
+
+int test_lesser_1(void);
+
+int test_lesser_2(void);
+
+int test_lesser_3(void);
+
+int test_greater_equal_1(void);
+
+int test_greater_equal_2(void);
+
+int test_greater_equal_3(void);
+
+int test_lesser_equal_1(void);
+
+int test_lesser_equal_2(void);
+
+int test_lesser_equal_3(void);
+
+int test_equal_1(void);
+
+int test_equal_2(void);
+
+int test_equal_3(void);
+
+int test_not_equal_1(void);
+
+int test_not_equal_2(void);
+
+int test_not_equal_3(void);
+
+int test_faulty_declare(void);
+
+//int test_faulty_identifier(void);
+
+//int test_faulty_variable(void);
+
+int test_faulty_type(void);
+
+int test_faulty_number(void);
+
+int test_faulty_characters_and_combinations(void);
+
+#endif	//IFJ_LEX_ALL_H

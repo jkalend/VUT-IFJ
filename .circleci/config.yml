@@ -13,31 +13,17 @@ parameters:
 commands:
   prepare_env:
     steps:
-      #      - run:
-      #          name: "Install clang"
-      #          command: |
-      #            sudo apt-get update
-      #            sudo apt-get install -y clang
       - run:
           name: "Install cmake"
           command: |
             sudo apt-get update
             sudo apt-get install -y cmake
+
       - run:
           name: "Install lcov"
           command: |
             sudo apt-get update
             sudo apt-get install -y lcov
-  #      - run:
-  #          name: "Update Cmake"
-  #          command: |
-  #            curl -OL https://github.com/Kitware/CMake/releases/download/v3.24.2/cmake-3.24.2.tar.gz
-  #            tar -xzf cmake-3.24.2.tar.gz
-  #            cd cmake-3.24.2
-  #            cmake .
-  #            make
-  #            sudo make install
-  #          when: never
 
   coverage:
     parameters:
@@ -106,15 +92,21 @@ jobs:
           command: "cmake -B build -S . && cmake --build build"
       - run:
           name: "Run tests"
-          command: "cd build && ctest -C Debug -T test -R lexer -E all"
-      - run:
-          name: "Get Coverage"
           command: |
-            lcov --directory . --capture --output-file coverage.info
-            lcov --remove coverage.info '/usr/*' "${HOME}"'/.cache/*' --output-file coverage.info
-            lcov --list coverage.info
+              cd build
+              ctest -C Debug -T test -R lexer -E all
+              lcov --directory . --capture --output-file coverage.info
+              lcov --remove coverage.info '/usr/*' "${HOME}"'/.cache/*' --output-file coverage.info
+              lcov --list coverage.info
+
+      - run:
+            name: "Get Coverage"
+            command: |
+              lcov --directory . --capture --output-file coverage.info
+              lcov --remove coverage.info '/usr/*' "${HOME}"'/.cache/*' --output-file coverage.info
+              lcov --list coverage.info
       - coverage:
-          flags: "scanner"
+            flags: "scanner"
 
   all_scanner_tests_cmake:
     docker:
