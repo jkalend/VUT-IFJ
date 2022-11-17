@@ -10,12 +10,13 @@
 #include <stdlib.h>
 
 TEST(test_greater_1, "Test greater 1")
-int check = write_file("greater_1.php", "if(1 > c)\n{$var = c}\nelse \n{$brrrr = 42; }");
+int check = write_file("greater_1.php", "if(1 > $c)\n{$var = $c}\nelse \n{$brrrr = 42; }");
 if (check != 0) {
 	return 1;
 }
 stream = fopen("greater_1.php", "r");
 Token *token = malloc(sizeof(Token));
+first_read = 1;
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_KEYWORD)
@@ -88,6 +89,10 @@ TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_INT)
 TEST_ASSERT(token->line == 4)
 TEST_ASSERT(token->value.number_int == 42)
+
+TEST_ASSERT(get_token(token) == 0)
+TEST_ASSERT(token->type == T_SEMICOLON)
+TEST_ASSERT(token->line == 4)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_RIGHT_BRACE)
@@ -104,7 +109,9 @@ int check = write_file("greater_2.php", "if(1 > 0)\n{$var = $c}\nelse \n{$brrrr 
 if (check != 0) {
 	return 1;
 }
+stream = fopen("greater_2.php", "r");
 Token *token = malloc(sizeof(Token));
+first_read = 1;
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_KEYWORD)
@@ -179,6 +186,10 @@ TEST_ASSERT(token->line == 4)
 TEST_ASSERT(token->value.number_int == 42)
 
 TEST_ASSERT(get_token(token) == 0)
+TEST_ASSERT(token->type == T_SEMICOLON)
+TEST_ASSERT(token->line == 4)
+
+TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_RIGHT_BRACE)
 TEST_ASSERT(token->line == 4)
 
@@ -189,11 +200,13 @@ free(token);
 ENDTEST(stream, "greater_2.php")
 
 TEST(test_greater_3, "Test greater 3")
-int check = write_file("greater_3.php", "if(a > \"Saruman\")\n{$var = $c}\nelse \n{$brrrr = 42; }");
+int check = write_file("greater_3.php", "if($a > \"Saruman\")\n{$var = $c}\nelse \n{$brrrr = 42; }");
 if (check != 0) {
 	return 1;
 }
+stream = fopen("greater_3.php", "r");
 Token *token = malloc(sizeof(Token));
+first_read = 1;
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_KEYWORD)
@@ -268,6 +281,10 @@ TEST_ASSERT(token->line == 4)
 TEST_ASSERT(token->value.number_int == 42)
 
 TEST_ASSERT(get_token(token) == 0)
+TEST_ASSERT(token->type == T_SEMICOLON)
+TEST_ASSERT(token->line == 4)
+
+TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_RIGHT_BRACE)
 TEST_ASSERT(token->line == 4)
 
@@ -278,11 +295,13 @@ free(token);
 ENDTEST(stream, "greater_3.php")
 
 TEST(test_lesser_1, "Test lesser 1")
-int check = write_file("lesser_1.php", "if(1 < c)\n{$var = $c}\nelse \n{$brrrr = 42; }");
+int check = write_file("lesser_1.php", "if(1 < $c)\n{$var = $c}\nelse \n{$brrrr = 42; }");
 if (check != 0) {
 	return 1;
 }
+stream = fopen("lesser_1.php", "r");
 Token *token = malloc(sizeof(Token));
+first_read = 1;
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_KEYWORD)
@@ -355,6 +374,10 @@ TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_INT)
 TEST_ASSERT(token->line == 4)
 TEST_ASSERT(token->value.number_int == 42)
+
+TEST_ASSERT(get_token(token) == 0)
+TEST_ASSERT(token->type == T_SEMICOLON)
+TEST_ASSERT(token->line == 4)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_RIGHT_BRACE)
@@ -371,7 +394,9 @@ int check = write_file("lesser_2.php", "if(1 < 0)\n{$var = $c}\nelse \n{$brrrr =
 if (check != 0) {
 	return 1;
 }
+stream = fopen("lesser_2.php", "r");
 Token *token = malloc(sizeof(Token));
+first_read = 1;
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_KEYWORD)
@@ -446,6 +471,10 @@ TEST_ASSERT(token->line == 4)
 TEST_ASSERT(token->value.number_int == 42)
 
 TEST_ASSERT(get_token(token) == 0)
+TEST_ASSERT(token->type == T_SEMICOLON)
+TEST_ASSERT(token->line == 4)
+
+TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_RIGHT_BRACE)
 TEST_ASSERT(token->line == 4)
 
@@ -460,7 +489,9 @@ int check = write_file("lesser_3.php", "if($a < \"Saruman\")\n{$var = $c}\nelse 
 if (check != 0) {
 	return 1;
 }
+stream = fopen("lesser_3.php", "r");
 Token *token = malloc(sizeof(Token));
+first_read = 1;
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_KEYWORD)
@@ -535,6 +566,10 @@ TEST_ASSERT(token->line == 4)
 TEST_ASSERT(token->value.number_int == 42)
 
 TEST_ASSERT(get_token(token) == 0)
+TEST_ASSERT(token->type == T_SEMICOLON)
+TEST_ASSERT(token->line == 4)
+
+TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_RIGHT_BRACE)
 TEST_ASSERT(token->line == 4)
 
@@ -545,11 +580,13 @@ free(token);
 ENDTEST(stream, "lesser_3.php")
 
 TEST(test_greater_equal_1, "Test greater_equal 1")
-int check = write_file("greater_equal_1.php", "if(1 >= $c)\n{$var = c}\nelse \n{$brrrr = 42; }");
+int check = write_file("greater_equal_1.php", "if(1 >= $c)\n{$var = $c}\nelse \n{$brrrr = 42; }");
 if (check != 0) {
 	return 1;
 }
+stream = fopen("greater_equal_1.php", "r");
 Token *token = malloc(sizeof(Token));
+first_read = 1;
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_KEYWORD)
@@ -624,6 +661,10 @@ TEST_ASSERT(token->line == 4)
 TEST_ASSERT(token->value.number_int == 42)
 
 TEST_ASSERT(get_token(token) == 0)
+TEST_ASSERT(token->type == T_SEMICOLON)
+TEST_ASSERT(token->line == 4)
+
+TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_RIGHT_BRACE)
 TEST_ASSERT(token->line == 4)
 
@@ -638,7 +679,9 @@ int check = write_file("greater_equal_2.php", "if(1 >= 0)\n{$var = $c}\nelse \n{
 if (check != 0) {
 	return 1;
 }
+stream = fopen("greater_equal_2.php", "r");
 Token *token = malloc(sizeof(Token));
+first_read = 1;
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_KEYWORD)
@@ -711,6 +754,10 @@ TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_INT)
 TEST_ASSERT(token->line == 4)
 TEST_ASSERT(token->value.number_int == 42)
+
+TEST_ASSERT(get_token(token) == 0)
+TEST_ASSERT(token->type == T_SEMICOLON)
+TEST_ASSERT(token->line == 4)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_RIGHT_BRACE)
@@ -728,7 +775,9 @@ int check =
 if (check != 0) {
 	return 1;
 }
+stream = fopen("greater_equal_3.php", "r");
 Token *token = malloc(sizeof(Token));
+first_read = 1;
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_KEYWORD)
@@ -803,6 +852,10 @@ TEST_ASSERT(token->line == 4)
 TEST_ASSERT(token->value.number_int == 42)
 
 TEST_ASSERT(get_token(token) == 0)
+TEST_ASSERT(token->type == T_SEMICOLON)
+TEST_ASSERT(token->line == 4)
+
+TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_RIGHT_BRACE)
 TEST_ASSERT(token->line == 4)
 
@@ -817,7 +870,9 @@ int check = write_file("lesser_equal_1.php", "if(1 <= $c)\n{$var = $c}\nelse \n{
 if (check != 0) {
 	return 1;
 }
+stream = fopen("lesser_equal_1.php", "r");
 Token *token = malloc(sizeof(Token));
+first_read = 1;
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_KEYWORD)
@@ -892,6 +947,10 @@ TEST_ASSERT(token->line == 4)
 TEST_ASSERT(token->value.number_int == 42)
 
 TEST_ASSERT(get_token(token) == 0)
+TEST_ASSERT(token->type == T_SEMICOLON)
+TEST_ASSERT(token->line == 4)
+
+TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_RIGHT_BRACE)
 TEST_ASSERT(token->line == 4)
 
@@ -906,7 +965,9 @@ int check = write_file("lesser_equal_2.php", "if(1 <= 0)\n{$var = $c}\nelse \n{$
 if (check != 0) {
 	return 1;
 }
+stream = fopen("lesser_equal_2.php", "r");
 Token *token = malloc(sizeof(Token));
+first_read = 1;
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_KEYWORD)
@@ -979,6 +1040,10 @@ TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_INT)
 TEST_ASSERT(token->line == 4)
 TEST_ASSERT(token->value.number_int == 42)
+
+TEST_ASSERT(get_token(token) == 0)
+TEST_ASSERT(token->type == T_SEMICOLON)
+TEST_ASSERT(token->line == 4)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_RIGHT_BRACE)
@@ -996,7 +1061,9 @@ int check =
 if (check != 0) {
 	return 1;
 }
+stream = fopen("lesser_equal_3.php", "r");
 Token *token = malloc(sizeof(Token));
+first_read = 1;
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_KEYWORD)
@@ -1071,6 +1138,10 @@ TEST_ASSERT(token->line == 4)
 TEST_ASSERT(token->value.number_int == 42)
 
 TEST_ASSERT(get_token(token) == 0)
+TEST_ASSERT(token->type == T_SEMICOLON)
+TEST_ASSERT(token->line == 4)
+
+TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_RIGHT_BRACE)
 TEST_ASSERT(token->line == 4)
 
@@ -1085,7 +1156,9 @@ int check = write_file("equal_1.php", "if(1 === $c)\n{$var = $c}\nelse \n{$brrrr
 if (check != 0) {
 	return 1;
 }
+stream = fopen("equal_1.php", "r");
 Token *token = malloc(sizeof(Token));
+first_read = 1;
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_KEYWORD)
@@ -1160,6 +1233,10 @@ TEST_ASSERT(token->line == 4)
 TEST_ASSERT(token->value.number_int == 42)
 
 TEST_ASSERT(get_token(token) == 0)
+TEST_ASSERT(token->type == T_SEMICOLON)
+TEST_ASSERT(token->line == 4)
+
+TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_RIGHT_BRACE)
 TEST_ASSERT(token->line == 4)
 
@@ -1174,7 +1251,9 @@ int check = write_file("equal_2.php", "if(1 === 0)\n{$var = $c}\nelse \n{$brrrr 
 if (check != 0) {
 	return 1;
 }
+stream = fopen("equal_2.php", "r");
 Token *token = malloc(sizeof(Token));
+first_read = 1;
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_KEYWORD)
@@ -1249,6 +1328,10 @@ TEST_ASSERT(token->line == 4)
 TEST_ASSERT(token->value.number_int == 42)
 
 TEST_ASSERT(get_token(token) == 0)
+TEST_ASSERT(token->type == T_SEMICOLON)
+TEST_ASSERT(token->line == 4)
+
+TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_RIGHT_BRACE)
 TEST_ASSERT(token->line == 4)
 
@@ -1263,7 +1346,9 @@ int check = write_file("equal_3.php", "if($a === \"Saruman\")\n{$var = $c}\nelse
 if (check != 0) {
 	return 1;
 }
+stream = fopen("equal_3.php", "r");
 Token *token = malloc(sizeof(Token));
+first_read = 1;
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_KEYWORD)
@@ -1338,6 +1423,10 @@ TEST_ASSERT(token->line == 4)
 TEST_ASSERT(token->value.number_int == 42)
 
 TEST_ASSERT(get_token(token) == 0)
+TEST_ASSERT(token->type == T_SEMICOLON)
+TEST_ASSERT(token->line == 4)
+
+TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_RIGHT_BRACE)
 TEST_ASSERT(token->line == 4)
 
@@ -1352,7 +1441,9 @@ int check = write_file("not_equal_1.php", "if(1 !== $c)\n{$var = $c}\nelse \n{$b
 if (check != 0) {
 	return 1;
 }
+stream = fopen("not_equal_1.php", "r");
 Token *token = malloc(sizeof(Token));
+first_read = 1;
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_KEYWORD)
@@ -1427,6 +1518,10 @@ TEST_ASSERT(token->line == 4)
 TEST_ASSERT(token->value.number_int == 42)
 
 TEST_ASSERT(get_token(token) == 0)
+TEST_ASSERT(token->type == T_SEMICOLON)
+TEST_ASSERT(token->line == 4)
+
+TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_RIGHT_BRACE)
 TEST_ASSERT(token->line == 4)
 
@@ -1441,7 +1536,9 @@ int check = write_file("not_equal_2.php", "if(1 !== 0)\n{$var = $c}\nelse \n{$br
 if (check != 0) {
 	return 1;
 }
+stream = fopen("not_equal_2.php", "r");
 Token *token = malloc(sizeof(Token));
+first_read = 1;
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_KEYWORD)
@@ -1514,6 +1611,10 @@ TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_INT)
 TEST_ASSERT(token->line == 4)
 TEST_ASSERT(token->value.number_int == 42)
+
+TEST_ASSERT(get_token(token) == 0)
+TEST_ASSERT(token->type == T_SEMICOLON)
+TEST_ASSERT(token->line == 4)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_RIGHT_BRACE)
@@ -1531,7 +1632,9 @@ int check =
 if (check != 0) {
 	return 1;
 }
+stream = fopen("not_equal_3.php", "r");
 Token *token = malloc(sizeof(Token));
+first_read = 1;
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_KEYWORD)
@@ -1604,6 +1707,10 @@ TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_INT)
 TEST_ASSERT(token->line == 4)
 TEST_ASSERT(token->value.number_int == 42)
+
+TEST_ASSERT(get_token(token) == 0)
+TEST_ASSERT(token->type == T_SEMICOLON)
+TEST_ASSERT(token->line == 4)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_RIGHT_BRACE)

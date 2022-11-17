@@ -11,7 +11,7 @@
 
 TEST(test_func_definition_1, "Test function definition 1")
 int check = write_file("func_definition_1.php",
-					   "<?phwp declare(strict_types=1);\nfunction foo(int $n) : int {}");
+					   "<?php declare(strict_types=1);\nfunction foo(int $n) : int {}");
 if (check != 0) {
 	return 1;
 }
@@ -36,7 +36,7 @@ TEST_ASSERT(token->type == T_LEFT_BRACKET)
 TEST_ASSERT(token->line == 2)
 
 TEST_ASSERT(get_token(token) == 0)
-TEST_ASSERT(token->type == T_KEYWORD)
+TEST_ASSERT(token->type == T_TYPE)
 TEST_ASSERT(token->line == 2)
 TEST_ASSERT(token->value.keyword == KW_INT)
 
@@ -54,7 +54,7 @@ TEST_ASSERT(token->type == T_DOUBLE_DOT)
 TEST_ASSERT(token->line == 2)
 
 TEST_ASSERT(get_token(token) == 0)
-TEST_ASSERT(token->type == T_KEYWORD)
+TEST_ASSERT(token->type == T_TYPE)
 TEST_ASSERT(token->line == 2)
 TEST_ASSERT(token->value.keyword == KW_INT)
 
@@ -75,10 +75,11 @@ ENDTEST(stream, "func_definition_1.php")
 TEST(test_func_definition_2, "Test function definition 2")
 int check = write_file(
 	"func_definition_2.php",
-	"<?phwp declare(strict_types=1);\nfunction foo(int $n) : int {\n$Gandalf = \"The Gray Wizard\";\nreturn 1;}");
+	"<?php declare(strict_types=1);\nfunction foo(int $n) : int {\n$Gandalf = \"The Gray Wizard\";\nreturn 1;}");
 if (check != 0) {
 	return 1;
 }
+stream = fopen("func_definition_2.php", "r");
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
@@ -99,7 +100,7 @@ TEST_ASSERT(token->type == T_LEFT_BRACKET)
 TEST_ASSERT(token->line == 2)
 
 TEST_ASSERT(get_token(token) == 0)
-TEST_ASSERT(token->type == T_KEYWORD)
+TEST_ASSERT(token->type == T_TYPE)
 TEST_ASSERT(token->line == 2)
 TEST_ASSERT(token->value.keyword == KW_INT)
 
@@ -117,7 +118,7 @@ TEST_ASSERT(token->type == T_DOUBLE_DOT)
 TEST_ASSERT(token->line == 2)
 
 TEST_ASSERT(get_token(token) == 0)
-TEST_ASSERT(token->type == T_KEYWORD)
+TEST_ASSERT(token->type == T_TYPE)
 TEST_ASSERT(token->line == 2)
 TEST_ASSERT(token->value.keyword == KW_INT)
 
@@ -154,8 +155,12 @@ TEST_ASSERT(token->line == 4)
 TEST_ASSERT(token->value.number_int == 1)
 
 TEST_ASSERT(get_token(token) == 0)
+TEST_ASSERT(token->type == T_SEMICOLON)
+TEST_ASSERT(token->line == 4)
+
+TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_RIGHT_BRACE)
-TEST_ASSERT(token->line == 3)
+TEST_ASSERT(token->line == 4)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_EOF)
@@ -166,10 +171,11 @@ ENDTEST(stream, "func_definition_2.php")
 TEST(test_func_definition_3, "Test function definition 3")
 int check = write_file(
 	"func_definition_3.php",
-	"<?phwp declare(strict_types=1);\nfunction foo(int $n) : string {\n$Gandalf = \"The Gray Wizard\"\n$temp = $n;\nreturn $Gandalf;\n}");
+	"<?php declare(strict_types=1);\nfunction foo(int $n) : string {\n$Gandalf = \"The Gray Wizard\";\n$temp = $n;\nreturn $Gandalf;\n}");
 if (check != 0) {
 	return 1;
 }
+stream = fopen("func_definition_3.php", "r");
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
@@ -190,7 +196,7 @@ TEST_ASSERT(token->type == T_LEFT_BRACKET)
 TEST_ASSERT(token->line == 2)
 
 TEST_ASSERT(get_token(token) == 0)
-TEST_ASSERT(token->type == T_KEYWORD)
+TEST_ASSERT(token->type == T_TYPE)
 TEST_ASSERT(token->line == 2)
 TEST_ASSERT(token->value.keyword == KW_INT)
 
@@ -208,9 +214,9 @@ TEST_ASSERT(token->type == T_DOUBLE_DOT)
 TEST_ASSERT(token->line == 2)
 
 TEST_ASSERT(get_token(token) == 0)
-TEST_ASSERT(token->type == T_KEYWORD)
+TEST_ASSERT(token->type == T_TYPE)
 TEST_ASSERT(token->line == 2)
-TEST_ASSERT(token->value.keyword == KW_INT)
+TEST_ASSERT(token->value.keyword == KW_STRING)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_LEFT_BRACE)
@@ -258,9 +264,13 @@ TEST_ASSERT(token->line == 5)
 TEST_ASSERT(token->value.keyword == KW_RETURN)
 
 TEST_ASSERT(get_token(token) == 0)
-TEST_ASSERT(token->type == T_INT)
+TEST_ASSERT(token->type == T_VAR)
 TEST_ASSERT(token->line == 5)
-TEST_ASSERT(token->value.number_int == 1)
+TEST_ASSERT(strcmp(token->value.identifier, "Gandalf") == 0)
+
+TEST_ASSERT(get_token(token) == 0)
+TEST_ASSERT(token->type == T_SEMICOLON)
+TEST_ASSERT(token->line == 5)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_RIGHT_BRACE)
@@ -278,10 +288,11 @@ ENDTEST(stream, "func_definition_3.php")
 
 TEST(test_func_call_1, "Test function call 1")
 int check =
-	write_file("func_call_1.php", "<?phwp declare(strict_types=1);\n$result = foo($variable);");
+	write_file("func_call_1.php", "<?php declare(strict_types=1);\n$result = foo($variable);");
 if (check != 0) {
 	return 1;
 }
+stream = fopen("func_call_1.php", "r");
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
@@ -309,6 +320,10 @@ TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_VAR)
 TEST_ASSERT(token->line == 2)
 TEST_ASSERT(strcmp(token->value.identifier, "variable") == 0)
+
+TEST_ASSERT(get_token(token) == 0)
+TEST_ASSERT(token->type == T_RIGHT_BRACKET)
+TEST_ASSERT(token->line == 2)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_SEMICOLON)

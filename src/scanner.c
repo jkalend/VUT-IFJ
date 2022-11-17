@@ -400,10 +400,9 @@ int get_token(Token *token) {
                         return BAD_LEXEM;
                     }
                 } else {
-                    ungetc(c2, stream);
-                    token->type = T_NOT;
+                    token->type = T_ERROR;
                     token->line = line;
-                    return LEX_OK;
+                    return BAD_LEXEM;
                 }
             }
             case '(': {
@@ -441,6 +440,7 @@ int get_token(Token *token) {
                 token->line = line;
                 return LEX_OK;
             }
+            /*
             case '&': {
                 int c2 = fgetc(stream);
                 if (c2 == '&') {
@@ -467,6 +467,7 @@ int get_token(Token *token) {
                     return BAD_LEXEM;
                 }
             }
+            */
             case ':':{
                 token->type = T_DOUBLE_DOT;
                 token->line = line;

@@ -10,7 +10,7 @@
 #include <stdlib.h>
 
 TEST(test_while_1, "Test while cycle 1")
-int check = write_file("while_1.php", "<?phwp declare(strict_types=1);\nwhile(true)\n{}");
+int check = write_file("while_1.php", "<?php declare(strict_types=1);\nwhile(true)\n{}");
 if (check != 0) {
 	return 1;
 }
@@ -27,6 +27,11 @@ TEST_ASSERT(token->value.keyword == KW_WHILE)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_LEFT_BRACKET)
+TEST_ASSERT(token->line == 2)
+
+TEST_ASSERT(get_token(token) == 0)
+TEST_ASSERT(token->type == T_KEYWORD)
+TEST_ASSERT(token->value.keyword == KW_TRUE)
 TEST_ASSERT(token->line == 2)
 
 TEST_ASSERT(get_token(token) == 0)
@@ -49,10 +54,11 @@ ENDTEST(stream, "while_1.php")
 
 TEST(test_while_2, "Test while cycle 2")
 int check = write_file("while_2.php",
-					   "<?phwp declare(strict_types=1);\nwhile($a)\n{ if($b)\n{$a = false;}}");
+					   "<?php declare(strict_types=1);\nwhile($a)\n{ if($b)\n{$a = false;}}");
 if (check != 0) {
 	return 1;
 }
+stream = fopen("while_2.php", "r");
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
@@ -122,11 +128,11 @@ TEST_ASSERT(token->line == 4)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_RIGHT_BRACE)
-TEST_ASSERT(token->line == 3)
+TEST_ASSERT(token->line == 4)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_RIGHT_BRACE)
-TEST_ASSERT(token->line == 3)
+TEST_ASSERT(token->line == 4)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_EOF)
@@ -136,10 +142,11 @@ ENDTEST(stream, "while_2.php")
 
 TEST(test_while_3, "Test while cycle 3")
 int check = write_file("while_3.php",
-					   "<?phwp declare(strict_types=1);\nwhile($vruuum > 0)\n{$emil = $emil - 2;}");
+					   "<?php declare(strict_types=1);\nwhile($vruuum > 0)\n{$emil = $emil - 2;}");
 if (check != 0) {
 	return 1;
 }
+stream = fopen("while_3.php", "r");
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
@@ -196,7 +203,7 @@ TEST_ASSERT(token->line == 3)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_INT)
-TEST_ASSERT(token->line == 2)
+TEST_ASSERT(token->line == 3)
 TEST_ASSERT(token->value.number_int == 2)
 
 TEST_ASSERT(get_token(token) == 0)
@@ -205,7 +212,7 @@ TEST_ASSERT(token->line == 3)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_RIGHT_BRACE)
-TEST_ASSERT(token->line == 4)
+TEST_ASSERT(token->line == 3)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_EOF)

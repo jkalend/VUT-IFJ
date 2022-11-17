@@ -44,15 +44,15 @@ TEST_ASSERT(token->line == 2)
 TEST_ASSERT(token->value.keyword == KW_NULL)
 
 TEST_ASSERT(get_token(token) == 0)
-TEST_ASSERT(token->type == T_LEFT_BRACKET)
-TEST_ASSERT(token->line == 2)
-
-TEST_ASSERT(get_token(token) == 0)
-TEST_ASSERT(token->type == T_RIGHT_BRACE)
+TEST_ASSERT(token->type == T_RIGHT_BRACKET)
 TEST_ASSERT(token->line == 2)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_LEFT_BRACE)
+TEST_ASSERT(token->line == 2)
+
+TEST_ASSERT(get_token(token) == 0)
+TEST_ASSERT(token->type == T_RIGHT_BRACE)
 TEST_ASSERT(token->line == 2)
 
 TEST_ASSERT(get_token(token) == 0)
@@ -66,6 +66,7 @@ int check = write_file("if_2.php", "<?php declare(strict_types=1);\nif($temp >= 
 if (check != 0) {
 	return 1;
 }
+stream = fopen("if_2.php", "r");
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
@@ -95,15 +96,15 @@ TEST_ASSERT(token->line == 2)
 TEST_ASSERT(token->value.number_int == 8)
 
 TEST_ASSERT(get_token(token) == 0)
-TEST_ASSERT(token->type == T_LEFT_BRACKET)
-TEST_ASSERT(token->line == 2)
-
-TEST_ASSERT(get_token(token) == 0)
-TEST_ASSERT(token->type == T_RIGHT_BRACE)
+TEST_ASSERT(token->type == T_RIGHT_BRACKET)
 TEST_ASSERT(token->line == 2)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_LEFT_BRACE)
+TEST_ASSERT(token->line == 2)
+
+TEST_ASSERT(get_token(token) == 0)
+TEST_ASSERT(token->type == T_RIGHT_BRACE)
 TEST_ASSERT(token->line == 3)
 
 TEST_ASSERT(get_token(token) == 0)
@@ -119,6 +120,7 @@ int check =
 if (check != 0) {
 	return 1;
 }
+stream = fopen("if_3.php", "r");
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
@@ -152,7 +154,7 @@ TEST_ASSERT(token->type == T_RIGHT_BRACKET)
 TEST_ASSERT(token->line == 2)
 
 TEST_ASSERT(get_token(token) == 0)
-TEST_ASSERT(token->type == T_RIGHT_BRACE)
+TEST_ASSERT(token->type == T_LEFT_BRACE)
 TEST_ASSERT(token->line == 2)
 
 TEST_ASSERT(get_token(token) == 0)
@@ -174,7 +176,7 @@ TEST_ASSERT(token->type == T_SEMICOLON)
 TEST_ASSERT(token->line == 3)
 
 TEST_ASSERT(get_token(token) == 0)
-TEST_ASSERT(token->type == T_LEFT_BRACE)
+TEST_ASSERT(token->type == T_RIGHT_BRACE)
 TEST_ASSERT(token->line == 4)
 
 TEST_ASSERT(get_token(token) == 0)
@@ -188,6 +190,7 @@ int check = write_file("if_4.php", "<?php declare(strict_types=1);\nif(1){$var =
 if (check != 0) {
 	return 1;
 }
+stream = fopen("if_4.php", "r");
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
@@ -231,7 +234,7 @@ TEST_ASSERT(strcmp(token->value.identifier, "c") == 0)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_SEMICOLON)
-TEST_ASSERT(token->line == 4)
+TEST_ASSERT(token->line == 2)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_RIGHT_BRACE)
@@ -253,6 +256,7 @@ int check =
 if (check != 0) {
 	return 1;
 }
+stream = fopen("if_else_1.php", "r");
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
@@ -318,6 +322,7 @@ int check = write_file("if_else_2.php",
 if (check != 0) {
 	return 1;
 }
+stream = fopen("if_else_2.php", "r");
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
@@ -414,6 +419,7 @@ int check = write_file(
 if (check != 0) {
 	return 1;
 }
+stream = fopen("if_else_3.php", "r");
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
@@ -447,7 +453,7 @@ TEST_ASSERT(token->type == T_RIGHT_BRACKET)
 TEST_ASSERT(token->line == 2)
 
 TEST_ASSERT(get_token(token) == 0)
-TEST_ASSERT(token->type == T_RIGHT_BRACE)
+TEST_ASSERT(token->type == T_LEFT_BRACE)
 TEST_ASSERT(token->line == 2)
 
 TEST_ASSERT(get_token(token) == 0)
@@ -469,40 +475,39 @@ TEST_ASSERT(token->type == T_SEMICOLON)
 TEST_ASSERT(token->line == 3)
 
 TEST_ASSERT(get_token(token) == 0)
-TEST_ASSERT(token->type == T_LEFT_BRACE)
+TEST_ASSERT(token->type == T_RIGHT_BRACE)
 TEST_ASSERT(token->line == 4)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_KEYWORD)
-TEST_ASSERT(token->line == 4)
+TEST_ASSERT(token->line == 5)
 TEST_ASSERT(token->value.keyword == KW_ELSE)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_LEFT_BRACE)
-TEST_ASSERT(token->line == 4)
+TEST_ASSERT(token->line == 5)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_VAR)
-TEST_ASSERT(token->line == 4)
+TEST_ASSERT(token->line == 5)
 TEST_ASSERT(strcmp(token->value.string, "var") == 0)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_ASSIGN)
-TEST_ASSERT(token->line == 4)
+TEST_ASSERT(token->line == 5)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_STRING)
-TEST_ASSERT(token->line == 4)
+TEST_ASSERT(token->line == 5)
 TEST_ASSERT(strcmp(token->value.string, "I hate the world!") == 0)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_SEMICOLON)
-TEST_ASSERT(token->line == 3)
+TEST_ASSERT(token->line == 5)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_RIGHT_BRACE)
-TEST_ASSERT(token->line == 4)
-
+TEST_ASSERT(token->line == 5)
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_EOF)
 
@@ -515,6 +520,7 @@ int check = write_file(
 if (check != 0) {
 	return 1;
 }
+stream = fopen("if_else_4.php", "r");
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
@@ -584,8 +590,12 @@ TEST_ASSERT(token->line == 5)
 TEST_ASSERT(token->value.number_int == 42)
 
 TEST_ASSERT(get_token(token) == 0)
+TEST_ASSERT(token->type == T_SEMICOLON)
+TEST_ASSERT(token->line == 5)
+
+TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_RIGHT_BRACE)
-TEST_ASSERT(token->line == 6)
+TEST_ASSERT(token->line == 5)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_EOF)

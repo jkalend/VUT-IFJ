@@ -53,10 +53,11 @@ free(token);
 ENDTEST(stream, "addition_1.php")
 
 TEST(test_arithmetic_addition_2, "Test addition 2")
-int check = write_file("addition_2.php", "<?php\ndeclare(strict_types=1);\n$a = $a + c;");
+int check = write_file("addition_2.php", "<?php\ndeclare(strict_types=1);\n$a = $a + $c;");
 if (check != 0) {
 	return 1;
 }
+stream = fopen("addition_2.php", "r");
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
@@ -99,6 +100,7 @@ int check = write_file("addition_3.php", "<?php\ndeclare(strict_types=1);\n$a=$a
 if (check != 0) {
 	return 1;
 }
+stream = fopen("addition_3.php", "r");
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
@@ -141,6 +143,7 @@ int check = write_file("addition_4.php", "<?php\ndeclare(strict_types=1);\n$a = 
 if (check != 0) {
 	return 1;
 }
+stream = fopen("addition_4.php", "r");
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
@@ -165,9 +168,9 @@ TEST_ASSERT(token->type == T_PLUS)
 TEST_ASSERT(token->line == 3)
 
 TEST_ASSERT(get_token(token) == 0)
-TEST_ASSERT(token->type == T_IDENTIFIER)
+TEST_ASSERT(token->type == T_VAR)
 TEST_ASSERT(token->line == 3)
-TEST_ASSERT(token->value.number_int == 4)
+TEST_ASSERT(strcmp(token->value.identifier, "a") == 0)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_PLUS)
@@ -192,6 +195,7 @@ int check = write_file("subtraction_1.php", "<?php\ndeclare(strict_types=1);\n$a
 if (check != 0) {
 	return 1;
 }
+stream = fopen("subtraction_1.php", "r");
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
@@ -234,6 +238,7 @@ int check = write_file("subtraction_2.php", "<?php\ndeclare(strict_types=1);\n$a
 if (check != 0) {
 	return 1;
 }
+stream = fopen("subtraction_2.php", "r");
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
@@ -276,6 +281,7 @@ int check = write_file("subtraction_3.php", "<?php\ndeclare(strict_types=1);\n$a
 if (check != 0) {
 	return 1;
 }
+stream = fopen("subtraction_3.php", "r");
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
@@ -319,6 +325,7 @@ int check =
 if (check != 0) {
 	return 1;
 }
+stream = fopen("subtraction_4.php", "r");
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
@@ -343,9 +350,9 @@ TEST_ASSERT(token->type == T_MINUS)
 TEST_ASSERT(token->line == 3)
 
 TEST_ASSERT(get_token(token) == 0)
-TEST_ASSERT(token->type == T_IDENTIFIER)
+TEST_ASSERT(token->type == T_VAR)
 TEST_ASSERT(token->line == 3)
-TEST_ASSERT(token->value.number_int == 4)
+TEST_ASSERT(strcmp(token->value.identifier, "a") == 0)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_MINUS)
@@ -370,6 +377,7 @@ int check = write_file("multiplication_1.php", "<?php\ndeclare(strict_types=1);\
 if (check != 0) {
 	return 1;
 }
+stream = fopen("multiplication_1.php", "r");
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
@@ -412,6 +420,7 @@ int check = write_file("multiplication_2.php", "<?php\ndeclare(strict_types=1);\
 if (check != 0) {
 	return 1;
 }
+stream = fopen("multiplication_2.php", "r");
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
@@ -454,6 +463,7 @@ int check = write_file("multiplication_3.php", "<?php\ndeclare(strict_types=1);\
 if (check != 0) {
 	return 1;
 }
+stream = fopen("multiplication_3.php", "r");
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
@@ -497,6 +507,7 @@ int check =
 if (check != 0) {
 	return 1;
 }
+stream = fopen("multiplication_4.php", "r");
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
@@ -521,9 +532,9 @@ TEST_ASSERT(token->type == T_MULTIPLY)
 TEST_ASSERT(token->line == 3)
 
 TEST_ASSERT(get_token(token) == 0)
-TEST_ASSERT(token->type == T_IDENTIFIER)
+TEST_ASSERT(token->type == T_VAR)
 TEST_ASSERT(token->line == 3)
-TEST_ASSERT(token->value.number_int == 4)
+TEST_ASSERT(strcmp(token->value.identifier, "a") == 0)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_MULTIPLY)
@@ -548,6 +559,7 @@ int check = write_file("division_1.php", "<?php\ndeclare(strict_types=1);\n$a = 
 if (check != 0) {
 	return 1;
 }
+stream = fopen("division_1.php", "r");
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
@@ -590,6 +602,7 @@ int check = write_file("division_2.php", "<?php\ndeclare(strict_types=1);\n$a = 
 if (check != 0) {
 	return 1;
 }
+stream = fopen("division_2.php", "r");
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
@@ -632,6 +645,7 @@ int check = write_file("division_3.php", "<?php\ndeclare(strict_types=1);\n$a=$a
 if (check != 0) {
 	return 1;
 }
+stream = fopen("division_3.php", "r");
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
@@ -674,6 +688,7 @@ int check = write_file("division_4.php", "<?php\ndeclare(strict_types=1);\n$a = 
 if (check != 0) {
 	return 1;
 }
+stream = fopen("division_4.php", "r");
 Token *token = malloc(sizeof(Token));
 
 TEST_ASSERT(get_token(token) == 0)
@@ -700,7 +715,7 @@ TEST_ASSERT(token->line == 3)
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_VAR)
 TEST_ASSERT(token->line == 3)
-TEST_ASSERT(strcmp(token->value.identifier, "A") == 0)
+TEST_ASSERT(strcmp(token->value.identifier, "a") == 0)
 
 TEST_ASSERT(get_token(token) == 0)
 TEST_ASSERT(token->type == T_DIVIDE)
