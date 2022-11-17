@@ -88,9 +88,21 @@ int get_token(Token *token) {
             }
             ungetc(c, stream);
             str[i] = '\0';
+			if(str[i-1] < '0' || str[i-1] > '9'){
+				token->type = T_ERROR;
+				token->line = line;
+				free_memory(str, BAD_LEXEM);
+				return BAD_LEXEM;
+			}
             i = 0;
             while (str[i] != '\0'){
                 if (str[i] == '.'){
+					if(e > 0){
+						token->type = T_ERROR;
+						token->line = line;
+						free_memory(str, BAD_LEXEM);
+						return BAD_LEXEM;
+					}
                     dot++;
                 }
                 if (str[i] == 'e' || str[i] == 'E'){
@@ -143,7 +155,7 @@ int get_token(Token *token) {
                 } else if (c2 == '*') {
                     c2 = fgetc(stream);
 
-                    kokocina:
+                    commentary:
                     while (c2 != '*') {
                         c2 = fgetc(stream);
                         if(c2 == '\n') {
@@ -166,7 +178,7 @@ int get_token(Token *token) {
                         if(c2 == '\n') {
                             line++;
                         }
-                        goto kokocina;
+                        goto commentary;
                     }
                 } else {
                     ungetc(c2, stream);
@@ -375,6 +387,7 @@ int get_token(Token *token) {
                         token->line = line;
                         return LEX_OK;
                     }else{
+						ungetc(c2, stream);
                         token->type = T_ERROR;
                         token->line = line;
                         return BAD_LEXEM;
@@ -395,11 +408,13 @@ int get_token(Token *token) {
                         token->line = line;
                         return LEX_OK;
                     }else{
+						ungetc(c2, stream);
                         token->type = T_ERROR;
                         token->line = line;
                         return BAD_LEXEM;
                     }
                 } else {
+					ungetc(c2, stream);
                     token->type = T_ERROR;
                     token->line = line;
                     return BAD_LEXEM;
@@ -504,11 +519,13 @@ int get_token(Token *token) {
                 }
                 ungetc(c2, stream);
                 str[i] = '\0';
-                if (kw_check(str, token) != 1){
+				/*
+				if (kw_check(str, token) != 1){
                     token->line = line;
                     free_memory(str, LEX_OK);
                     return LEX_OK;
                 }
+                */
                 token->value.identifier = str;
                 return LEX_OK;
             }

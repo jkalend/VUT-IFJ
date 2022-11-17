@@ -189,4 +189,16 @@ int test_not_equal_2(void);
 
 int test_not_equal_3(void);
 
+int test_faulty_declare(void);
+
+//int test_faulty_identifier(void);
+
+//int test_faulty_variable(void);
+
+int test_faulty_type(void);
+
+int test_faulty_number(void);
+
+int test_faulty_characters_and_combinations(void);
+
 #endif	//IFJ_LEX_ALL_H

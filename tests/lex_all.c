@@ -93,6 +93,12 @@ int main(void) {
 	tests_failed += test_not_equal_1();
 	tests_failed += test_not_equal_2();
 	tests_failed += test_not_equal_3();
+	tests_failed += test_faulty_declare();
+	tests_failed += test_faulty_type();
+	tests_failed += test_faulty_number();
+	tests_failed += test_faulty_characters_and_combinations();
+	//tests_failed += test_faulty_identifier();
+	//tests_failed += test_faulty_variable();
 	return tests_failed ? 1 : 0;
 }
 #endif	//LEX_ALL
