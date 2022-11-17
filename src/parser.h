@@ -70,6 +70,7 @@ typedef struct {
     htab_pair_t *in_func;
     htab_pair_t *in_assign;
     bool in_param_def;
+    bool empty_expr;
     bool popframe;
     char relation_operator; // 0 for < 1 for > 2 for <= 3 for >=
     int tmp_counter;

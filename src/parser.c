@@ -438,9 +438,9 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps) {
 int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back) {
     stack_push(stack, stack_data(P_END, P_END));
     
-    
     Token *lookahead = *token;
     bool end = false;
+    parser.empty_expr = false;
     unsigned int row, column;
     TStack *shelf = NULL;
     TStack *temps = NULL;
@@ -478,9 +478,8 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
             if (parser.in_assign != NULL && top != NULL) {
                 parser.in_assign->value_type = top->bucket->value_type;
                 parser.in_assign = NULL;
-            } else if (parser.in_assign != NULL && top == NULL) {
-                parser.in_assign->value_type = D_NONE;
-                parser.in_assign = NULL;
+            } else if (top == NULL) {
+                parser.empty_expr = true;
             }
             return 1;
         }
@@ -600,12 +599,11 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 return 0;
             } else {
                 TData *top = stack_top(temps);
-                if (parser.in_assign != NULL) {
+                if (parser.in_assign != NULL && top != NULL) {
                     parser.in_assign->value_type = top->bucket->value_type;
                     parser.in_assign = NULL;
-                } else if (parser.in_assign != NULL && top == NULL) {
-                    parser.in_assign->value_type = D_NONE;
-                    parser.in_assign = NULL;
+                } else if (top == NULL) {
+                    parser.empty_expr = true;
                 }
                 return 1;
             }
