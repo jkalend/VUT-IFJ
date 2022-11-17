@@ -13,16 +13,19 @@
 // FIXME
 // FIXME
 
-Token *tmp_token = NULL;
-htab_t *glob_tab = NULL;
-htab_t *temporary_tab = NULL;
-TStack *local_tabs = NULL;
-htab_pair_t *in_func = NULL;
-htab_pair_t *in_assign = NULL;
-bool in_param_def = false;
-int tmp_counter = 0;
-unsigned int relation_operator = 0;
-bool popframe = false;
+//Token *parser.tmp_token = NULL;
+// htab_t *parser.glob_tab = NULL;
+// htab_t *parser.temporary_tab = NULL;
+// TStack *parser.local_tabs = NULL;
+// htab_pair_t *parser.in_func = NULL;
+// htab_pair_t *parser.in_assign = NULL;
+// bool parser.in_param_def = false;
+// int parser.tmp_counter = 0;
+// unsigned int parser.relation_operator = 0;
+// bool parser.popframe = false;*/
+
+/* global struct for parser flags and variables */
+parser_t parser;
 
 const unsigned int PREC_TABLE[14][14] = { //TODO
         {P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_OPEN, P_OPEN, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_OPEN, P_CLOSE},
@@ -56,20 +59,20 @@ TData *stack_data(int value, int type) { //unsigned?
 void get_next_token(Token **token, bool *keep_token, bool *return_back) {
     if (*keep_token && *return_back) {
         Token *tmp = *token;
-        *token = tmp_token;
-        tmp_token = tmp;
+        *token = parser.tmp_token;
+        parser.tmp_token = tmp;
     }
     else if (!(*keep_token) && *return_back) {
         Token *tmp = *token;
-        *token = tmp_token;
-        tmp_token = tmp;
+        *token = parser.tmp_token;
+        parser.tmp_token = tmp;
         *return_back = false;
     }
     else if (!(*keep_token)){
         /* copy previous token to temporary token */
-        tmp_token->line = (*token)->line;
-        tmp_token->value = (*token)->value;
-        tmp_token->type = (*token)->type;
+        parser.tmp_token->line = (*token)->line;
+        parser.tmp_token->value = (*token)->value;
+        parser.tmp_token->type = (*token)->type;
 
         /* get new token from scanner */
         get_token(*token);
@@ -279,16 +282,16 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps) {
     DataType op_two;
     char number[100];
 
-    long long number_size = (long long)((ceil(log10(tmp_counter))+1)*sizeof(char));
-    snprintf(number, number_size, "%d", tmp_counter);
+    long long number_size = (long long)((ceil(log10(parser.tmp_counter))+1)*sizeof(char));
+    snprintf(number, number_size, "%d", parser.tmp_counter);
     char tmp[100] = TEMP_VAR_PREFIX;
     strcat(tmp, number);
 
     TData *data;
     htab_pair_t *pair;
     if (res > 34 && res != 59) {
-        tmp_counter++;
-        pair = htab_insert(temporary_tab, NULL, tmp);
+        parser.tmp_counter++;
+        pair = htab_insert(parser.temporary_tab, NULL, tmp);
         data = stack_data(P_E, P_E);
         data->bucket = pair;
     }
@@ -384,7 +387,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps) {
             printf("8p ");
             stack_push(temps, data);
             stack_push(stack, stack_data(P_E, P_E));
-            relation_operator = 0;
+            parser.relation_operator = 0;
             return 1;
         default:
             if (fn) goto function;
@@ -472,9 +475,9 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
         unsigned int sym = PREC_TABLE[row][column];
         if (end && !sym) {
             TData *top = stack_top(temps);
-            if (in_assign != NULL) {
-                in_assign->value_type = top->bucket->value_type;
-                in_assign = NULL;
+            if (parser.in_assign != NULL) {
+                parser.in_assign->value_type = top->bucket->value_type;
+                parser.in_assign = NULL;
             }
             return 1;
         }
@@ -502,14 +505,14 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
         // if Rel operators are fund -> P_R is pushed
         // <(=)> is deleted, same for
         if (!end) {
-            long long number_size = (long long)((ceil(log10(tmp_counter))+1)*sizeof(char));
+            long long number_size = (long long)((ceil(log10(parser.tmp_counter))+1)*sizeof(char));
             char *number = malloc(100);
-            snprintf(number, number_size, "%d", tmp_counter);
+            snprintf(number, number_size, "%d", parser.tmp_counter);
 
             if (lookahead->type == T_IDENTIFIER) {
                 char id[100] = "69";
                 strcat(id, lookahead->value.identifier);
-                htab_pair_t *pair = htab_find(glob_tab, id);
+                htab_pair_t *pair = htab_find(parser.glob_tab, id);
                 TData *data = stack_data(P_FN, P_FN);
                 data->bucket = pair;
                 stack_push(stack, data);
@@ -521,10 +524,10 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 char tmp[100] = TEMP_VAR_PREFIX;
                 strcat(tmp, number);
 
-                htab_pair_t *pair = htab_find(temporary_tab, tmp);
+                htab_pair_t *pair = htab_find(parser.temporary_tab, tmp);
                 if (pair == NULL) {
-                    tmp_counter++;
-                    pair = htab_insert(temporary_tab, NULL, tmp);
+                    parser.tmp_counter++;
+                    pair = htab_insert(parser.temporary_tab, NULL, tmp);
                     pair->value.string = lookahead->value.string;
                     pair->value_type = D_FLOAT;
                 }
@@ -538,10 +541,10 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 char tmp[100] = TEMP_VAR_PREFIX;
                 strcat(tmp, number);
 
-                htab_pair_t *pair = htab_find(temporary_tab, tmp);
+                htab_pair_t *pair = htab_find(parser.temporary_tab, tmp);
                 if (pair == NULL) {
-                    tmp_counter++;
-                    pair = htab_insert(temporary_tab, NULL, tmp);
+                    parser.tmp_counter++;
+                    pair = htab_insert(parser.temporary_tab, NULL, tmp);
                     pair->value.number_int = lookahead->value.number_int;
                     pair->value_type = D_INT;
                 }
@@ -555,10 +558,10 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 char tmp[100] = TEMP_VAR_PREFIX;
                 strcat(tmp, number);
 
-                htab_pair_t *pair = htab_find(temporary_tab, tmp);
+                htab_pair_t *pair = htab_find(parser.temporary_tab, tmp);
                 if (pair == NULL) {
-                    tmp_counter++;
-                    pair = htab_insert(temporary_tab, NULL, tmp);
+                    parser.tmp_counter++;
+                    pair = htab_insert(parser.temporary_tab, NULL, tmp);
                     pair->value.string = lookahead->value.string;
                     pair->value_type = D_STRING;
                 }
@@ -569,7 +572,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 stack_push(temps, data);
                 stack_push(stack, stack_data(P_I, P_I));
             } else if (lookahead->type == T_VAR) {
-                htab_pair_t *pair = htab_find(temporary_tab, lookahead->value.identifier);
+                htab_pair_t *pair = htab_find(parser.temporary_tab, lookahead->value.identifier);
                 if (pair == NULL || pair->value_type == D_NONE) {
                     exit(BAD_UNDEFINED_VAR);
                 }
@@ -580,8 +583,8 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 stack_push(stack, stack_data(P_I, P_I));
             } else if (lookahead->type >= T_LESS && lookahead->type <= T_GREATER_EQUAL) {
                 stack_push(stack, stack_data(P_R, P_R));
-                if (relation_operator == 0) {
-                    relation_operator = lookahead->type;
+                if (parser.relation_operator == 0) {
+                    parser.relation_operator = lookahead->type;
                 } else {
                     exit(BAD_TYPE_COMPATIBILTY);
                 }
@@ -594,9 +597,9 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 return 0;
             } else {
                 TData *top = stack_top(temps);
-                if (in_assign != NULL) {
-                    in_assign->value_type = top->bucket->value_type;
-                    in_assign = NULL;
+                if (parser.in_assign != NULL) {
+                    parser.in_assign->value_type = top->bucket->value_type;
+                    parser.in_assign = NULL;
                 }   
                 return 1;
             }
@@ -618,8 +621,8 @@ int parse(void) {
 
     Token *token = malloc(sizeof(Token));
     if (token == NULL)  exit(1);
-    tmp_token = malloc(sizeof(Token));
-    if (tmp_token == NULL) exit(1);
+    parser.tmp_token = malloc(sizeof(Token));
+    if (parser.tmp_token == NULL) exit(1);
 
     bool keep_prev_token = false;
     bool return_back = false;
@@ -635,70 +638,70 @@ int parse(void) {
             if (top->value == token->type) { 
 
                 /* definition of a function */
-                if (in_func != NULL) {
-                    if (in_param_def && token->type == T_RIGHT_BRACKET) {
-                        in_param_def = false;
+                if (parser.in_func != NULL) {
+                    if (parser.in_param_def && token->type == T_RIGHT_BRACKET) {
+                        parser.in_param_def = false;
                     }
-                    else if (!in_param_def && token->type == T_TYPE) {
+                    else if (!parser.in_param_def && token->type == T_TYPE) {
                         switch (token->value.keyword) {
                             case KW_INT:
-                                in_func->return_type = D_INT;
+                                parser.in_func->return_type = D_INT;
                                 break;
                             case KW_FLOAT:
-                                in_func->return_type = D_FLOAT;
+                                parser.in_func->return_type = D_FLOAT;
                                 break;
                             case KW_STRING:
-                                in_func->return_type = D_STRING;
+                                parser.in_func->return_type = D_STRING;
                                 break;
                             case KW_VOID:
-                                in_func->return_type = D_VOID;
+                                parser.in_func->return_type = D_VOID;
                                 break;
                             default:
                                 exit(1); // unknown data type
                         }
-                        in_func = NULL;
+                        parser.in_func = NULL;
                     }
-                    else if (in_param_def && token->type == T_TYPE) {
-                        in_func->param_count += 1;
+                    else if (parser.in_param_def && token->type == T_TYPE) {
+                        parser.in_func->param_count += 1;
                         
-                        in_func->params = realloc(in_func->params, sizeof(Value) * in_func->param_count);
-                        if (in_func->params == NULL) exit(1); // realloc failed
+                        parser.in_func->params = realloc(parser.in_func->params, sizeof(Value) * parser.in_func->param_count);
+                        if (parser.in_func->params == NULL) exit(1); // realloc failed
                         
                         switch (token->value.keyword) {
                             case KW_INT:
-                                in_func->params[in_func->param_count - 1] = D_INT;
+                                parser.in_func->params[parser.in_func->param_count - 1] = D_INT;
                                 break;
                             case KW_FLOAT:
-                                in_func->params[in_func->param_count - 1] = D_FLOAT;
+                                parser.in_func->params[parser.in_func->param_count - 1] = D_FLOAT;
                                 break;
                             case KW_STRING:
-                                in_func->params[in_func->param_count - 1] = D_STRING;
+                                parser.in_func->params[parser.in_func->param_count - 1] = D_STRING;
                                 break;
                             default:
                                 exit(1); // unknown data type
                         }
                     }
-                    else if (in_param_def && token->type == T_VAR) {
-                        htab_pair_t *frame_item = htab_find(temporary_tab, token->value.identifier);
+                    else if (parser.in_param_def && token->type == T_VAR) {
+                        htab_pair_t *frame_item = htab_find(parser.temporary_tab, token->value.identifier);
                         /* add the var to the table */
                         if (frame_item != NULL) {
                             exit(1); // two parameters with the same name
                         }
                         else {
-                            frame_item = htab_insert(temporary_tab, token, token->value.identifier);
-                            frame_item->value_type = in_func->params[in_func->param_count - 1];
+                            frame_item = htab_insert(parser.temporary_tab, token, token->value.identifier);
+                            frame_item->value_type = parser.in_func->params[parser.in_func->param_count - 1];
                         }
                     }
                 }
                 
                 get_next_token(&token, &keep_prev_token, &return_back);
 
-                if (token->type == T_ASSIGN && tmp_token->type == T_VAR) {
-                    in_assign = htab_find(temporary_tab, tmp_token->value.identifier);
+                if (token->type == T_ASSIGN && parser.tmp_token->type == T_VAR) {
+                    parser.in_assign = htab_find(parser.temporary_tab, parser.tmp_token->value.identifier);
                     /* add the var if it's not currently in the table */
-                    if (in_assign == NULL) {
-                        in_assign = htab_insert(temporary_tab, tmp_token, tmp_token->value.identifier);
-                        in_assign->value_type = D_NONE;
+                    if (parser.in_assign == NULL) {
+                        parser.in_assign = htab_insert(parser.temporary_tab, parser.tmp_token, parser.tmp_token->value.identifier);
+                        parser.in_assign->value_type = D_NONE;
                     }
                     
                 }
@@ -710,39 +713,41 @@ int parse(void) {
         }
         else if (top->type == T_KW) {
             if (token->type == T_KEYWORD && top->value == token->value.keyword) {
+                if (token->value.keyword == KW_RETURN) {
+                    parser.popframe = true;
+                }
+
                 get_next_token(&token, &keep_prev_token, &return_back);
-                
+
                 /* function definition - create new item in tab */
-                if (tmp_token->value.keyword == KW_FUNCTION && token->type == T_IDENTIFIER) { 
+                if (parser.tmp_token->value.keyword == KW_FUNCTION && token->type == T_IDENTIFIER) { 
 
                     char id[100] = "69";
                     strcat(id, token->value.identifier);
 
                     /* check if the function is not already defined */
-                    in_func = htab_find(temporary_tab, id);
+                    parser.in_func = htab_find(parser.temporary_tab, id);
                     /* redefinition of function -> exit */
-                    if (in_func != NULL) {
+                    if (parser.in_func != NULL) {
                         exit(BAD_DEFINITION);
                     }
                     
                     /* else insert to tab */
-                    in_func = htab_insert(temporary_tab, token, id);
-                    in_func->param_count = 0;
-                    in_func->params = NULL;
-                    in_func->return_type = D_NONE;
-                    in_param_def = true;
+                    parser.in_func = htab_insert(parser.temporary_tab, token, id);
+                    parser.in_func->param_count = 0;
+                    parser.in_func->params = NULL;
+                    parser.in_func->return_type = D_NONE;
+                    parser.in_param_def = true;
 
                     /* create new frame for current function call */
                     htab_t *new_tab = htab_init(LOCALTAB_SIZE);
                     TData *new_data = malloc(sizeof(TData));
                     new_data->bucket = NULL;
                     new_data->htab = new_tab;
-                    stack_push(local_tabs, new_data);
-                    temporary_tab = new_tab;
+                    stack_push(parser.local_tabs, new_data);
+                    parser.temporary_tab = new_tab;
                 }
-                if (token->value.keyword == KW_RETURN) {
-                    popframe = true;
-                }
+                
                 
             }
             else {
@@ -764,13 +769,20 @@ int parse(void) {
                 stack_dispose(prec);
 
                 if (!result) exit(5); //TODO bad code
-                in_assign = NULL;
+                parser.in_assign = NULL;
                 get_next_token(&token, &keep_prev_token, &return_back);
-                if (popframe) {
-                    stack_pop(local_tabs);
-                    if (stack_isEmpty(local_tabs)) temporary_tab = glob_tab;
+
+                if (parser.popframe) {
+                    /* return from main */
+                    if (stack_isEmpty(parser.local_tabs)) {
+                        break; 
+                    }
+                    /* return from any other function */
+                    stack_pop(parser.local_tabs);
+                    if (stack_isEmpty(parser.local_tabs)) parser.temporary_tab = parser.glob_tab;
+                    else parser.temporary_tab = stack_top(parser.local_tabs)->htab;
                 }
-                popframe = false;
+                parser.popframe = false;
                 continue;
             }
 
@@ -795,6 +807,8 @@ int parse(void) {
     }
     printf("\n");
     stack_dispose(stack);
+    stack_dispose(parser.local_tabs);
+    htab_free(parser.glob_tab);
     return 0;
 }
 
@@ -802,8 +816,17 @@ int main(void) {
     stream = fopen("test.php", "r");
     if (stream == NULL) exit(1);
 
-    glob_tab = htab_init(GLOBTAB_SIZE);
-    temporary_tab = glob_tab;
-    local_tabs = stack_init(local_tabs);
+    /* initialize the parser struct */
+    parser.tmp_token = NULL;
+    parser.glob_tab = htab_init(GLOBTAB_SIZE);;
+    parser.temporary_tab = parser.glob_tab;
+    parser.local_tabs = stack_init(parser.local_tabs);
+    parser.in_func = NULL;
+    parser.in_assign = NULL;
+    parser.in_param_def = false;
+    parser.tmp_counter = 0;
+    parser.relation_operator = 0;
+    parser.popframe = false;
+
     return parse();
 }

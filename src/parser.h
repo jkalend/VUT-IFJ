@@ -70,7 +70,9 @@ typedef struct {
     htab_pair_t *in_func;
     htab_pair_t *in_assign;
     bool in_param_def;
+    bool popframe;
     char relation_operator; // 0 for < 1 for > 2 for <= 3 for >=
+    int tmp_counter;
 } parser_t;
 
 // * float > int, str is always converted
