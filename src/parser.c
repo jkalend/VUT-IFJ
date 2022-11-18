@@ -4,6 +4,7 @@
 #include "htab.h"
 #include "error.h"
 #include "math.h"
+#include "generator.h"
 
 // TODO
 // TODO
@@ -32,6 +33,15 @@ const unsigned int PREC_TABLE[14][14] = { //TODO
         {[6] = P_EQUAL},
         {P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_OPEN,P_OPEN, P_OPEN, P_EQUAL, P_OPEN, [12] = P_OPEN, P_EQUAL}
 };
+
+const unsigned int LL_TABLE[8][33] = {{1},
+                                      {0, 2, 2, 2, 2, 2, 2, 2, 0, 2, 0, 0, 3, 4, [15] =  2, 2, 2, 2},
+                                      {0, 7, 11, 12, 10, 5, 6, 9, 0, 8, [15] =  7, 7, 7, 7},
+                                      {[9] = 13, 14, [19] = 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15},
+                                      {[8] = 16, [14] = 22},
+                                      {[7] = 17},
+                                      {[11] = 19, [14] = 18},
+                                      {0, 20, 20, 20, 20, 0, 20, 20, 0, 0, 0, 0, 0, 0, 21} };
 
 
 TData *stack_data(int value, int type) { //unsigned?
@@ -197,7 +207,6 @@ void prec_index(const Token *token, unsigned int *rc, int symbol) {
             break;
         case T_EOF: case T_END:
             exit(BAD_SYNTAX);
-            break;
         case T_PLUS:
             *rc = 2;
             break;
@@ -237,7 +246,7 @@ void prec_index(const Token *token, unsigned int *rc, int symbol) {
     }
 }
 
-int reduce(TStack *stack, TStack *shelf, TStack *temps) {
+int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
 
     if (stack_top(stack)->value == P_E) {
         stack_push(shelf, stack_pop(stack));
@@ -261,7 +270,6 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps) {
         exit(BAD_SYNTAX);
     }
 
-    //could it be simpler? yes, but 3AC gotta go somewhere
     int cnt = 0;
     DataType op_one;
     DataType op_two;
@@ -420,7 +428,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps) {
     return 0;
 }
 
-int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back) {
+int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back, Generator *gen) {
     stack_push(stack, stack_data(P_END, P_END));
     
     Token *lookahead = *token;
@@ -484,7 +492,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
         if (end) stack_push(stack, stack_data(P_CLOSE, P_CLOSE));
 
         if (sym == P_CLOSE) {
-            int res = reduce(stack, shelf, temps);
+            int res = reduce(stack, shelf, temps, gen);
             if (!res || !stack_isEmpty(shelf)) exit(1); //TODO bad code
             goto reduced;
         }
@@ -579,8 +587,8 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 stack_push(stack, stack_data((int) column, (int) column));
             }
         } else {
-            while (reduce(stack, shelf, temps) == 1);
-            if (reduce(stack, shelf, temps) != -1) {
+            while (reduce(stack, shelf, temps, gen) == 1);
+            if (reduce(stack, shelf, temps, gen) != -1) {
                 return 0;
             } else {
                 TData *top = stack_top(temps);
@@ -600,7 +608,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
     exit(BAD_LEXEM);
 }
 
-int parse(void) {
+int parse(Generator *gen) {
     TStack *stack = NULL;
     stack = stack_init(stack);
     TStack *prec = NULL;
@@ -621,6 +629,11 @@ int parse(void) {
     while(1) {
         if (stack_isEmpty(stack)) {
             break;
+        }
+        if (parser.main_found) {
+            Instruction *inst = malloc(sizeof(Instruction));
+            inst->instruct = main_;
+            generator_add_instruction(gen, inst);
         }
         
         TData *top = stack_pop(stack);
@@ -708,6 +721,7 @@ int parse(void) {
                 get_next_token(&token, &keep_prev_token, &return_back);
 
                 if (token->type == T_ASSIGN && parser.tmp_token->type == T_VAR) {
+                    parser.main_found = true;
                     parser.in_assign = htab_find(parser.temporary_tab, parser.tmp_token->value.identifier);
                     /* add the var if it's not currently in the table */
                     if (parser.in_assign == NULL) {
@@ -724,6 +738,9 @@ int parse(void) {
         }
         else if (top->type == T_KW) {
             if (token->type == T_KEYWORD && top->value == token->value.keyword) {
+                if ((token->value.keyword == KW_IF || token->value.keyword == KW_WHILE) && !parser.in_func) {
+                    parser.main_found = true;
+                }
                 if (token->value.keyword == KW_RETURN) {
                     parser.expect_ret = true;
                     parser.allow_expr_empty = true;
@@ -777,7 +794,7 @@ int parse(void) {
                 /* CALL PRECEDENTIAL */
                 keep_prev_token = true;
 
-                int result = precedence(prec, &token, &keep_prev_token, &return_back);
+                int result = precedence(prec, &token, &keep_prev_token, &return_back, gen);
                 stack_dispose(prec);
 
                 if (!result) exit(5); //TODO bad code
@@ -806,6 +823,11 @@ int parse(void) {
             if (val == 0) val = LL_TABLE[row_idx][EPS];
 
             printf("%d ", val);
+            if (val >= 7 && val <= 12 && !parser.in_func) {
+                parser.main_found = true;
+            } else if (val == 4 && !parser.in_func) {
+                parser.main_found = true;
+            }
             apply_rule(stack, val);
         }
         else {
@@ -814,6 +836,10 @@ int parse(void) {
         }
     }
     printf("\n");
+    Instruction *instr = malloc(sizeof(Instruction));
+    instr->instruct = end;
+    generator_add_instruction(gen, instr);
+    //printf("%d", parser.main_found);
     stack_dispose(stack);
     stack_dispose(parser.local_tabs);
     htab_free(parser.glob_tab);
@@ -823,6 +849,9 @@ int parse(void) {
 int main(void) {
     stream = fopen("test.php", "r");
     if (stream == NULL) exit(1);
+
+    Generator *gen = malloc(sizeof(Generator));
+    generator_init(gen);
 
     /* initialize the parser struct */
     parser.tmp_token = NULL;
@@ -834,6 +863,7 @@ int main(void) {
     parser.in_param_def = false;
     parser.empty_expr = false;
     parser.allow_expr_empty = false;
+    parser.main_found = false;
     parser.tmp_counter = 0;
     parser.relation_operator = 0;
     parser.expect_ret = false;
@@ -841,5 +871,11 @@ int main(void) {
     parser.val_returned = D_VOID;
     parser.val_expected = D_VOID;
 
-    return parse();
+    int result = parse(gen);
+    if (result) {
+        return result;
+    }
+
+    generate(gen);
+    return 0;
 }

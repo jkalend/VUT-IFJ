@@ -38,13 +38,16 @@ typedef enum {
     readi,
     write,
     concat,
-    strlen_
+    strlen_,
+    main_,
+    end
 }InstructionType;
 
 typedef struct {
     InstructionType instruct;
     char *id; // function id, variable id
     char **operands;
+    int *types; // 0 - int, 1 - float, 2 - string, 3 - bool, 4 - nil, 5 - var, 6 - function
     int operands_count;
     char **params;
     int params_count;
@@ -59,7 +62,7 @@ typedef struct {
     // bool started;
 
 
-    Instruction *instructions;
+    Instruction **instructions;
     long instruction_count;
 
 }Generator;
@@ -68,7 +71,7 @@ void generator_init(Generator *);
 
 int generate(const Generator *);
 
-void generator_add_instruction(Generator *, Instruction);
+void generator_add_instruction(Generator *, Instruction *);
 
 void generator_free(Generator *);
 

@@ -5,14 +5,7 @@
 #include "htab.h"
 #include "stack.h"
 
-const unsigned int LL_TABLE[8][33] = {{1},
-                                      {0, 2, 2, 2, 2, 2, 2, 2, 0, 2, 0, 0, 3, 4, [15] =  2, 2, 2, 2},
-                                      {0, 7, 11, 12, 10, 5, 6, 9, 0, 8, [15] =  7, 7, 7, 7},
-                                      {[9] = 13, 14, [19] = 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15},
-                                      {[8] = 16, [14] = 22},
-                                      {[7] = 17},
-                                      {[11] = 19, [14] = 18},
-                                      {0, 20, 20, 20, 20, 0, 20, 20, 0, 0, 0, 0, 0, 0, 21} };
+extern const unsigned int LL_TABLE[8][33];
 
 extern const unsigned int PREC_TABLE[14][14];
 extern Token *tmp_token;
@@ -73,6 +66,7 @@ typedef struct {
     bool empty_expr;
     bool allow_expr_empty;
     bool expect_ret;
+    bool main_found;
     char relation_operator; // 0 for < 1 for > 2 for <= 3 for >=
     int tmp_counter;
     int bracket_counter;

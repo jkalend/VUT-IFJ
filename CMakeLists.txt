@@ -17,7 +17,7 @@ set(SCANNER src/scanner.c src/scanner.h src/error.h)
 set(LEX_ALL tests/lextest_empty.c tests/lex_all.c tests/lex_all.h tests/lextest_only_prologue.c tests/lextest_variables_operations.c)
 set(GEN src/generator.c src/generator.h src/error.h src/htab.h src/htab.c)
 
-add_executable(IFJ ${PARSER} ${SCANNER} ${LEX_ALL} ${GEN})
+add_executable(IFJ ${PARSER} ${SCANNER} ${GEN})
 add_coverage(IFJ)
 
 add_executable(parser
