@@ -207,7 +207,7 @@ void prec_index(const Token *token, unsigned int *rc, int symbol) {
             *rc = 13;
             break;
         case T_EOF: case T_END:
-            //FIXME
+            exit(BAD_SYNTAX);
             break;
         case T_PLUS:
             *rc = 2;
@@ -240,13 +240,11 @@ void prec_index(const Token *token, unsigned int *rc, int symbol) {
             *rc = 7;
             break;
         case T_ERROR:
-            //FIXME
-            break;
+            exit(BAD_LEXEM);
         case T_SEMICOLON: case T_LEFT_BRACE:
-            //somehow return the token to the LL stack
             break;
         default:
-            exit(1);
+            exit(BAD_SYNTAX);
     }
 }
 
