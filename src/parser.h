@@ -72,9 +72,12 @@ typedef struct {
     bool in_param_def;
     bool empty_expr;
     bool allow_expr_empty;
-    bool popframe;
+    bool expect_ret;
     char relation_operator; // 0 for < 1 for > 2 for <= 3 for >=
     int tmp_counter;
+    int bracket_counter;
+    DataType val_returned;
+    DataType val_expected;
 } parser_t;
 
 // * float > int, str is always converted

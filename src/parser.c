@@ -13,17 +13,6 @@
 // FIXME
 // FIXME
 
-//Token *parser.tmp_token = NULL;
-// htab_t *parser.glob_tab = NULL;
-// htab_t *parser.temporary_tab = NULL;
-// TStack *parser.local_tabs = NULL;
-// htab_pair_t *parser.in_func = NULL;
-// htab_pair_t *parser.in_assign = NULL;
-// bool parser.in_param_def = false;
-// int parser.tmp_counter = 0;
-// unsigned int parser.relation_operator = 0;
-// bool parser.popframe = false;*/
-
 /* global struct for parser flags and variables */
 parser_t parser;
 
@@ -471,6 +460,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
         unsigned int sym = PREC_TABLE[row][column];
         if (end && !sym) {
             TData *top = stack_top(temps);
+            if (parser.expect_ret) parser.val_returned = top->bucket->value_type;
             if (parser.in_assign != NULL && top != NULL) {
                 parser.in_assign->value_type = top->bucket->value_type;
                 parser.in_assign = NULL;
@@ -515,7 +505,6 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 data->bucket = pair;
                 stack_push(stack, data);
                 if (pair == NULL) {
-                    printf("%s\n", id);
                     exit(BAD_DEFINITION);
                 }
             } else if (lookahead->type == T_FLOAT) {
@@ -595,6 +584,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 return 0;
             } else {
                 TData *top = stack_top(temps);
+                if (parser.expect_ret) parser.val_returned = top->bucket->value_type;
                 if (parser.in_assign != NULL && top != NULL) {
                     parser.in_assign->value_type = top->bucket->value_type;
                     parser.in_assign = NULL;
@@ -636,6 +626,25 @@ int parse(void) {
         TData *top = stack_pop(stack);
         if (top->type == T_TERM) {
             if (top->value == token->type) { 
+                if (token->type == T_LEFT_BRACE) parser.bracket_counter++;
+                else if (token->type == T_RIGHT_BRACE) {
+                    if (parser.bracket_counter == 0) {
+
+                        /* missing closing brace */
+                        if (stack_isEmpty(parser.local_tabs)) {
+                            exit(BAD_SYNTAX); 
+                        }
+                        /* return from a function */
+                        stack_pop(parser.local_tabs);
+                        if (stack_isEmpty(parser.local_tabs)) parser.temporary_tab = parser.glob_tab;
+                        else parser.temporary_tab = stack_top(parser.local_tabs)->htab;
+
+                        if (parser.val_returned != parser.val_expected) {
+                            exit(BAD_TYPE_OR_RETURN);
+                        } 
+                    }
+                    parser.bracket_counter--;
+                }
 
                 /* definition of a function */
                 if (parser.in_func != NULL) {
@@ -659,6 +668,8 @@ int parse(void) {
                             default:
                                 exit(1); // unknown data type
                         }
+                        parser.val_expected = parser.in_func->return_type;
+                        parser.val_returned = D_VOID;
                         parser.in_func = NULL;
                     }
                     else if (parser.in_param_def && token->type == T_TYPE) {
@@ -714,7 +725,7 @@ int parse(void) {
         else if (top->type == T_KW) {
             if (token->type == T_KEYWORD && top->value == token->value.keyword) {
                 if (token->value.keyword == KW_RETURN) {
-                    parser.popframe = true;
+                    parser.expect_ret = true;
                     parser.allow_expr_empty = true;
                 }
 
@@ -722,7 +733,7 @@ int parse(void) {
 
                 /* function definition - create new item in tab */
                 if (parser.tmp_token->value.keyword == KW_FUNCTION && token->type == T_IDENTIFIER) { 
-
+                    parser.bracket_counter = -1;
                     char id[100] = "69";
                     strcat(id, token->value.identifier);
 
@@ -774,17 +785,11 @@ int parse(void) {
                 parser.in_assign = NULL;
                 get_next_token(&token, &keep_prev_token, &return_back);
 
-                if (parser.popframe) {
-                    /* return from main */
-                    if (stack_isEmpty(parser.local_tabs)) {
-                        break; 
-                    }
-                    /* return from any other function */
-                    stack_pop(parser.local_tabs);
-                    if (stack_isEmpty(parser.local_tabs)) parser.temporary_tab = parser.glob_tab;
-                    else parser.temporary_tab = stack_top(parser.local_tabs)->htab;
+                if (parser.expect_ret) {
+                    if (parser.val_returned != parser.val_expected) exit(BAD_TYPE_OR_RETURN);
                 }
-                parser.popframe = false;
+                
+                parser.expect_ret = false;
                 parser.allow_expr_empty = false;
                 continue;
             }
@@ -831,7 +836,10 @@ int main(void) {
     parser.allow_expr_empty = false;
     parser.tmp_counter = 0;
     parser.relation_operator = 0;
-    parser.popframe = false;
+    parser.expect_ret = false;
+    parser.bracket_counter = 0;
+    parser.val_returned = D_VOID;
+    parser.val_expected = D_VOID;
 
     return parse();
 }
