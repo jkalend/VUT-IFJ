@@ -45,11 +45,11 @@ typedef enum {
 
 typedef struct {
     InstructionType instruct;
-    char *id; // function id, variable id
-    char **operands;
-    int *types; // 0 - int, 1 - float, 2 - string, 3 - bool, 4 - nil, 5 - var, 6 - function
+    const char *id; // for call and defvar
+    htab_pair_t **operands;
+    DataType *types;
     int operands_count;
-    char **params;
+    htab_pair_t **params;
     int params_count;
     DataType retval;
 }Instruction;
@@ -59,7 +59,7 @@ typedef struct {
     // started var signalises that the generator has started and printed the ifjcode22 header
     bool in_function;
     bool in_while;
-    // bool started;
+    bool started;
 
 
     Instruction **instructions;
@@ -74,5 +74,14 @@ int generate(const Generator *);
 void generator_add_instruction(Generator *, Instruction *);
 
 void generator_free(Generator *);
+
+Instruction *generate_instruction(InstructionType instruct,
+                                  char *id,
+                                  char **operands,
+                                  int *types,
+                                  int operands_count,
+                                  char **params,
+                                  int params_count,
+                                  DataType retval);
 
 #endif //IFJ_GENERATOR_H

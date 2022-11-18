@@ -9,6 +9,7 @@
 void generator_init(Generator *generator) {
     generator->in_function = false;
     generator->in_while = false;
+    generator->started = false;
     generator->instructions = malloc(sizeof(Instruction *) * 200);
     if (generator->instructions == NULL) {
         exit(BAD_INTERNAL);
@@ -33,13 +34,43 @@ void generator_free(Generator *generator) {
 
 void generator_add_instruction(Generator *generator, Instruction *instruction) {
     if (generator->instruction_count % 100 == 0) {
-        generator->instructions = realloc(generator->instructions, sizeof(Instruction*) * (generator->instruction_count + 200));
+        generator->instructions = realloc(
+                generator->instructions, sizeof(Instruction*) * (generator->instruction_count + 200));
         if (generator->instructions == NULL) {
             exit(BAD_INTERNAL);
         }
     }
     generator->instructions[generator->instruction_count] = instruction;
     generator->instruction_count++;
+}
+
+void gen_assign(Instruction *instruction) {
+    switch (instruction->operands[0]->type) {
+        case H_CONSTANT:
+            switch (instruction->operands[0]->value_type) {
+                case D_INT:
+                    printf("MOVE LF@%s int@%lld\n",
+                           instruction->id, instruction->operands[0]->value.number_int);
+                    break;
+                case D_FLOAT:
+                    printf("MOVE LF@%s float@%a\n",
+                           instruction->id, instruction->operands[0]->value.number_float);
+                    break;
+                case D_STRING:
+                    printf("MOVE LF@%s string@%s\n",
+                           instruction->id, instruction->operands[0]->value.string);
+                    break;
+                default:
+                    break; // FIXME placeholder
+            }
+            break;
+        case H_VAR:
+            printf("MOVE LF@%s LF@%s\n", instruction->id, instruction->operands[0]->identifier);
+            printf("DPRINT LF@%s\n", instruction->id);
+            break;
+        default:
+            break; // FIXME placeholder
+    }
 }
 
 int generate(const Generator *generator) {
@@ -61,8 +92,10 @@ int generate(const Generator *generator) {
         //each instruction has its own function
         switch (generator->instructions[i]->instruct) {
             case assign:
+                gen_assign(generator->instructions[i]);
                 break;
             case defvar:
+                printf("defvar LF@%s\n", generator->instructions[i]->id);
                 break;
             case call:
                 break;

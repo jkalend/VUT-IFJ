@@ -290,7 +290,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
     }
 
     switch (res) {
-        case 34:
+        case 34: // <i>
             while (cnt < 3) {stack_pop(shelf); cnt++;}
             if (cnt != 3) goto cleanup;
             stack_push(stack, stack_data(P_E, P_E));
@@ -471,6 +471,15 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
             if (parser.expect_ret) parser.val_returned = top->bucket->value_type;
             if (parser.in_assign != NULL && top != NULL) {
                 parser.in_assign->value_type = top->bucket->value_type;
+
+                Instruction *inst = malloc(sizeof(Instruction));
+                inst->instruct = assign;
+                inst->id = parser.in_assign->identifier;
+                inst->operands = malloc(sizeof(htab_pair_t*));
+                inst->operands[0] = top->bucket;
+                inst->operands_count = 1;
+                generator_add_instruction(gen, inst);
+
                 parser.in_assign = NULL;
             } else if (top == NULL) {
                 parser.empty_expr = true;
@@ -506,7 +515,10 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
             snprintf(number, number_size, "%d", parser.tmp_counter);
 
             if (lookahead->type == T_IDENTIFIER) {
-                char id[100] = "69";
+                char *id = malloc(strlen(lookahead->value.identifier) + 3);
+                if (id == NULL) exit(BAD_INTERNAL);
+
+                id = "69";
                 strcat(id, lookahead->value.identifier);
                 htab_pair_t *pair = htab_find(parser.glob_tab, id);
                 TData *data = stack_data(P_FN, P_FN);
@@ -516,15 +528,32 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                     exit(BAD_DEFINITION);
                 }
             } else if (lookahead->type == T_FLOAT) {
-                char tmp[100] = TEMP_VAR_PREFIX;
-                strcat(tmp, number);
+                char *tmp = calloc(200, 200);
+                if (tmp == NULL) exit(BAD_INTERNAL);
+                strcat(tmp, TEMP_VAR_PREFIX);
+                strncat(tmp, number, 100);
 
                 htab_pair_t *pair = htab_find(parser.temporary_tab, tmp);
                 if (pair == NULL) {
                     parser.tmp_counter++;
                     pair = htab_insert(parser.temporary_tab, NULL, tmp);
-                    pair->value.string = lookahead->value.string;
+                    pair->value.number_float = lookahead->value.number_float;
                     pair->value_type = D_FLOAT;
+                    pair->type = H_CONSTANT;
+
+                    Instruction *instr = malloc(sizeof(Instruction));
+                    instr->instruct = defvar;
+                    instr->id = tmp;
+                    generator_add_instruction(gen, instr);
+
+                    Instruction *inst = malloc(sizeof(Instruction));
+                    inst->instruct = assign;
+                    inst->id = tmp;
+                    inst->operands = malloc(sizeof(htab_pair_t*));
+                    inst->operands[0] = pair;
+                    inst->operands_count = 1;
+                    generator_add_instruction(gen, inst);
+
                 }
 
                 TData *data = stack_data(P_I, P_I);
@@ -533,8 +562,10 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 stack_push(temps, data);
                 stack_push(stack, stack_data(P_I, P_I));
             } else if (lookahead->type == T_INT) {
-                char tmp[100] = TEMP_VAR_PREFIX;
-                strcat(tmp, number);
+                char *tmp = calloc(200, 200);
+                if (tmp == NULL) exit(BAD_INTERNAL);
+                strcat(tmp, TEMP_VAR_PREFIX);
+                strncat(tmp, number, 100);
 
                 htab_pair_t *pair = htab_find(parser.temporary_tab, tmp);
                 if (pair == NULL) {
@@ -542,6 +573,20 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                     pair = htab_insert(parser.temporary_tab, NULL, tmp);
                     pair->value.number_int = lookahead->value.number_int;
                     pair->value_type = D_INT;
+                    pair->type = H_CONSTANT;
+
+                    Instruction *instr = malloc(sizeof(Instruction));
+                    instr->instruct = defvar;
+                    instr->id = tmp;
+                    generator_add_instruction(gen, instr);
+
+                    Instruction *inst = malloc(sizeof(Instruction));
+                    inst->instruct = assign;
+                    inst->id = tmp;
+                    inst->operands = malloc(sizeof(htab_pair_t*));
+                    inst->operands[0] = pair;
+                    inst->operands_count = 1;
+                    generator_add_instruction(gen, inst);
                 }
 
                 TData *data = stack_data(P_I, P_I);
@@ -550,8 +595,10 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 stack_push(temps, data);
                 stack_push(stack, stack_data(P_I, P_I));
             } else if (lookahead->type == T_STRING) {
-                char tmp[100] = TEMP_VAR_PREFIX;
-                strcat(tmp, number);
+                char *tmp = calloc(200, 200);
+                if (tmp == NULL) exit(BAD_INTERNAL);
+                strcat(tmp, TEMP_VAR_PREFIX);
+                strncat(tmp, number, 100);
 
                 htab_pair_t *pair = htab_find(parser.temporary_tab, tmp);
                 if (pair == NULL) {
@@ -595,7 +642,16 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 if (parser.expect_ret) parser.val_returned = top->bucket->value_type;
                 if (parser.in_assign != NULL && top != NULL) {
                     parser.in_assign->value_type = top->bucket->value_type;
+
+                    Instruction *inst = malloc(sizeof(Instruction));
+                    inst->instruct = assign;
+                    inst->id = parser.in_assign->identifier;
+                    inst->operands = malloc(sizeof(htab_pair_t*));
+                    inst->operands[0] = top->bucket;
+                    inst->operands_count = 1;
+                    generator_add_instruction(gen, inst);
                     parser.in_assign = NULL;
+
                 } else if (top == NULL) {
                     parser.empty_expr = true;
                 }
@@ -630,10 +686,11 @@ int parse(Generator *gen) {
         if (stack_isEmpty(stack)) {
             break;
         }
-        if (parser.main_found) {
+        if (parser.main_found && !gen->started) {
             Instruction *inst = malloc(sizeof(Instruction));
             inst->instruct = main_;
             generator_add_instruction(gen, inst);
+            gen->started = true;
         }
         
         TData *top = stack_pop(stack);
@@ -721,12 +778,15 @@ int parse(Generator *gen) {
                 get_next_token(&token, &keep_prev_token, &return_back);
 
                 if (token->type == T_ASSIGN && parser.tmp_token->type == T_VAR) {
-                    parser.main_found = true;
                     parser.in_assign = htab_find(parser.temporary_tab, parser.tmp_token->value.identifier);
                     /* add the var if it's not currently in the table */
                     if (parser.in_assign == NULL) {
                         parser.in_assign = htab_insert(parser.temporary_tab, parser.tmp_token, parser.tmp_token->value.identifier);
                         parser.in_assign->value_type = D_NONE;
+                        Instruction *inst = malloc(sizeof(Instruction));
+                        inst->instruct = defvar;
+                        inst->id = parser.tmp_token->value.identifier;
+                        generator_add_instruction(gen, inst);
                     }
                     
                 }
@@ -825,7 +885,7 @@ int parse(Generator *gen) {
             printf("%d ", val);
             if (val >= 7 && val <= 12 && !parser.in_func) {
                 parser.main_found = true;
-            } else if (val == 4 && !parser.in_func) {
+            } else if ((val == 4 || val == 3) && !parser.in_func) {
                 parser.main_found = true;
             }
             apply_rule(stack, val);
@@ -839,10 +899,9 @@ int parse(Generator *gen) {
     Instruction *instr = malloc(sizeof(Instruction));
     instr->instruct = end;
     generator_add_instruction(gen, instr);
-    //printf("%d", parser.main_found);
     stack_dispose(stack);
-    stack_dispose(parser.local_tabs);
-    htab_free(parser.glob_tab);
+    //stack_dispose(parser.local_tabs);
+    //htab_free(parser.glob_tab);
     return 0;
 }
 

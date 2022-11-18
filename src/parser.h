@@ -10,7 +10,7 @@ extern const unsigned int LL_TABLE[8][33];
 extern const unsigned int PREC_TABLE[14][14];
 extern Token *tmp_token;
 
-#define TEMP_VAR_PREFIX "$_^/$Zz*zZ$\\^_::tmp"
+#define TEMP_VAR_PREFIX "!!$__$!!tmp"
 #define EPS 14 // eps has column index 14 in ll table
 #define GLOBTAB_SIZE 2003 // num of buckets to allocate for global symtab
 #define LOCALTAB_SIZE 557 // num of buckets to allocate for local symtabs

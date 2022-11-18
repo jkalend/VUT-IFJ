@@ -19,6 +19,7 @@ set(GEN src/generator.c src/generator.h src/error.h src/htab.h src/htab.c)
 
 add_executable(IFJ ${PARSER} ${SCANNER} ${GEN})
 add_coverage(IFJ)
+target_link_libraries(IFJ m)
 
 add_executable(parser
         ${PARSER} ${SCANNER})
