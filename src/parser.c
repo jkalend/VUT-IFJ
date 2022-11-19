@@ -538,7 +538,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
             if (lookahead->type == T_IDENTIFIER) {
                 char *id = malloc(strlen(lookahead->value.identifier) + 3);
                 if (id == NULL) exit(BAD_INTERNAL);
-                id = "69";
+                id[0] = '6'; id[1] = '9';
                 strcat(id, lookahead->value.identifier);
 
                 htab_pair_t *pair = htab_find(parser.glob_tab, id);
