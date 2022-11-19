@@ -6,18 +6,10 @@
 #include "math.h"
 #include "generator.h"
 
-// TODO
-// TODO
-//
-// we are unable to accept inbuilt functions as of now
-//
-// FIXME
-// FIXME
-
 /* global struct for parser flags and variables */
 parser_t parser;
 
-const unsigned int PREC_TABLE[14][14] = { //TODO
+const unsigned int PREC_TABLE[14][14] = {
         {P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_OPEN, P_OPEN, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_OPEN, P_CLOSE},
         {P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_OPEN, P_OPEN, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_OPEN, P_CLOSE},
         {P_OPEN,P_OPEN,P_CLOSE, P_CLOSE, P_CLOSE, P_OPEN, P_OPEN, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_OPEN, P_CLOSE},
@@ -37,7 +29,7 @@ const unsigned int PREC_TABLE[14][14] = { //TODO
 const unsigned int LL_TABLE[8][33] = {{1},
                                       {0, 2, 2, 2, 2, 2, 2, 2, 0, 2, 0, 0, 3, 4, [15] =  2, 2, 2, 2},
                                       {0, 7, 11, 12, 10, 5, 6, 9, 0, 8, [15] =  7, 7, 7, 7},
-                                      {[9] = 13, 14, [19] = 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15},
+                                      {[9] = 15, 14, [19] = 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15},
                                       {[8] = 16, [14] = 22},
                                       {[7] = 17},
                                       {[11] = 19, [14] = 18},
@@ -484,7 +476,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
 
     function:
     if (fn && res >= 71) {
-        //symtable should be used here ideally to check for number of args
+        //symtable is used here to check for number of args
         int brackets = 0;
         int E = 0;
         TStack *reversal = NULL;
@@ -503,18 +495,12 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
         stack_pop(shelf); // pops last bracket
 
         // args number check
-        if (E != last_fn->param_count || last_fn->param_count != -1) exit(BAD_TYPE_OR_RETURN);
+        if (E != last_fn->param_count && last_fn->param_count != -1)  {
+            exit(BAD_TYPE_OR_RETURN);
+        }
 
         for (int i = 0; i < last_fn->param_count; i++) {
-            if (last_fn->params[i] == D_INT) {
-                if (stack_pop(reversal)->bucket->value_type == D_INT ||
-                        stack_pop(reversal)->bucket->value_type == D_FLOAT ||
-                        stack_pop(reversal)->bucket->value_type == D_VOID) {
-                    continue;
-                } else {
-                    exit(BAD_TYPE_OR_RETURN);
-                }
-            } else if (last_fn->params[i] == D_FLOAT) {
+            if (last_fn->params[i] == D_INT || last_fn->params[i] == D_FLOAT) {
                 if (stack_pop(reversal)->bucket->value_type == D_INT ||
                     stack_pop(reversal)->bucket->value_type == D_FLOAT ||
                     stack_pop(reversal)->bucket->value_type == D_VOID) {
@@ -628,10 +614,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
             }
             goto reduced;
         }
-        
-        // if T_VAR is found -> P_I is pushed
-        // if Rel operators are fund -> P_R is pushed
-        // <(=)> is deleted, same for
+
         if (!end) {
             long long number_size = (long long)((ceil(log10(parser.tmp_counter))+1)*sizeof(char));
             char *number = malloc(100);
@@ -868,10 +851,11 @@ int parse(Generator *gen) {
             if (top->value == token->type) { 
                 if (token->type == T_LEFT_BRACE) parser.bracket_counter++;
                 else if (token->type == T_RIGHT_BRACE) {
+                    parser.bracket_counter--;
                     if (parser.bracket_counter == 0) {
 
                         /* missing closing brace */
-                        if (stack_isEmpty(parser.local_tabs)) {
+                        if (parser.temporary_tab != parser.glob_tab && stack_isEmpty(parser.local_tabs)) {
                             exit(BAD_SYNTAX); 
                         }
                         /* return from a function */
@@ -883,7 +867,7 @@ int parse(Generator *gen) {
                             exit(BAD_TYPE_OR_RETURN);
                         } 
                     }
-                    parser.bracket_counter--;
+                    
                 }
 
                 /* definition of a function */
@@ -980,7 +964,7 @@ int parse(Generator *gen) {
 
                 /* function definition - create new item in tab */
                 if (parser.tmp_token->value.keyword == KW_FUNCTION && token->type == T_IDENTIFIER) { 
-                    parser.bracket_counter = -1;
+                    parser.bracket_counter = 0;
                     char id[100] = "69";
                     strcat(id, token->value.identifier);
 
@@ -1153,6 +1137,7 @@ void insert_builtins(void) {
     chr_->param_count = 1;
     chr_->return_type = D_STRING;
 
+    //FIXME this wont work
     identifier = calloc(sizeof(char)*20, 20);
     if (identifier == NULL) exit(BAD_INTERNAL);
     strcat(identifier, "69floatval_i");
@@ -1275,6 +1260,7 @@ void insert_builtins(void) {
 }
 
 int main(void) {
+    //stream = stdin;
     stream = fopen("test.php", "r");
     if (stream == NULL) exit(1);
 
