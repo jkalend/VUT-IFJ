@@ -68,6 +68,7 @@ typedef struct {
     bool expect_ret;
     bool main_found;
     char relation_operator;
+    char **builtins;
     int tmp_counter;
     int bracket_counter;
     DataType val_returned;

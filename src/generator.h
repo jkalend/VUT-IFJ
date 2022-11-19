@@ -12,6 +12,18 @@
 #include "parser.h"
 
 typedef enum {
+    reads,
+    readi,
+    readf,
+    strlen_,
+    substring,
+    ord,
+    chr,
+    floatval,
+    intval,
+    strval,
+    write,
+    concat,
     assign,
     defvar,
     call,
@@ -27,18 +39,6 @@ typedef enum {
     lte,
     gte,
     neq,
-    floatval,
-    intval,
-    strval,
-    substring,
-    ord,
-    chr,
-    reads,
-    readf,
-    readi,
-    write,
-    concat,
-    strlen_,
     main_,
     end
 }InstructionType;
@@ -46,7 +46,7 @@ typedef enum {
 typedef struct {
     InstructionType instruct;
     const char *id; // for call and defvar
-    htab_pair_t **operands;
+    htab_pair_t **operands; // for call op0 will be the label
     DataType *types;
     int operands_count;
     htab_pair_t **params;
@@ -65,6 +65,7 @@ typedef struct {
 
     Instruction **instructions;
     long instruction_count;
+    int fn_temps;
 
 }Generator;
 
