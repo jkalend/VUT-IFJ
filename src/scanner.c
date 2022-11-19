@@ -615,7 +615,7 @@ int get_token(Token *token) {
                         return BAD_LEXEM;
                     }
                 }
-                token->value.string = convert_string_for_ifjcode(str);
+                token->value.string = convert_string_for_ifjcode(str, size);
                 return LEX_OK;
             }
             default: {
@@ -627,12 +627,12 @@ int get_token(Token *token) {
     }
 }
 
-char* convert_string_for_ifjcode(char *str) {
-    int i = 0;
-    unsigned long len = strlen(str);
-    char hex[2];
-    char oct[3];
-    while(str[i] != '\0'){
+char* convert_string_for_ifjcode(char *str, int size) {
+	int i = 0;
+	//unsigned long len = strlen(str);
+	char hex[2];
+	char oct[3];
+	while(str[i] != '\0'){
 		if(str[i] == '\\' && str[i+1] == 'x'){
 			hex[0] = str[i+2];
 			hex[1] = str[i+3];
@@ -698,101 +698,122 @@ char* convert_string_for_ifjcode(char *str) {
 			str[i+1] = '0';
 			str[i+2] = '3';
 			str[i+3] = '2';
-		}else if(str[i] == '\\'){
-			int j = i;
+		}
+		else if(str[i] == '\\'){
+			int j = size - 1;
 			switch (str[i+1]) {
-				case 'n':
-					str[i] = '\n';
-					while (j < (int) len - 2) {
-						str[j + 1] = str[j + 2];
-						j++;
-					}
-					break;
-				case 't':
-					str[i] = '\t';
-					while (j < (int) len - 2) {
-						str[j + 1] = str[j + 2];
-						j++;
-					}
-					break;
-				case 'r':
-					str[i] = '\r';
-					while (j < (int) len - 2) {
-						str[j + 1] = str[j + 2];
-						j++;
-					}
-					break;
-				case 'e':
-					str[i] = 27;
-					while (j < (int) len - 2) {
-						str[j + 1] = str[j + 2];
-						j++;
-					}
-					break;
-				case 'a':
-					str[i] = 7;
-					while (j < (int) len - 2) {
-						str[j + 1] = str[j + 2];
-						j++;
-					}
-					break;
-				case 'f':
-					str[i] = '\f';
-					while (j < (int) len - 2) {
-						str[j + 1] = str[j + 2];
-						j++;
-					}
-					break;
-				case 'v':
-					str[i] = '\v';
-					while (j < (int) len - 2) {
-						str[j + 1] = str[j + 2];
-						j++;
-					}
-					break;
-				case '\\':
-					str[i] = '\\';
-					while (j < (int) len - 2) {
-						str[j + 1] = str[j + 2];
-						j++;
-					}
-					break;
-				case '$':
-					str[i] = '$';
-					while (j < (int) len - 2) {
-						str[j + 1] = str[j + 2];
-						j++;
-					}
-					break;
-				default:
-					break;
+			case 'n':
+				while (j > i + 1) {
+					str[j] = str[j - 2];
+					j--;
+				}
+				str[i+1] = '0';
+				str[i+2] = '1';
+				str[i+3] = '0';
+				break;
+			case 't':
+				while (j > i + 1) {
+					str[j] = str[j - 2];
+					j--;
+				}
+				str[i+1] = '0';
+				str[i+2] = '0';
+				str[i+3] = '9';
+				break;
+			case 'r':
+				while (j > i + 1) {
+					str[j] = str[j - 2];
+					j--;
+				}
+				str[i+1] = '0';
+				str[i+2] = '1';
+				str[i+3] = '3';
+				break;
+			case 'e':
+				while (j > i + 1) {
+					str[j] = str[j - 2];
+					j--;
+				}
+				str[i+1] = '0';
+				str[i+2] = '2';
+				str[i+3] = '7';
+				break;
+			case 'a':
+				while (j > i + 1) {
+					str[j] = str[j - 2];
+					j--;
+				}
+				str[i+1] = '0';
+				str[i+2] = '0';
+				str[i+3] = '7';
+				break;
+			case 'f':
+				while (j > i + 1) {
+					str[j] = str[j - 2];
+					j--;
+				}
+				str[i+1] = '0';
+				str[i+2] = '1';
+				str[i+3] = '2';
+				break;
+			case 'v':
+				while (j > i + 1) {
+					str[j] = str[j - 2];
+					j--;
+				}
+				str[i+1] = '0';
+				str[i+2] = '1';
+				str[i+3] = '1';
+				break;
+			case '\\':
+				while (j > i + 1) {
+					str[j] = str[j - 2];
+					j--;
+				}
+				str[i+1] = '0';
+				str[i+2] = '9';
+				str[i+3] = '2';
+				break;
+			case '$':
+				while (j > i + 1) {
+					str[j] = str[j - 2];
+					j--;
+				}
+				str[i+1] = '0';
+				str[i+2] = '3';
+				str[i+3] = '6';
+				break;
+			default:
+				break;
 			}
 		}
 		i++;
-    }
-    return str;
+	}
+	return str;
 }
 
-int convert_esc_to_char(const char* str, int len) {
-    long result = 0;
-    if (len == 3) {
-        result = strtol(str, NULL, 8);
-        if(result > 255 || result == 36){
-            return -1;
-        }
-    }else if(len == 2) {
-        if(str[0] < '0' || (str[0] > '9' && str[0] < 'A') || (str[0] > 'F' && str[0] < 'a') || str[0] > 'f'){
-            return -1;
-        }
-        if(str[1] < '0' || (str[1] > '9' && str[1] < 'A') || (str[1] > 'F' && str[1] < 'a') || str[1] > 'f' ){
-            return -1;
-        }
-        result = strtol(str, NULL, 16);
-        if(result == 36){
-            return -1;
-        }
-    }
-    return result;
+int convert_esc_to_int(const char* str, int len) {
+	long result = 0;
+	char esc[3];
+	if (len == 3) {
+		result = strtol(str, NULL, 8);
+		if(result > 255 || result == 36){
+			return -1;
+		}
+		sprintf(esc, "%d", (int) result);
+	}else if(len == 2) {
+		if(str[0] < '0' || (str[0] > '9' && str[0] < 'A') || (str[0] > 'F' && str[0] < 'a') || str[0] > 'f'){
+			return -1;
+		}
+		if(str[1] < '0' || (str[1] > '9' && str[1] < 'A') || (str[1] > 'F' && str[1] < 'a') || str[1] > 'f' ){
+			return -1;
+		}
+		result = strtol(str, NULL, 16);
+		if(result == 36){
+			return -1;
+		}
+	}
+	return (int) result;
 }
 
 int free_memory(char *s, int ret_code){
