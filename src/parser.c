@@ -241,6 +241,13 @@ void prec_index(const Token *token, unsigned int *rc, int symbol) {
             exit(BAD_LEXEM);
         case T_SEMICOLON: case T_LEFT_BRACE:
             break;
+        case T_KEYWORD:
+            if (token->value.keyword == KW_NULL) {
+                *rc = 5;
+            } else {
+                exit(BAD_SYNTAX);
+            }
+            break;
         default:
             exit(BAD_SYNTAX);
     }
@@ -333,7 +340,23 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
                 pair->value_type = D_FLOAT;
             } else if (op_one->bucket->value_type == D_INT && op_two->bucket->value_type == D_INT) {
                 pair->value_type = D_INT;
+            } else if (op_one->bucket->value_type == D_VOID && op_two->bucket->value_type == D_VOID) {
+                pair->value_type = D_INT;
             }
+
+            Instruction *add = malloc(sizeof(Instruction));
+            add->instruct = defvar;
+            add->id = tmp;
+            generator_add_instruction(gen, add);
+
+            Instruction *add_ = malloc(sizeof(Instruction));
+            add_->instruct = addition;
+            add_->id = tmp;
+            add_->operands = malloc(sizeof(htab_pair_t*) * 2);
+            add_->operands[0] = op_one->bucket; // order doesn't matter here
+            add_->operands[1] = op_two->bucket;
+            add_->operands_count = 2;
+            generator_add_instruction(gen, add_);
 
             printf("4p ");
             stack_push(temps, data);
@@ -359,7 +382,9 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
             if (cnt != 5) goto cleanup;
             op_one = stack_pop(temps);
             op_two = stack_pop(temps);
-            if (op_one->bucket->value_type != D_STRING || op_two->bucket->value_type != D_STRING) {
+            if (op_one->bucket->value_type == D_VOID || op_two->bucket->value_type == D_VOID) {
+                // concat with null
+            } else if (op_one->bucket->value_type != D_STRING || op_two->bucket->value_type != D_STRING) {
                 exit(BAD_TYPE_COMPATIBILTY);
             }
             
@@ -538,7 +563,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
             if (lookahead->type == T_IDENTIFIER) {
                 char *id = malloc(strlen(lookahead->value.identifier) + 3);
                 if (id == NULL) exit(BAD_INTERNAL);
-                id[0] = '6'; id[1] = '9';
+                strcat(id, "69");
                 strcat(id, lookahead->value.identifier);
 
                 htab_pair_t *pair = htab_find(parser.glob_tab, id);
@@ -637,7 +662,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                     Instruction *inst = malloc(sizeof(Instruction));
                     inst->instruct = assign;
                     inst->id = tmp;
-                    inst->operands = malloc(sizeof(htab_pair_t*));
+                    inst->operands = malloc(sizeof(htab_pair_t *));
                     inst->operands[0] = pair;
                     inst->operands_count = 1;
                     generator_add_instruction(gen, inst);
@@ -665,6 +690,39 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 } else {
                     exit(BAD_TYPE_COMPATIBILTY);
                 }
+            }  else if (lookahead->value.keyword = KW_NULL && lookahead->type == T_KEYWORD) {
+                char *tmp = calloc(200, 200);
+                if (tmp == NULL) exit(BAD_INTERNAL);
+                strcat(tmp, TEMP_VAR_PREFIX);
+                strncat(tmp, number, 100);
+
+                htab_pair_t *pair = htab_find(parser.temporary_tab, tmp);
+                if (pair == NULL) {
+                    parser.tmp_counter++;
+                    pair = htab_insert(parser.temporary_tab, NULL, tmp);
+                    pair->value.keyword = lookahead->value.keyword;
+                    pair->value_type = D_VOID;
+                    pair->type = H_CONSTANT;
+
+                    Instruction *instr = malloc(sizeof(Instruction));
+                    instr->instruct = defvar;
+                    instr->id = tmp;
+                    generator_add_instruction(gen, instr);
+
+                    Instruction *inst = malloc(sizeof(Instruction));
+                    inst->instruct = assign;
+                    inst->id = tmp;
+                    inst->operands = malloc(sizeof(htab_pair_t *));
+                    inst->operands[0] = pair;
+                    inst->operands_count = 1;
+                    generator_add_instruction(gen, inst);
+                }
+
+                TData *data = stack_data(P_I, P_I);
+                data->bucket = pair;
+
+                stack_push(temps, data);
+                stack_push(stack, stack_data(P_I, P_I));
             } else {
                 stack_push(stack, stack_data((int) column, (int) column));
             }

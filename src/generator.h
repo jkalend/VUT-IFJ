@@ -16,7 +16,7 @@ typedef enum {
     defvar,
     call,
     ret,
-    add,
+    addition,
     sub,
     mul,
     div_,
@@ -60,6 +60,7 @@ typedef struct {
     bool in_function;
     bool in_while;
     bool started;
+    int label_count;
 
 
     Instruction **instructions;
@@ -69,7 +70,7 @@ typedef struct {
 
 void generator_init(Generator *);
 
-int generate(const Generator *);
+int generate(Generator *);
 
 void generator_add_instruction(Generator *, Instruction *);
 
