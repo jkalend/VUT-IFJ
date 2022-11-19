@@ -29,7 +29,7 @@ const unsigned int PREC_TABLE[14][14] = {
 const unsigned int LL_TABLE[8][33] = {{1},
                                       {0, 2, 2, 2, 2, 2, 2, 2, 0, 2, 0, 0, 3, 4, [15] =  2, 2, 2, 2},
                                       {0, 7, 11, 12, 10, 5, 6, 9, 0, 8, [15] =  7, 7, 7, 7},
-                                      {[9] = 13, 14, [19] = 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15},
+                                      {[9] = 15, 14, [19] = 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15},
                                       {[8] = 16, [14] = 22},
                                       {[7] = 17},
                                       {[11] = 19, [14] = 18},
@@ -495,7 +495,9 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
         stack_pop(shelf); // pops last bracket
 
         // args number check
-        if (E != last_fn->param_count || last_fn->param_count != -1) exit(BAD_TYPE_OR_RETURN);
+        if (E != last_fn->param_count && last_fn->param_count != -1)  {
+            exit(BAD_TYPE_OR_RETURN);
+        }
 
         for (int i = 0; i < last_fn->param_count; i++) {
             if (last_fn->params[i] == D_INT || last_fn->params[i] == D_FLOAT) {
@@ -849,10 +851,11 @@ int parse(Generator *gen) {
             if (top->value == token->type) { 
                 if (token->type == T_LEFT_BRACE) parser.bracket_counter++;
                 else if (token->type == T_RIGHT_BRACE) {
+                    parser.bracket_counter--;
                     if (parser.bracket_counter == 0) {
 
                         /* missing closing brace */
-                        if (stack_isEmpty(parser.local_tabs)) {
+                        if (parser.temporary_tab != parser.glob_tab && stack_isEmpty(parser.local_tabs)) {
                             exit(BAD_SYNTAX); 
                         }
                         /* return from a function */
@@ -864,7 +867,7 @@ int parse(Generator *gen) {
                             exit(BAD_TYPE_OR_RETURN);
                         } 
                     }
-                    parser.bracket_counter--;
+                    
                 }
 
                 /* definition of a function */
@@ -961,7 +964,7 @@ int parse(Generator *gen) {
 
                 /* function definition - create new item in tab */
                 if (parser.tmp_token->value.keyword == KW_FUNCTION && token->type == T_IDENTIFIER) { 
-                    parser.bracket_counter = -1;
+                    parser.bracket_counter = 0;
                     char id[100] = "69";
                     strcat(id, token->value.identifier);
 
