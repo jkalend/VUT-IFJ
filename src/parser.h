@@ -67,7 +67,7 @@ typedef struct {
     bool allow_expr_empty;
     bool expect_ret;
     bool main_found;
-    char relation_operator; // 0 for < 1 for > 2 for <= 3 for >=
+    char relation_operator;
     int tmp_counter;
     int bracket_counter;
     DataType val_returned;

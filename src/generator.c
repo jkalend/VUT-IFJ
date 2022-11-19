@@ -4,6 +4,7 @@
 
 #include "generator.h"
 #include <stdio.h>
+#include <math.h>
 
 
 void generator_init(Generator *generator) {
@@ -15,6 +16,17 @@ void generator_init(Generator *generator) {
         exit(BAD_INTERNAL);
     }
     generator->instruction_count = 0;
+}
+
+void gen_strlen(Instruction *instruction) {
+    // not happening here likely
+    if (instruction->operands_count != 1) {
+        exit(BAD_INTERNAL);
+    }
+    if (instruction->operands[0]->value_type != D_STRING) {
+        exit(BAD_TYPE_COMPATIBILTY);
+    }
+    printf("STRLEN LF@%s LF@%s", instruction->id, instruction->operands[0]->value.string);
 }
 
 void generator_free(Generator *generator) {
@@ -80,6 +92,8 @@ int generate(const Generator *generator) {
     printf("defvar GF@%%float\n");
     printf("defvar GF@%%string\n");
     printf("defvar GF@%%nil\n");
+    printf("defvar GF@%%check\n");
+    printf("defvar GF@%%index\n");
     printf("move GF@%%bool string@bool\n");
     printf("move GF@%%int string@int\n");
     printf("move GF@%%float string@float\n");
@@ -144,6 +158,11 @@ int generate(const Generator *generator) {
             case write:
                 break;
             case concat:
+                printf("CONCAT LF@%s LF@%s LF@%s",
+                       generator->instructions[i]->id,
+                       generator->instructions[i]->operands[0]->identifier,
+                       generator->instructions[i]->operands[1]->identifier
+                       );
                 break;
             case strlen_:
                 break;

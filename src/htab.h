@@ -46,14 +46,12 @@ typedef struct htab_pair {
 } htab_pair_t;                  // typedef podle zadání
 
 // Tabulka:
-typedef struct htab_item
-{
+typedef struct htab_item {
     htab_pair_t item;
     struct htab_item *next;
 } htab_item_t;
 
-typedef struct htab
-{
+typedef struct htab {
     size_t size;
     size_t arr_size;
     htab_item_t **arr_ptr;   

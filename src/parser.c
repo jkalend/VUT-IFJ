@@ -355,8 +355,12 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
         case 67: // concatenation
             while (cnt < 5) {stack_pop(shelf); cnt++;}
             if (cnt != 5) goto cleanup;
-            stack_pop(temps);
-            stack_pop(temps);
+            op_one = stack_pop(temps)->bucket->value_type;
+            op_two = stack_pop(temps)->bucket->value_type;
+            if (op_one != D_STRING || op_two != D_STRING) {
+                exit(BAD_TYPE_COMPATIBILTY);
+            }
+
             pair->value_type = D_STRING;
 
             printf("6p ");
@@ -408,7 +412,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
         stack_pop(shelf); // pops last bracket
 
         // args number check
-        if (E != last_fn->param_count) exit(BAD_TYPE_OR_RETURN);
+        if (E != last_fn->param_count || last_fn->param_count != -1) exit(BAD_TYPE_OR_RETURN);
 
         for (int i = 0; i < last_fn->param_count; i++) {
             if (stack_pop(reversal)->bucket->value_type != last_fn->params[i]) exit(BAD_TYPE_OR_RETURN);
@@ -517,9 +521,9 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
             if (lookahead->type == T_IDENTIFIER) {
                 char *id = malloc(strlen(lookahead->value.identifier) + 3);
                 if (id == NULL) exit(BAD_INTERNAL);
-
                 id = "69";
                 strcat(id, lookahead->value.identifier);
+
                 htab_pair_t *pair = htab_find(parser.glob_tab, id);
                 TData *data = stack_data(P_FN, P_FN);
                 data->bucket = pair;
@@ -905,6 +909,205 @@ int parse(Generator *gen) {
     return 0;
 }
 
+void insert_builtins(void) {
+    char *identifier = calloc(sizeof(char)*10, 10);
+    if (identifier == NULL) exit(BAD_INTERNAL);
+    strcat(identifier, "69reads");
+    htab_pair_t *reads = htab_insert(parser.glob_tab, NULL, identifier);
+    if (reads == NULL) exit(BAD_INTERNAL);
+    reads->type = H_FUNC_ID;
+    reads->param_count = 0;
+    reads->return_type = D_STRING;
+
+    identifier = calloc(sizeof(char)*10, 10);
+    if (identifier == NULL) exit(BAD_INTERNAL);
+    strcat(identifier, "69readi");
+    htab_pair_t *readi = htab_insert(parser.glob_tab, NULL, identifier);
+    if (readi == NULL) exit(BAD_INTERNAL);
+    readi->type = H_FUNC_ID;
+    readi->param_count = 0;
+    readi->return_type = D_INT;
+
+    identifier = calloc(sizeof(char)*10, 10);
+    if (identifier == NULL) exit(BAD_INTERNAL);
+    strcat(identifier, "69readf");
+    htab_pair_t *readf = htab_insert(parser.glob_tab, NULL, identifier);
+    if (readf == NULL) exit(BAD_INTERNAL);
+    readf->type = H_FUNC_ID;
+    readf->param_count = 0;
+    readf->return_type = D_FLOAT;
+
+    identifier = calloc(sizeof(char)*20, 20);
+    if (identifier == NULL) exit(BAD_INTERNAL);
+    strcat(identifier, "69strlen");
+    htab_pair_t *strlen_ = htab_insert(parser.glob_tab, NULL, identifier);
+    if (strlen_ == NULL) exit(BAD_INTERNAL);
+    strlen_->type = H_FUNC_ID;
+    strlen_->params = malloc(sizeof(DataType));
+    if (strlen_->params == NULL) exit(BAD_INTERNAL);
+    strlen_->params[0] = D_STRING;
+    strlen_->param_count = 1;
+    strlen_->return_type = D_INT;
+
+    identifier = calloc(sizeof(char)*20, 20);
+    if (identifier == NULL) exit(BAD_INTERNAL);
+    strcat(identifier, "69substring");
+    htab_pair_t *substring = htab_insert(parser.glob_tab, NULL, identifier);
+    if (substring == NULL) exit(BAD_INTERNAL);
+    substring->type = H_FUNC_ID;
+    substring->params = malloc(sizeof(DataType)*3);
+    if (substring->params == NULL) exit(BAD_INTERNAL);
+    substring->params[0] = D_STRING;
+    substring->params[1] = D_INT;
+    substring->params[2] = D_INT;
+    substring->param_count = 3;
+    substring->return_type = D_STRING;
+
+    identifier = calloc(sizeof(char)*10, 10);
+    if (identifier == NULL) exit(BAD_INTERNAL);
+    strcat(identifier, "69ord");
+    htab_pair_t *ord_ = htab_insert(parser.glob_tab, NULL, identifier);
+    if (ord_ == NULL) exit(BAD_INTERNAL);
+    ord_->type = H_FUNC_ID;
+    ord_->params = malloc(sizeof(DataType));
+    if (ord_->params == NULL) exit(BAD_INTERNAL);
+    ord_->params[0] = D_STRING;
+    ord_->param_count = 1;
+    ord_->return_type = D_INT;
+
+    identifier = calloc(sizeof(char)*10, 10);
+    if (identifier == NULL) exit(BAD_INTERNAL);
+    strcat(identifier, "69chr");
+    htab_pair_t *chr_ = htab_insert(parser.glob_tab, NULL, identifier);
+    if (chr_ == NULL) exit(BAD_INTERNAL);
+    chr_->type = H_FUNC_ID;
+    chr_->params = malloc(sizeof(DataType));
+    if (chr_->params == NULL) exit(BAD_INTERNAL);
+    chr_->params[0] = D_INT;
+    chr_->param_count = 1;
+    chr_->return_type = D_STRING;
+
+    identifier = calloc(sizeof(char)*20, 20);
+    if (identifier == NULL) exit(BAD_INTERNAL);
+    strcat(identifier, "69floatval_i");
+    htab_pair_t *floatval_i = htab_insert(parser.glob_tab, NULL, identifier);
+    if (floatval_i == NULL) exit(BAD_INTERNAL);
+    floatval_i->type = H_FUNC_ID;
+    floatval_i->params = malloc(sizeof(DataType));
+    if (floatval_i->params == NULL) exit(BAD_INTERNAL);
+    floatval_i->params[0] = D_INT;
+    floatval_i->param_count = 1;
+    floatval_i->return_type = D_FLOAT;
+
+    identifier = calloc(sizeof(char)*20, 20);
+    if (identifier == NULL) exit(BAD_INTERNAL);
+    strcat(identifier, "69floatval_f");
+    htab_pair_t *floatval_f = htab_insert(parser.glob_tab, NULL, identifier);
+    if (floatval_f == NULL) exit(BAD_INTERNAL);
+    floatval_f->type = H_FUNC_ID;
+    floatval_f->params = malloc(sizeof(DataType));
+    if (floatval_f->params == NULL) exit(BAD_INTERNAL);
+    floatval_f->params[0] = D_FLOAT;
+    floatval_f->param_count = 1;
+    floatval_f->return_type = D_FLOAT;
+
+    identifier = calloc(sizeof(char)*20, 20);
+    if (identifier == NULL) exit(BAD_INTERNAL);
+    strcat(identifier, "69floatval_s");
+    htab_pair_t *floatval_s = htab_insert(parser.glob_tab, NULL, identifier);
+    if (floatval_s == NULL) exit(BAD_INTERNAL);
+    floatval_s->type = H_FUNC_ID;
+    floatval_s->params = malloc(sizeof(DataType));
+    if (floatval_s->params == NULL) exit(BAD_INTERNAL);
+    floatval_s->params[0] = D_STRING;
+    floatval_s->param_count = 1;
+    floatval_s->return_type = D_FLOAT;
+
+    identifier = calloc(sizeof(char)*20, 20);
+    if (identifier == NULL) exit(BAD_INTERNAL);
+    strcat(identifier, "69intval_i");
+    htab_pair_t *intval_i = htab_insert(parser.glob_tab, NULL, identifier);
+    if (intval_i == NULL) exit(BAD_INTERNAL);
+    intval_i->type = H_FUNC_ID;
+    intval_i->params = malloc(sizeof(DataType));
+    if (intval_i->params == NULL) exit(BAD_INTERNAL);
+    intval_i->params[0] = D_INT;
+    intval_i->param_count = 1;
+    intval_i->return_type = D_INT;
+
+    identifier = calloc(sizeof(char)*20, 20);
+    if (identifier == NULL) exit(BAD_INTERNAL);
+    strcat(identifier, "69intval_f");
+    htab_pair_t *intval_f = htab_insert(parser.glob_tab, NULL, identifier);
+    if (intval_f == NULL) exit(BAD_INTERNAL);
+    intval_f->type = H_FUNC_ID;
+    intval_f->params = malloc(sizeof(DataType));
+    if (intval_f->params == NULL) exit(BAD_INTERNAL);
+    intval_f->params[0] = D_FLOAT;
+    intval_f->param_count = 1;
+    intval_f->return_type = D_INT;
+
+    identifier = calloc(sizeof(char)*20, 20);
+    if (identifier == NULL) exit(BAD_INTERNAL);
+    strcat(identifier, "69intval_s");
+    htab_pair_t *intval_s = htab_insert(parser.glob_tab, NULL, identifier);
+    if (intval_s == NULL) exit(BAD_INTERNAL);
+    intval_s->type = H_FUNC_ID;
+    intval_s->params = malloc(sizeof(DataType));
+    if (intval_s->params == NULL) exit(BAD_INTERNAL);
+    intval_s->params[0] = D_STRING;
+    intval_s->param_count = 1;
+    intval_s->return_type = D_INT;
+
+    identifier = calloc(sizeof(char)*20, 20);
+    if (identifier == NULL) exit(BAD_INTERNAL);
+    strcat(identifier, "69strval_i");
+    htab_pair_t *strval_i = htab_insert(parser.glob_tab, NULL, identifier);
+    if (strval_i == NULL) exit(BAD_INTERNAL);
+    strval_i->type = H_FUNC_ID;
+    strval_i->params = malloc(sizeof(DataType));
+    if (strval_i->params == NULL) exit(BAD_INTERNAL);
+    strval_i->params[0] = D_INT;
+    strval_i->param_count = 1;
+    strval_i->return_type = D_STRING;
+
+    identifier = calloc(sizeof(char)*20, 20);
+    if (identifier == NULL) exit(BAD_INTERNAL);
+    strcat(identifier, "69strval_f");
+    htab_pair_t *strval_f = htab_insert(parser.glob_tab, NULL, identifier);
+    if (strval_f == NULL) exit(BAD_INTERNAL);
+    strval_f->type = H_FUNC_ID;
+    strval_f->params = malloc(sizeof(DataType));
+    if (strval_f->params == NULL) exit(BAD_INTERNAL);
+    strval_f->params[0] = D_FLOAT;
+    strval_f->param_count = 1;
+    strval_f->return_type = D_STRING;
+
+    identifier = calloc(sizeof(char)*20, 20);
+    if (identifier == NULL) exit(BAD_INTERNAL);
+    strcat(identifier, "69strval_s");
+    htab_pair_t *strval_s = htab_insert(parser.glob_tab, NULL, identifier);
+    if (strval_s == NULL) exit(BAD_INTERNAL);
+    strval_s->type = H_FUNC_ID;
+    strval_s->params = malloc(sizeof(DataType));
+    if (strval_s->params == NULL) exit(BAD_INTERNAL);
+    strval_s->params[0] = D_STRING;
+    strval_s->param_count = 1;
+    strval_s->return_type = D_STRING;
+
+    identifier = calloc(sizeof(char)*20, 20);
+    if (identifier == NULL) exit(BAD_INTERNAL);
+    strcat(identifier, "69write");
+    htab_pair_t *write = htab_insert(parser.glob_tab, NULL, identifier);
+    if (write == NULL) exit(BAD_INTERNAL);
+    write->type = H_FUNC_ID;
+    write->params = malloc(sizeof(DataType)*50);
+    if (write->params == NULL) exit(BAD_INTERNAL);
+    write->param_count = -1;
+    write->return_type = D_VOID;
+
+}
+
 int main(void) {
     stream = fopen("test.php", "r");
     if (stream == NULL) exit(1);
@@ -929,6 +1132,8 @@ int main(void) {
     parser.bracket_counter = 0;
     parser.val_returned = D_VOID;
     parser.val_expected = D_VOID;
+
+    insert_builtins();
 
     int result = parse(gen);
     if (result) {
