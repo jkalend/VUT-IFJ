@@ -631,7 +631,6 @@ int get_token(Token *token) {
 
 char* convert_string_for_ifjcode(char *str, int size) {
     int i = 0;
-    unsigned long len = strlen(str);
     char hex[2];
     char oct[3];
     while(str[i] != '\0'){
