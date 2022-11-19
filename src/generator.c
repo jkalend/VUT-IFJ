@@ -158,7 +158,7 @@ int generate(const Generator *generator) {
             case write:
                 break;
             case concat:
-                printf("CONCAT LF@%s LF@%s LF@%s",
+                printf("CONCAT LF@%s LF@%s LF@%s\n",
                        generator->instructions[i]->id,
                        generator->instructions[i]->operands[0]->identifier,
                        generator->instructions[i]->operands[1]->identifier

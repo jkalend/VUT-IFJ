@@ -271,13 +271,14 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
     }
 
     int cnt = 0;
-    DataType op_one;
-    DataType op_two;
+    TData *op_one;
+    TData *op_two;
     char *number = malloc(sizeof(char) * 100);
 
     long long number_size = (long long)((ceil(log10(parser.tmp_counter))+1)*sizeof(char));
     snprintf(number, number_size, "%d", parser.tmp_counter);
-    char tmp[100] = TEMP_VAR_PREFIX;
+    char *tmp = malloc(sizeof(char) * 100);
+    strcat(tmp, TEMP_VAR_PREFIX);
     strcat(tmp, number);
 
     TData *data;
@@ -287,6 +288,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
         pair = htab_insert(parser.temporary_tab, NULL, tmp);
         data = stack_data(P_E, P_E);
         data->bucket = pair;
+        data->bucket->type = H_VAR;
     }
 
     switch (res) {
@@ -299,11 +301,11 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
         case 63: // multiplication
             while (cnt < 5) {if(stack_pop(shelf) != NULL) {break;} cnt++;}
             if (cnt != 5) goto cleanup;
-            op_one = stack_pop(temps)->bucket->value_type;
-            op_two = stack_pop(temps)->bucket->value_type;
-            if (op_one == D_FLOAT || op_two == D_FLOAT) {
+            op_one = stack_pop(temps);
+            op_two = stack_pop(temps);
+            if (op_one->bucket->value_type == D_FLOAT || op_two->bucket->value_type == D_FLOAT) {
                 pair->value_type = D_FLOAT;
-            } else if (op_one == D_INT && op_two == D_INT) {
+            } else if (op_one->bucket->value_type == D_INT && op_two->bucket->value_type == D_INT) {
                 pair->value_type = D_INT;
             }
 
@@ -325,11 +327,11 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
         case 65: // addition
             while (cnt < 5) {stack_pop(shelf); cnt++;}
             if (cnt != 5) goto cleanup;
-            op_one = stack_pop(temps)->bucket->value_type;
-            op_two = stack_pop(temps)->bucket->value_type;
-            if (op_one == D_FLOAT || op_two == D_FLOAT) {
+            op_one = stack_pop(temps);
+            op_two = stack_pop(temps);
+            if (op_one->bucket->value_type == D_FLOAT || op_two->bucket->value_type == D_FLOAT) {
                 pair->value_type = D_FLOAT;
-            } else if (op_one == D_INT && op_two == D_INT) {
+            } else if (op_one->bucket->value_type == D_INT && op_two->bucket->value_type == D_INT) {
                 pair->value_type = D_INT;
             }
 
@@ -340,11 +342,11 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
         case 66: // subtraction
             while (cnt < 5) {stack_pop(shelf); cnt++;}
             if (cnt != 5) goto cleanup;
-            op_one = stack_pop(temps)->bucket->value_type;
-            op_two = stack_pop(temps)->bucket->value_type;
-            if (op_one == D_FLOAT || op_two == D_FLOAT) {
+            op_one = stack_pop(temps);
+            op_two = stack_pop(temps);
+            if (op_one->bucket->value_type == D_FLOAT || op_two->bucket->value_type == D_FLOAT) {
                 pair->value_type = D_FLOAT;
-            } else if (op_one == D_INT && op_two == D_INT) {
+            } else if (op_one->bucket->value_type == D_INT && op_two->bucket->value_type == D_INT) {
                 pair->value_type = D_INT;
             }
 
@@ -355,11 +357,26 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
         case 67: // concatenation
             while (cnt < 5) {stack_pop(shelf); cnt++;}
             if (cnt != 5) goto cleanup;
-            op_one = stack_pop(temps)->bucket->value_type;
-            op_two = stack_pop(temps)->bucket->value_type;
-            if (op_one != D_STRING || op_two != D_STRING) {
+            op_one = stack_pop(temps);
+            op_two = stack_pop(temps);
+            if (op_one->bucket->value_type != D_STRING || op_two->bucket->value_type != D_STRING) {
                 exit(BAD_TYPE_COMPATIBILTY);
             }
+            
+            Instruction *conc = malloc(sizeof(Instruction));
+            conc->instruct = defvar;
+            conc->id = tmp;
+            generator_add_instruction(gen, conc);
+
+            Instruction *conc_ = malloc(sizeof(Instruction));
+            conc_->instruct = concat;
+            conc_->id = tmp;
+            conc_->operands = malloc(sizeof(htab_pair_t*) * 2);
+            conc_->operands[1] = op_one->bucket; //reversed due to stack
+            conc_->operands[0] = op_two->bucket;
+            conc_->operands_count = 2;
+            generator_add_instruction(gen, conc_);
+            
 
             pair->value_type = D_STRING;
 
@@ -400,7 +417,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
         reversal = stack_init(reversal);
 
         while (stack_top(shelf)->value != P_CLOSE) {
-             TData *tmp_data = stack_pop(shelf);
+            const TData *tmp_data = stack_pop(shelf);
             if (tmp_data->value == P_LEFT_BRACKET) brackets--;
             else if (tmp_data->value == P_RIGHT_BRACKET) brackets++;
             else if (tmp_data->value == P_E) {
@@ -610,6 +627,20 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                     pair = htab_insert(parser.temporary_tab, NULL, tmp);
                     pair->value.string = lookahead->value.string;
                     pair->value_type = D_STRING;
+                    pair->type = H_CONSTANT;
+
+                    Instruction *instr = malloc(sizeof(Instruction));
+                    instr->instruct = defvar;
+                    instr->id = tmp;
+                    generator_add_instruction(gen, instr);
+
+                    Instruction *inst = malloc(sizeof(Instruction));
+                    inst->instruct = assign;
+                    inst->id = tmp;
+                    inst->operands = malloc(sizeof(htab_pair_t*));
+                    inst->operands[0] = pair;
+                    inst->operands_count = 1;
+                    generator_add_instruction(gen, inst);
                 }
 
                 TData *data = stack_data(P_I, P_I);
