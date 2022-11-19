@@ -306,7 +306,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
             printf("1p ");
             return 1;
         case 63: // multiplication
-            while (cnt < 5) {if(stack_pop(shelf) != NULL) {break;} cnt++;}
+            while (cnt < 5) {stack_pop(shelf); cnt++;}
             if (cnt != 5) goto cleanup;
             op_one = stack_pop(temps);
             op_two = stack_pop(temps);
@@ -314,7 +314,23 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
                 pair->value_type = D_FLOAT;
             } else if (op_one->bucket->value_type == D_INT && op_two->bucket->value_type == D_INT) {
                 pair->value_type = D_INT;
+            } else if (op_one->bucket->value_type == D_VOID && op_two->bucket->value_type == D_VOID) {
+                pair->value_type = D_INT;
             }
+
+            Instruction *mul_var = malloc(sizeof(Instruction));
+            mul_var->instruct = defvar;
+            mul_var->id = tmp;
+            generator_add_instruction(gen, mul_var);
+
+            Instruction *mul_ins = malloc(sizeof(Instruction));
+            mul_ins->instruct = mul;
+            mul_ins->id = tmp;
+            mul_ins->operands = malloc(sizeof(htab_pair_t*) * 2);
+            mul_ins->operands[0] = op_one->bucket; // order doesn't matter here
+            mul_ins->operands[1] = op_two->bucket;
+            mul_ins->operands_count = 2;
+            generator_add_instruction(gen, mul_ins);
 
             printf("2p ");
             stack_push(temps, data);
@@ -323,9 +339,23 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
         case 64: // division
             while (cnt < 5) {stack_pop(shelf); cnt++;}
             if (cnt != 5) goto cleanup;
-            stack_pop(temps);
-            stack_pop(temps);
+            op_one = stack_pop(temps);
+            op_two = stack_pop(temps);
             pair->value_type = D_FLOAT;
+
+            Instruction *div_var = malloc(sizeof(Instruction));
+            div_var->instruct = defvar;
+            div_var->id = tmp;
+            generator_add_instruction(gen, div_var);
+
+            Instruction *div_ins = malloc(sizeof(Instruction));
+            div_ins->instruct = div_;
+            div_ins->id = tmp;
+            div_ins->operands = malloc(sizeof(htab_pair_t*) * 2);
+            div_ins->operands[1] = op_one->bucket; //reversed due to stack
+            div_ins->operands[0] = op_two->bucket;
+            div_ins->operands_count = 2;
+            generator_add_instruction(gen, div_ins);
 
             printf("3p ");
             stack_push(temps, data);
@@ -371,14 +401,33 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
                 pair->value_type = D_FLOAT;
             } else if (op_one->bucket->value_type == D_INT && op_two->bucket->value_type == D_INT) {
                 pair->value_type = D_INT;
+            } else if (op_one->bucket->value_type == D_VOID && op_two->bucket->value_type == D_VOID) {
+                pair->value_type = D_INT;
             }
+
+            Instruction *sub_var = malloc(sizeof(Instruction));
+            sub_var->instruct = defvar;
+            sub_var->id = tmp;
+            generator_add_instruction(gen, sub_var);
+
+            Instruction *sub_ins = malloc(sizeof(Instruction));
+            sub_ins->instruct = sub;
+            sub_ins->id = tmp;
+            sub_ins->operands = malloc(sizeof(htab_pair_t*) * 2);
+            sub_ins->operands[1] = op_one->bucket; //reversed due to stack
+            sub_ins->operands[0] = op_two->bucket;
+            sub_ins->operands_count = 2;
+            generator_add_instruction(gen, sub_ins);
 
             printf("5p ");
             stack_push(temps, data);
             stack_push(stack, stack_data(P_E, P_E));
             return 1;
         case 67: // concatenation
-            while (cnt < 5) {stack_pop(shelf); cnt++;}
+            while (cnt < 5) {
+                stack_pop(shelf);
+                cnt++;
+            }
             if (cnt != 5) goto cleanup;
             op_one = stack_pop(temps);
             op_two = stack_pop(temps);
@@ -457,7 +506,33 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
         if (E != last_fn->param_count || last_fn->param_count != -1) exit(BAD_TYPE_OR_RETURN);
 
         for (int i = 0; i < last_fn->param_count; i++) {
-            if (stack_pop(reversal)->bucket->value_type != last_fn->params[i]) exit(BAD_TYPE_OR_RETURN);
+            if (last_fn->params[i] == D_INT) {
+                if (stack_pop(reversal)->bucket->value_type == D_INT ||
+                        stack_pop(reversal)->bucket->value_type == D_FLOAT ||
+                        stack_pop(reversal)->bucket->value_type == D_VOID) {
+                    continue;
+                } else {
+                    exit(BAD_TYPE_OR_RETURN);
+                }
+            } else if (last_fn->params[i] == D_FLOAT) {
+                if (stack_pop(reversal)->bucket->value_type == D_INT ||
+                    stack_pop(reversal)->bucket->value_type == D_FLOAT ||
+                    stack_pop(reversal)->bucket->value_type == D_VOID) {
+                    continue;
+                } else {
+                    exit(BAD_TYPE_OR_RETURN);
+                }
+            } else if (last_fn->params[i] == D_STRING) {
+                if (stack_pop(reversal)->bucket->value_type == D_STRING ||
+                    stack_pop(reversal)->bucket->value_type == D_VOID) {
+                    continue;
+                } else {
+                    exit(BAD_TYPE_OR_RETURN);
+                }
+            } else {
+                exit(BAD_TYPE_OR_RETURN);
+            }
+
         }
 
         printf("9p ");
@@ -548,7 +623,9 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
 
         if (sym == P_CLOSE) {
             int res = reduce(stack, shelf, temps, gen);
-            if (!res || !stack_isEmpty(shelf)) exit(1); //TODO bad code
+            if (!res || !stack_isEmpty(shelf)) {
+                exit(BAD_SYNTAX);
+            }
             goto reduced;
         }
         
@@ -767,9 +844,9 @@ int parse(Generator *gen) {
     stack_push(stack, stack_data(N_PROG, T_NONTERM));
 
     Token *token = malloc(sizeof(Token));
-    if (token == NULL)  exit(1);
+    if (token == NULL)  exit(BAD_INTERNAL);
     parser.tmp_token = malloc(sizeof(Token));
-    if (parser.tmp_token == NULL) exit(1);
+    if (parser.tmp_token == NULL) exit(BAD_INTERNAL);
 
     bool keep_prev_token = false;
     bool return_back = false;
@@ -829,7 +906,7 @@ int parse(Generator *gen) {
                                 parser.in_func->return_type = D_VOID;
                                 break;
                             default:
-                                exit(1); // unknown data type
+                                exit(BAD_SYNTAX); // unknown data type
                         }
                         parser.val_expected = parser.in_func->return_type;
                         parser.val_returned = D_VOID;
@@ -839,7 +916,7 @@ int parse(Generator *gen) {
                         parser.in_func->param_count += 1;
                         
                         parser.in_func->params = realloc(parser.in_func->params, sizeof(Value) * parser.in_func->param_count);
-                        if (parser.in_func->params == NULL) exit(1); // realloc failed
+                        if (parser.in_func->params == NULL) exit(BAD_INTERNAL); // realloc failed
                         
                         switch (token->value.keyword) {
                             case KW_INT:
