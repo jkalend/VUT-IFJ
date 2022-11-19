@@ -29,6 +29,42 @@ void gen_strlen(Instruction *instruction, Generator *generator) {
     printf("STRLEN LF@%s LF@%s\n", instruction->id, instruction->operands[0]->identifier);
 }
 
+void gen_substring(Instruction *instruction, Generator *generator) {
+	printf("TYPE GF@%%check0 LF@%s\n", instruction->operands[0]->identifier);
+	printf("JUMPIFEQ !!%d GF@%%string GF@%%check0\n", generator->label_count);
+}
+
+void gen_ord(Instruction *instruction, Generator *generator) {
+	printf("TYPE GF@%%check0 LF@%s\n", instruction->operands[0]->identifier);
+	printf("JUMPIFEQ !!%d GF@%%string GF@%%check0\n", generator->label_count);
+	printf("MOVE LF@%s int@0\n", instruction->id);
+	printf("JUMP !!%d\n", generator->label_count + 1);
+
+	printf("LABEL !!%d\n", generator->label_count);
+	printf("STRI2INT LF@%s LF@%s int@0\n", instruction->id, instruction->operands[0]->identifier);
+
+	printf("LABEL !!%d\n", generator->label_count + 1);
+	generator->label_count += 2;
+}
+
+void gen_chr(Instruction *instruction, Generator *generator) {
+	printf("TYPE GF@%%check0 LF@%s\n", instruction->operands[0]->identifier);
+	printf("JUMPIFEQ !!%d GF@%%int GF@%%check0\n", generator->label_count);
+	printf("TYPE GF@%%check0 LF@%s\n", instruction->operands[0]->identifier);
+	printf("JUMPIFEQ !!%d GF@%%float GF@%%check0\n", generator->label_count + 1);
+	printf("INT2CHAR LF@%s int@0\n", instruction->id);
+	printf("JUMP !!%d\n", generator->label_count + 2);
+
+	printf("LABEL !!%d\n", generator->label_count + 1);
+	printf("FLOAT2INT LF@%s LF@%s\n", instruction->operands[0]->identifier, instruction->operands[0]->identifier);
+
+	printf("LABEL !!%d\n", generator->label_count);
+	printf("INT2CHAR LF@%s LF@%s\n", instruction->id, instruction->operands[0]->identifier);
+
+	printf("LABEL !!%d\n", generator->label_count + 2);
+	generator->label_count += 3;
+}
+
 void generator_free(Generator *generator) {
     for (int i = 0; i < generator->instruction_count; i++) {
         free(generator->instructions[i]->id);
@@ -348,14 +384,19 @@ int generate(Generator *generator) {
             case substring:
                 break;
             case ord:
+				gen_ord(generator->instructions[i], generator);
                 break;
             case chr:
+				gen_chr(generator->instructions[i], generator);
                 break;
             case reads:
+				printf("READ LF@%s string\n", generator->instructions[i]->id);
                 break;
             case readf:
+				printf("READ LF@%s float\n", generator->instructions[i]->id);
                 break;
             case readi:
+				printf("READ LF@%s int\n", generator->instructions[i]->id);
                 break;
             case write:
                 break;

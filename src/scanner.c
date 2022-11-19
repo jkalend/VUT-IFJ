@@ -798,7 +798,7 @@ int convert_esc_to_int(const char* str, int len) {
 	char esc[3];
     if (len == 3) {
         result = strtol(str, NULL, 8);
-        if(result > 255 || result == 36){
+        if(result > 255 || result == 36 || result < 0){
             return -1;
         }
 		sprintf(esc, "%d", (int) result);
