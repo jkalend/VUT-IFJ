@@ -42,7 +42,9 @@ typedef enum {
     main_,
     end,
     start_fn,
-    end_fn
+    end_fn,
+    while_,
+    if_
 }InstructionType;
 
 typedef struct {

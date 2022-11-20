@@ -21,7 +21,7 @@ const unsigned int PREC_TABLE[14][14] = {
         {P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_CLOSE, [9] = P_CLOSE, P_CLOSE, P_CLOSE, P_OPEN, P_CLOSE},
         {P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_CLOSE, P_OPEN, [11] = P_CLOSE, P_OPEN, P_CLOSE},
         {P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_CLOSE, P_OPEN, [11] = P_CLOSE, P_OPEN, P_CLOSE},
-        {P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_OPEN, [8] = P_OPEN, [12] = P_OPEN},
+        {P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_OPEN, [8] = P_OPEN, P_OPEN, P_OPEN, [12] = P_OPEN},
         {[6] = P_EQUAL},
         {P_OPEN, P_OPEN, P_OPEN, P_OPEN, P_OPEN,P_OPEN, P_OPEN, P_EQUAL, P_OPEN, [12] = P_OPEN, P_EQUAL}
 };
@@ -474,8 +474,8 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
         case 72: // E===E
             while (cnt < 5) {stack_pop(shelf); cnt++;}
             if (cnt != 5) goto cleanup;
-            stack_pop(temps);
-            stack_pop(temps);
+            op_one = stack_pop(temps);
+            op_two = stack_pop(temps);
             pair->value_type = D_BOOL;
 
             Instruction *_eq = malloc(sizeof(Instruction));
@@ -500,8 +500,8 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
         case 73: // E!==E
             while (cnt < 5) {stack_pop(shelf); cnt++;}
             if (cnt != 5) goto cleanup;
-            stack_pop(temps);
-            stack_pop(temps);
+            op_one = stack_pop(temps);
+            op_two = stack_pop(temps);
             pair->value_type = D_BOOL;
 
             Instruction *_neq = malloc(sizeof(Instruction));

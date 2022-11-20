@@ -393,17 +393,15 @@ void gen_call(Instruction *instruction) {
     printf("CALL $!%s\n", instruction->operands[0]->identifier);
 }
 
-void gen_eq(Instruction *instruction) {
+void gen_eq(Instruction *instruction, Generator *generator) {
     printf("TYPE GF@%%check0 LF@%s\n", instruction->operands[0]->identifier);
-    printf("TYPE GF@%%check1 LF@%s\n", instruction->operands[0]->identifier);
+    printf("TYPE GF@%%check1 LF@%s\n", instruction->operands[1]->identifier);
     printf("EQ LF@%s GF@%%check0 GF@%%check1\n", instruction->id);
-}
+    printf("JUMPIFNEQ !!%d GF@%%true LF@%s\n", generator->label_count, instruction->id);
+    printf("EQ LF@%s LF@%s LF@%s\n", instruction->id, instruction->operands[0]->identifier, instruction->operands[1]->identifier);
+    printf("LABEL !!%d\n", generator->label_count);
+    generator->label_count++;
 
-void gen_neq(Instruction *instruction) {
-    printf("TYPE GF@%%check0 LF@%s\n", instruction->operands[0]->identifier);
-    printf("TYPE GF@%%check1 LF@%s\n", instruction->operands[0]->identifier);
-    printf("EQ LF@%s GF@%%check0 GF@%%check1\n", instruction->id);
-    printf("NOT LF@%s LF@%s\n", instruction->id, instruction->id);
 }
 
 int generate(Generator *generator) {
@@ -417,11 +415,15 @@ int generate(Generator *generator) {
     printf("defvar GF@%%check1\n");
     printf("defvar GF@%%check2\n");
     printf("defvar GF@%%index\n");
+    printf("defvar GF@%%true\n");
+    printf("defvar GF@%%false\n");
     printf("move GF@%%bool string@bool\n");
     printf("move GF@%%int string@int\n");
     printf("move GF@%%float string@float\n");
     printf("move GF@%%string string@string\n");
     printf("move GF@%%nil string@nil\n");
+    printf("move GF@%%true bool@true\n");
+    printf("move GF@%%false bool@false\n");
     printf("jump $$main\n");
 
     for (long i = 0; i < generator->instruction_count; i++) {
@@ -437,7 +439,7 @@ int generate(Generator *generator) {
             case call:
                 gen_call(generator->instructions[i]);
                 break;
-            case ret:
+            case ret: //not needed?
                 break;
             case addition:
                 gen_add(generator->instructions[i], generator);
@@ -459,14 +461,15 @@ int generate(Generator *generator) {
             case gt:
                 break;
             case eq:
-                gen_eq(generator->instructions[i]);
+                gen_eq(generator->instructions[i], generator);
                 break;
             case lte:
                 break;
             case gte:
                 break;
             case neq:
-                gen_neq(generator->instructions[i]);
+                gen_eq(generator->instructions[i], generator);
+                printf("NOT LF@%s LF@%s\n", generator->instructions[i]->id, generator->instructions[i]->id);
                 break;
             case floatval:
                 break;
@@ -520,6 +523,11 @@ int generate(Generator *generator) {
                     printf("MOVE LF@$$retval LF@%s\n", generator->instructions[i]->operands[0]->identifier);
                 printf("POPFRAME\n");
                 printf("RET\n");
+                break;
+            case while_:
+                break;
+            case if_:
+                break;
             default:
                 break;
         }
