@@ -943,10 +943,10 @@ int parse(Generator *gen) {
                 if (token->type == T_LEFT_BRACE) parser.bracket_counter++;
                 else if (token->type == T_RIGHT_BRACE) {
                     parser.bracket_counter--;
-                    if (parser.bracket_counter == 0) {
+                    if (parser.bracket_counter == 0 && parser.temporary_tab != parser.glob_tab) {
 
                         /* missing closing brace */
-                        if (parser.temporary_tab != parser.glob_tab && stack_isEmpty(parser.local_tabs)) {
+                        if (stack_isEmpty(parser.local_tabs)) {
                             exit(BAD_SYNTAX); 
                         }
                         /* return from a function */
@@ -957,6 +957,10 @@ int parse(Generator *gen) {
                         if (parser.val_returned != parser.val_expected) {
                             exit(BAD_TYPE_OR_RETURN);
                         } 
+
+                        Instruction *instr = malloc(sizeof(Instruction));
+                        instr->instruct = end_fn;
+                        generator_add_instruction(gen, instr);
                     }
                     
                 }
@@ -993,6 +997,8 @@ int parse(Generator *gen) {
                         parser.in_func->params = realloc(parser.in_func->params, sizeof(Value) * parser.in_func->param_count);
                         if (parser.in_func->params == NULL) exit(BAD_INTERNAL); // realloc failed
                         
+                        
+
                         switch (token->value.keyword) {
                             case KW_INT:
                                 parser.in_func->params[parser.in_func->param_count - 1] = D_INT;
@@ -1016,6 +1022,10 @@ int parse(Generator *gen) {
                         else {
                             frame_item = htab_insert(parser.temporary_tab, token, token->value.identifier);
                             frame_item->value_type = parser.in_func->params[parser.in_func->param_count - 1];
+
+                            parser.in_func->param_names = realloc(parser.in_func->param_names, sizeof(char *) * parser.in_func->param_count);
+                            parser.in_func->param_names[parser.in_func->param_count - 1] = malloc(sizeof(char) * strlen(token->value.identifier));
+                            strcpy(parser.in_func->param_names[parser.in_func->param_count - 1], token->value.identifier);
                         }
                     }
                 }
@@ -1071,6 +1081,7 @@ int parse(Generator *gen) {
                     parser.in_func->param_count = 0;
                     parser.in_func->params = NULL;
                     parser.in_func->return_type = D_NONE;
+                    parser.in_func->param_names = NULL;
                     parser.in_param_def = true;
 
                     /* create new frame for current function call */
@@ -1080,6 +1091,14 @@ int parse(Generator *gen) {
                     new_data->htab = new_tab;
                     stack_push(parser.local_tabs, new_data);
                     parser.temporary_tab = new_tab;
+
+                    /* create label and pushframe */
+                    Instruction *instr = malloc(sizeof(Instruction));
+                    instr->instruct = start_fn;
+                    instr->operands_count = 1;
+                    instr->operands = malloc(sizeof(htab_pair_t *));
+                    instr->operands[0] = parser.in_func;
+                    generator_add_instruction(gen, instr);
                 }
                 
                 
@@ -1110,6 +1129,9 @@ int parse(Generator *gen) {
 
                 if (parser.expect_ret) {
                     if (parser.val_returned != parser.val_expected) exit(BAD_TYPE_OR_RETURN);
+                    Instruction *instr = malloc(sizeof(Instruction));
+                    instr->instruct = end_fn;
+                    generator_add_instruction(gen, instr);
                 }
                 
                 parser.expect_ret = false;
