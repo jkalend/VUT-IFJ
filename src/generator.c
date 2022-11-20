@@ -432,14 +432,15 @@ int generate(Generator *generator) {
             case end:
                 printf("EXIT int@0\n");
                 break;
-            case start_fn:
+            case start_fn:    
                 printf("LABEL $%s\n", generator->instructions[i]->operands[0]->identifier);
                 printf("PUSHFRAME\n");
                 printf("DEFVAR LF@$$retval\n");
                 printf("MOVE LF@$$retval nil@nil\n");
                 break;
             case end_fn:
-                printf("MOVE LF@$$retval LF@%s", generator->instructions[i]->operands[0]->identifier);
+                if (generator->instructions[i]->operands != NULL) 
+                    printf("MOVE LF@$$retval LF@%s\n", generator->instructions[i]->operands[0]->identifier);
                 printf("POPFRAME\n");
                 printf("RET\n");
             default:

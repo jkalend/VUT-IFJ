@@ -667,7 +667,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
         unsigned int sym = PREC_TABLE[row][column];
         if (end && !sym) {
             TData *top = stack_top(temps);
-            if (parser.expect_ret && top != NULL) parser.val_returned = top->bucket->value_type;
+            if (parser.expect_ret && top != NULL) parser.val_returned = top->bucket;
             if (parser.in_assign != NULL && top != NULL) {
                 parser.in_assign->value_type = top->bucket->value_type;
 
@@ -883,7 +883,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 return 0;
             } else {
                 TData *top = stack_top(temps);
-                if (parser.expect_ret) parser.val_returned = top->bucket->value_type;
+                if (parser.expect_ret) parser.val_returned = top->bucket;
                 if (parser.in_assign != NULL && top != NULL) {
                     parser.in_assign->value_type = top->bucket->value_type;
 
@@ -954,7 +954,7 @@ int parse(Generator *gen) {
                         if (stack_isEmpty(parser.local_tabs)) parser.temporary_tab = parser.glob_tab;
                         else parser.temporary_tab = stack_top(parser.local_tabs)->htab;
 
-                        if (parser.val_returned != parser.val_expected) {
+                        if (parser.val_returned != NULL && parser.val_returned->value_type != parser.val_expected) {
                             exit(BAD_TYPE_OR_RETURN);
                         } 
 
@@ -988,7 +988,7 @@ int parse(Generator *gen) {
                                 exit(BAD_SYNTAX); // unknown data type
                         }
                         parser.val_expected = parser.in_func->return_type;
-                        parser.val_returned = D_VOID;
+                        parser.val_returned = NULL;
                         parser.in_func = NULL;
                     }
                     else if (parser.in_param_def && token->type == T_TYPE) {
@@ -1128,12 +1128,15 @@ int parse(Generator *gen) {
                 get_next_token(&token, &keep_prev_token, &return_back);
 
                 if (parser.expect_ret) {
-                    if (parser.val_returned != parser.val_expected) exit(BAD_TYPE_OR_RETURN);
-                    Instruction *instr = malloc(sizeof(Instruction));
-                    instr->operands = malloc(1);
-                    instr->operands[0] = parser.val_returned;
-                    instr->instruct = end_fn;
-                    generator_add_instruction(gen, instr);
+                    if (parser.temporary_tab != parser.glob_tab && parser.val_returned != NULL && parser.val_returned->value_type != parser.val_expected) 
+                        exit(BAD_TYPE_OR_RETURN);
+                    if (!parser.empty_expr) {
+                        Instruction *instr = malloc(sizeof(Instruction));
+                        instr->operands = malloc(sizeof(htab_pair_t *));
+                        instr->operands[0] = parser.val_returned;
+                        instr->instruct = end_fn;
+                        generator_add_instruction(gen, instr);
+                    } 
                 }
                 
                 parser.expect_ret = false;
@@ -1337,7 +1340,7 @@ int main(void) {
     parser.relation_operator = 0;
     parser.expect_ret = false;
     parser.bracket_counter = 0;
-    parser.val_returned = D_VOID;
+    parser.val_returned = NULL;
     parser.val_expected = D_VOID;
 
     insert_builtins();

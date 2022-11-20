@@ -71,7 +71,7 @@ typedef struct {
     char **builtins;
     int tmp_counter;
     int bracket_counter;
-    DataType val_returned;
+    htab_pair_t *val_returned;
     DataType val_expected;
 } parser_t;
 
