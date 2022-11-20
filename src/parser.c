@@ -542,8 +542,8 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
             Instruction *fnc_ = malloc(sizeof(Instruction));
             fnc_->instruct = builtin;
             fnc_->id = tmp;
-            fnc_->params = malloc(sizeof(htab_pair_t*) * last_fn->param_count);
-            for (int j = 0; j < last_fn->param_count; j++) {
+            fnc_->params = malloc(sizeof(htab_pair_t*) * E);
+            for (int j = 0; j < E; j++) {
                 if (builtin >= 7 && builtin <= 10) {
                     fnc_->params[j] = stack_pop(reversal)->bucket;
                 } else {
@@ -569,7 +569,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
                 }
             }
             fnc_->retval = last_fn->return_type;
-            fnc_->params_count = last_fn->param_count;
+            fnc_->params_count = E;
             generator_add_instruction(gen, fnc_);
         } else {
             // creates a temporary variable
@@ -1298,7 +1298,7 @@ int main(void) {
     /* initialize the parser struct */
     parser.builtins = malloc(sizeof(char *) * 11);
     parser.tmp_token = NULL;
-    parser.glob_tab = htab_init(GLOBTAB_SIZE);;
+    parser.glob_tab = htab_init(GLOBTAB_SIZE);
     parser.temporary_tab = parser.glob_tab;
     parser.local_tabs = stack_init(parser.local_tabs);
     parser.in_func = NULL;

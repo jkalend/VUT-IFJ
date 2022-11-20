@@ -66,6 +66,12 @@ void gen_chr(Instruction *instruction, Generator *generator) {
 	generator->label_count += 3;
 }
 
+void gen_write(Instruction *instruction) {
+    for (int i = 0; i < instruction->params_count; i++) {
+        printf("WRITE LF@%s\n", instruction->params[i]->identifier);
+    }
+}
+
 void generator_free(Generator *generator) {
     for (int i = 0; i < generator->instruction_count; i++) {
         free(generator->instructions[i]->id);
@@ -118,7 +124,7 @@ void gen_assign(Instruction *instruction) {
             break;
         case H_VAR:
             printf("MOVE LF@%s LF@%s\n", instruction->id, instruction->operands[0]->identifier);
-            printf("DPRINT LF@%s\n", instruction->id);
+            //printf("DPRINT LF@%s\n", instruction->id);
             break;
         default:
             break; // FIXME placeholder
@@ -410,6 +416,7 @@ int generate(Generator *generator) {
 				printf("READ LF@%s int\n", generator->instructions[i]->id);
                 break;
             case write:
+                gen_write(generator->instructions[i]);
                 break;
             case concat:
                 gen_concat(generator->instructions[i], generator);
