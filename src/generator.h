@@ -23,6 +23,7 @@ typedef enum {
     floatval,
     intval,
     write,
+    // do NOT move anything above this comment
     concat,
     assign,
     defvar,

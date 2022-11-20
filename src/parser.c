@@ -953,6 +953,7 @@ int parse(Generator *gen) {
     bool keep_prev_token = false;
     bool return_back = false;
     get_token(token);
+    printf("# ");
 
     while(1) {
         if (stack_isEmpty(stack)) {
