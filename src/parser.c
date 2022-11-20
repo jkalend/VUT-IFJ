@@ -642,7 +642,6 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
     while (true) {
 
         get_next_token(&lookahead, keep_token, return_back);
-        
         if (lookahead->type == T_ERROR) goto bad_token;
         
         reduced:
@@ -652,7 +651,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
             *token = lookahead;
             *keep_token = true;
         }
-
+        
         
         //only 1 skip needed?
         if (stack_top(stack)->value == P_E) stack_push(shelf, stack_pop(stack));
@@ -668,7 +667,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
         unsigned int sym = PREC_TABLE[row][column];
         if (end && !sym) {
             TData *top = stack_top(temps);
-            if (parser.expect_ret) parser.val_returned = top->bucket->value_type;
+            if (parser.expect_ret && top != NULL) parser.val_returned = top->bucket->value_type;
             if (parser.in_assign != NULL && top != NULL) {
                 parser.in_assign->value_type = top->bucket->value_type;
 
@@ -798,7 +797,6 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 if (tmp == NULL) exit(BAD_INTERNAL);
                 strcat(tmp, TEMP_VAR_PREFIX);
                 strncat(tmp, number, 100);
-
                 htab_pair_t *pair = htab_find(parser.temporary_tab, tmp);
                 if (pair == NULL) {
                     parser.tmp_counter++;
@@ -1100,11 +1098,12 @@ int parse(Generator *gen) {
 
                 /* CALL PRECEDENTIAL */
                 keep_prev_token = true;
-
+                
                 int result = precedence(prec, &token, &keep_prev_token, &return_back, gen);
                 stack_dispose(prec);
-
+                
                 if (!result) exit(5); //TODO bad code
+
                 else if (parser.empty_expr && !parser.allow_expr_empty) exit(5);
                 parser.in_assign = NULL;
                 get_next_token(&token, &keep_prev_token, &return_back);
