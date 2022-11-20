@@ -85,8 +85,8 @@ typedef struct {
 }Token;
 
 int get_token(Token*);
-char* convert_string_for_ifjcode(char*);
-char convert_esc_to_char(const char*, int);
+char* convert_string_for_ifjcode(char*, int);
+int convert_esc_to_int(const char*, int);
 int kw_check(char*, Token*);
 int free_memory(char*, int);
 
