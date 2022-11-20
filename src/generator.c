@@ -332,6 +332,19 @@ void gen_call(Instruction *instruction) {
     printf("CALL $!%s\n", instruction->operands[0]->identifier);
 }
 
+void gen_eq(Instruction *instruction) {
+    printf("TYPE GF@%%check0 LF@%s\n", instruction->operands[0]->identifier);
+    printf("TYPE GF@%%check1 LF@%s\n", instruction->operands[0]->identifier);
+    printf("EQ LF@%s GF@%%check0 GF@%%check1\n", instruction->id);
+}
+
+void gen_neq(Instruction *instruction) {
+    printf("TYPE GF@%%check0 LF@%s\n", instruction->operands[0]->identifier);
+    printf("TYPE GF@%%check1 LF@%s\n", instruction->operands[0]->identifier);
+    printf("EQ LF@%s GF@%%check0 GF@%%check1\n", instruction->id);
+    printf("NOT LF@%s LF@%s\n", instruction->id, instruction->id);
+}
+
 int generate(Generator *generator) {
     printf(".IFJcode22\n");
     printf("defvar GF@%%bool\n");
@@ -385,12 +398,14 @@ int generate(Generator *generator) {
             case gt:
                 break;
             case eq:
+                gen_eq(generator->instructions[i]);
                 break;
             case lte:
                 break;
             case gte:
                 break;
             case neq:
+                gen_neq(generator->instructions[i]);
                 break;
             case floatval:
                 break;

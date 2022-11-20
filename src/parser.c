@@ -478,6 +478,20 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
             stack_pop(temps);
             pair->value_type = D_BOOL;
 
+            Instruction *_eq = malloc(sizeof(Instruction));
+            _eq->instruct = defvar;
+            _eq->id = tmp;
+            generator_add_instruction(gen, _eq);
+
+            Instruction *eq_ = malloc(sizeof(Instruction));
+            eq_->instruct = eq;
+            eq_->id = tmp;
+            eq_->operands = malloc(sizeof(htab_pair_t*) * 2);
+            eq_->operands[1] = op_one->bucket; // order doesn't matter
+            eq_->operands[0] = op_two->bucket;
+            eq_->operands_count = 2;
+            generator_add_instruction(gen, eq_);
+
             printf("9p ");
             stack_push(temps, data);
             stack_push(stack, stack_data(P_E, P_E));
@@ -489,6 +503,20 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
             stack_pop(temps);
             stack_pop(temps);
             pair->value_type = D_BOOL;
+
+            Instruction *_neq = malloc(sizeof(Instruction));
+            _neq->instruct = defvar;
+            _neq->id = tmp;
+            generator_add_instruction(gen, _neq);
+
+            Instruction *neq_ = malloc(sizeof(Instruction));
+            neq_->instruct = neq;
+            neq_->id = tmp;
+            neq_->operands = malloc(sizeof(htab_pair_t*) * 2);
+            neq_->operands[1] = op_one->bucket; // order doesn't matter
+            neq_->operands[0] = op_two->bucket;
+            neq_->operands_count = 2;
+            generator_add_instruction(gen, neq_);
 
             printf("10p ");
             stack_push(temps, data);
