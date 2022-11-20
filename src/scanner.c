@@ -32,7 +32,7 @@ int get_token(Token *token) {
 			if(identifier == NULL){
 				token->type = T_ERROR;
 				token->line = line;
-				return BAD_INTERNAL;
+				exit(BAD_INTERNAL);
 			}
             while(c != EOF && (isalnum(c) || c == '_')) {
                 if(i == size) {
@@ -42,7 +42,7 @@ int get_token(Token *token) {
 						token->type = T_ERROR;
 						token->line = line;
 						free(identifier);
-						return BAD_INTERNAL;
+						exit(BAD_INTERNAL);
 					}
 					identifier = tmp;
                 }
@@ -68,7 +68,7 @@ int get_token(Token *token) {
 			if(str == NULL){
 				token->type = T_ERROR;
 				token->line = line;
-				return BAD_INTERNAL;
+				exit(BAD_INTERNAL);
 			}
             int i = 0;
             int e = 0;
@@ -82,7 +82,7 @@ int get_token(Token *token) {
 						token->type = T_ERROR;
 						token->line = line;
 						free(str);
-						return BAD_INTERNAL;
+						exit(BAD_INTERNAL);
 					}
 					str = tmp;
                 }
@@ -216,7 +216,7 @@ int get_token(Token *token) {
 								if(arr == NULL){
 									token->type = T_ERROR;
 									token->line = line;
-									return BAD_INTERNAL;
+									exit(BAD_INTERNAL);
 								}
 								char *slider = arr;
 								while (true) {
@@ -495,7 +495,7 @@ int get_token(Token *token) {
 				if(str == NULL){
 					token->type = T_ERROR;
 					token->line = line;
-					return BAD_INTERNAL;
+					exit(BAD_INTERNAL);
 				}
                 int i = 0;
                 while((c2 == '_') || (c2 >= '0' && c2 <= '9') || (c2 >= 'A' && c2 <= 'Z') || (c2 >= 'a' && c2 <= 'z')){
@@ -506,7 +506,7 @@ int get_token(Token *token) {
 							token->type = T_ERROR;
 							token->line = line;
 							free(str);
-							return BAD_INTERNAL;
+							exit(BAD_INTERNAL);
 						}
 						str = tmp;
                     }
@@ -535,7 +535,8 @@ int get_token(Token *token) {
 					if(str == NULL){
 						token->type = T_ERROR;
 						token->line = line;
-						return BAD_INTERNAL;					}
+						exit(BAD_INTERNAL);
+					}
                     int size = 40;
                     int i = 0;
                     while (c2 >= 'a' && c2 <= 'z') {
@@ -546,7 +547,7 @@ int get_token(Token *token) {
 								token->type = T_ERROR;
 								token->line = line;
 								free(str);
-								return BAD_INTERNAL;
+								exit(BAD_INTERNAL);
 							}
 							str = tmp;
                         }
@@ -583,7 +584,7 @@ int get_token(Token *token) {
 				if(str == NULL){
 					token->type = T_ERROR;
 					token->line = line;
-					return BAD_INTERNAL;
+					exit(BAD_INTERNAL);
 				}
                 int size = 40;
                 int i = 0;
@@ -595,7 +596,7 @@ int get_token(Token *token) {
 							token->type = T_ERROR;
 							token->line = line;
 							free(str);
-							return BAD_INTERNAL;
+							exit(BAD_INTERNAL);
 						}
 						str = tmp;
                     }
@@ -638,6 +639,15 @@ char* convert_string_for_ifjcode(char *str, int size) {
 			hex[0] = str[i+2];
 			hex[1] = str[i+3];
 			if(convert_esc_to_int(hex, 2) == -1){
+				int j = size - 1;
+				while (j > i + 1) {
+					str[j] = str[j - 3];
+					j--;
+				}
+				str[i] = '\\';
+				str[i+1] = '0';
+				str[i+2] = '9';
+				str[i+3] = '2';
 				i++;
 				continue;
 			}
@@ -666,6 +676,15 @@ char* convert_string_for_ifjcode(char *str, int size) {
 			oct[1] = str[i+2];
 			oct[2] = str[i+3];
 			if(convert_esc_to_int(oct, 3) == -1){
+				int j = size - 1;
+				while (j > i + 1) {
+					str[j] = str[j - 3];
+					j--;
+				}
+				str[i] = '\\';
+				str[i+1] = '0';
+				str[i+2] = '9';
+				str[i+3] = '2';
 				i++;
 				continue;
 			}
@@ -692,13 +711,23 @@ char* convert_string_for_ifjcode(char *str, int size) {
 		}else if(str[i] ==' '){
 			int j = size - 1;
 			while (j > i + 1) {
-				str[j] = str[j - 2];
+				str[j] = str[j - 3];
 				j--;
 			}
 			str[i] = '\\';
 			str[i+1] = '0';
 			str[i+2] = '3';
 			str[i+3] = '2';
+		}else if(str[i] =='#'){
+			int j = size - 1;
+			while (j > i + 1) {
+				str[j] = str[j - 3];
+				j--;
+			}
+			str[i] = '\\';
+			str[i+1] = '0';
+			str[i+2] = '3';
+			str[i+3] = '5';
 		}
 		else if(str[i] == '\\'){
 			int j = size - 1;
@@ -785,6 +814,13 @@ char* convert_string_for_ifjcode(char *str, int size) {
 					str[i+3] = '6';
 					break;
 				default:
+					while (j > i + 2) {
+						str[j] = str[j - 3];
+						j--;
+					}
+					str[i+1] = '0';
+					str[i+2] = '9';
+					str[i+3] = '2';
 					break;
 			}
 		}
@@ -798,7 +834,7 @@ int convert_esc_to_int(const char* str, int len) {
 	char esc[3];
     if (len == 3) {
         result = strtol(str, NULL, 8);
-        if(result > 255 || result == 36 || result < 0){
+        if(result > 255 || result == 36 || result < 1){
             return -1;
         }
 		sprintf(esc, "%d", (int) result);
@@ -806,7 +842,7 @@ int convert_esc_to_int(const char* str, int len) {
         if(str[0] < '0' || (str[0] > '9' && str[0] < 'A') || (str[0] > 'F' && str[0] < 'a') || str[0] > 'f'){
             return -1;
         }
-        if(str[1] < '0' || (str[1] > '9' && str[1] < 'A') || (str[1] > 'F' && str[1] < 'a') || str[1] > 'f' ){
+        if(str[1] < '1' || (str[1] > '9' && str[1] < 'A') || (str[1] > 'F' && str[1] < 'a') || str[1] > 'f' ){
             return -1;
         }
         result = strtol(str, NULL, 16);
