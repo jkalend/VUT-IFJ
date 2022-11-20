@@ -30,8 +30,6 @@ int get_token(Token *token) {
             int i = 0;
             char *identifier = malloc(size * sizeof(char));
 			if(identifier == NULL){
-				token->type = T_ERROR;
-				token->line = line;
 				exit(BAD_INTERNAL);
 			}
             while(c != EOF && (isalnum(c) || c == '_')) {
@@ -39,8 +37,6 @@ int get_token(Token *token) {
                     size *= 2;
 					char *tmp = realloc(identifier, size * sizeof(char));
 					if(tmp == NULL){
-						token->type = T_ERROR;
-						token->line = line;
 						free(identifier);
 						exit(BAD_INTERNAL);
 					}
@@ -66,8 +62,6 @@ int get_token(Token *token) {
             int size = 40;
             char *str = malloc(size);
 			if(str == NULL){
-				token->type = T_ERROR;
-				token->line = line;
 				exit(BAD_INTERNAL);
 			}
             int i = 0;
@@ -79,8 +73,6 @@ int get_token(Token *token) {
                     size *= 2;
                     char *tmp = realloc(str, size);
 					if(tmp == NULL){
-						token->type = T_ERROR;
-						token->line = line;
 						free(str);
 						exit(BAD_INTERNAL);
 					}
@@ -95,9 +87,21 @@ int get_token(Token *token) {
             }
             ungetc(c, stream);
             str[i] = '\0';
+			if(str[i-1] < '0' || str[i-1] > '9'){
+				token->type = T_ERROR;
+				token->line = line;
+				free_memory(str, BAD_LEXEM);
+				return BAD_LEXEM;
+			}
             i = 0;
             while (str[i] != '\0'){
                 if (str[i] == '.'){
+					if(e > 0){
+						token->type = T_ERROR;
+						token->line = line;
+						free_memory(str, BAD_LEXEM);
+						return BAD_LEXEM;
+					}
                     dot++;
                 }
                 if (str[i] == 'e' || str[i] == 'E'){
@@ -150,7 +154,7 @@ int get_token(Token *token) {
                 } else if (c2 == '*') {
                     c2 = fgetc(stream);
 
-                    kokocina:
+                    commentary:
                     while (c2 != '*') {
                         c2 = fgetc(stream);
                         if(c2 == '\n') {
@@ -173,7 +177,7 @@ int get_token(Token *token) {
                         if(c2 == '\n') {
                             line++;
                         }
-                        goto kokocina;
+                        goto commentary;
                     }
                 } else {
                     ungetc(c2, stream);
@@ -214,8 +218,6 @@ int get_token(Token *token) {
 								int ok = 0;
 								char *arr = malloc(24);
 								if(arr == NULL){
-									token->type = T_ERROR;
-									token->line = line;
 									exit(BAD_INTERNAL);
 								}
 								char *slider = arr;
@@ -384,6 +386,7 @@ int get_token(Token *token) {
                         token->line = line;
                         return LEX_OK;
                     }else{
+						ungetc(c2, stream);
                         token->type = T_ERROR;
                         token->line = line;
                         return BAD_LEXEM;
@@ -404,15 +407,16 @@ int get_token(Token *token) {
                         token->line = line;
                         return LEX_OK;
                     }else{
+						ungetc(c2, stream);
                         token->type = T_ERROR;
                         token->line = line;
                         return BAD_LEXEM;
                     }
                 } else {
-                    ungetc(c2, stream);
-                    token->type = T_NOT;
+					ungetc(c2, stream);
+                    token->type = T_ERROR;
                     token->line = line;
-                    return LEX_OK;
+                    return BAD_LEXEM;
                 }
             }
             case '(': {
@@ -450,6 +454,7 @@ int get_token(Token *token) {
                 token->line = line;
                 return LEX_OK;
             }
+            /*
             case '&': {
                 int c2 = fgetc(stream);
                 if (c2 == '&') {
@@ -476,6 +481,7 @@ int get_token(Token *token) {
                     return BAD_LEXEM;
                 }
             }
+            */
             case ':':{
                 token->type = T_DOUBLE_DOT;
                 token->line = line;
@@ -493,8 +499,6 @@ int get_token(Token *token) {
                 int size = 40;
                 char *str = malloc(40);
 				if(str == NULL){
-					token->type = T_ERROR;
-					token->line = line;
 					exit(BAD_INTERNAL);
 				}
                 int i = 0;
@@ -503,8 +507,6 @@ int get_token(Token *token) {
                         size *= 2;
                         char *tmp = realloc(str, size);
 						if(tmp == NULL){
-							token->type = T_ERROR;
-							token->line = line;
 							free(str);
 							exit(BAD_INTERNAL);
 						}
@@ -516,11 +518,13 @@ int get_token(Token *token) {
                 }
                 ungetc(c2, stream);
                 str[i] = '\0';
-                if (kw_check(str, token) != 1){
+				/*
+				if (kw_check(str, token) != 1){
                     token->line = line;
                     free_memory(str, LEX_OK);
                     return LEX_OK;
                 }
+                */
                 token->value.identifier = str;
                 return LEX_OK;
             }
@@ -533,8 +537,6 @@ int get_token(Token *token) {
                 } else if (c2 >= 'a' && c2 <= 'z') {
                     char *str = malloc(40);
 					if(str == NULL){
-						token->type = T_ERROR;
-						token->line = line;
 						exit(BAD_INTERNAL);
 					}
                     int size = 40;
@@ -544,8 +546,6 @@ int get_token(Token *token) {
                             size *= 2;
                             char *tmp = realloc(str, size);
 							if(tmp == NULL){
-								token->type = T_ERROR;
-								token->line = line;
 								free(str);
 								exit(BAD_INTERNAL);
 							}
@@ -582,8 +582,6 @@ int get_token(Token *token) {
                 }
                 char *str = malloc(40);
 				if(str == NULL){
-					token->type = T_ERROR;
-					token->line = line;
 					exit(BAD_INTERNAL);
 				}
                 int size = 40;
@@ -593,8 +591,6 @@ int get_token(Token *token) {
                         size *= 2;
                         char *tmp = realloc(str, size);
 						if(tmp == NULL){
-							token->type = T_ERROR;
-							token->line = line;
 							free(str);
 							exit(BAD_INTERNAL);
 						}
@@ -635,6 +631,7 @@ char* convert_string_for_ifjcode(char *str, int size) {
     char hex[2];
     char oct[3];
     while(str[i] != '\0'){
+
 		if(str[i] == '\\' && str[i+1] == 'x'){
 			hex[0] = str[i+2];
 			hex[1] = str[i+3];
@@ -842,11 +839,11 @@ int convert_esc_to_int(const char* str, int len) {
         if(str[0] < '0' || (str[0] > '9' && str[0] < 'A') || (str[0] > 'F' && str[0] < 'a') || str[0] > 'f'){
             return -1;
         }
-        if(str[1] < '1' || (str[1] > '9' && str[1] < 'A') || (str[1] > 'F' && str[1] < 'a') || str[1] > 'f' ){
+        if(str[1] < '0' || (str[1] > '9' && str[1] < 'A') || (str[1] > 'F' && str[1] < 'a') || str[1] > 'f' ){
             return -1;
         }
         result = strtol(str, NULL, 16);
-        if(result == 36){
+        if(result == 36 || result < 1){
             return -1;
         }
     }

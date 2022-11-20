@@ -247,14 +247,14 @@ ENDTEST(stream, "prologue_declare_variable_float_with_exp_as_string.php")
 
 #ifndef LEX_ALL
 int main(void) {
-    int tests_failed = 0;
-    tests_failed += test_prologue_declare_variable_string();
-    tests_failed += test_prologue_declare_variable_int();
-    tests_failed += test_prologue_declare_variable_float();
-    tests_failed += test_prologue_declare_variable_int_as_string();
-    tests_failed += test_prologue_declare_variable_float_as_string();
-    tests_failed += test_prologue_declare_variable_float_with_exp();
-    tests_failed += test_prologue_declare_variable_float_with_exp_as_string();
-    return tests_failed ? 1 : 0;
+	int tests_failed = 0;
+	tests_failed += test_prologue_declare_variable_string();
+	tests_failed += test_prologue_declare_variable_int();
+	tests_failed += test_prologue_declare_variable_float();
+	tests_failed += test_prologue_declare_variable_int_as_string();
+	tests_failed += test_prologue_declare_variable_float_as_string();
+	tests_failed += test_prologue_declare_variable_float_with_exp();
+	tests_failed += test_prologue_declare_variable_float_with_exp_as_string();
+	return tests_failed ? 1 : 0;
 }
-#endif //LEX_ALL
+#endif	//LEX_ALL
