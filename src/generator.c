@@ -387,10 +387,23 @@ void gen_concat(Instruction *instruction, Generator *generator) {
 void gen_call(Instruction *instruction) {
     printf("CREATEFRAME\n");
     for (int i = 0; i < instruction->params_count; i++) {
-        printf("DEFVAR TF@%s\n", instruction->params[i]->identifier);
-        printf("MOVE TF@%s LF@%s\n", instruction->params[i]->identifier, instruction->params[i]->identifier);
+        printf("DEFVAR TF@%s\n", instruction->operands[0]->param_names[i]);
+        printf("MOVE TF@%s LF@%s\n", instruction->operands[0]->param_names[i], instruction->params[i]->identifier);
     }
     printf("CALL $!%s\n", instruction->operands[0]->identifier);
+}
+
+void gen_eq(Instruction *instruction) {
+    printf("TYPE GF@%%check0 LF@%s\n", instruction->operands[0]->identifier);
+    printf("TYPE GF@%%check1 LF@%s\n", instruction->operands[0]->identifier);
+    printf("EQ LF@%s GF@%%check0 GF@%%check1\n", instruction->id);
+}
+
+void gen_neq(Instruction *instruction) {
+    printf("TYPE GF@%%check0 LF@%s\n", instruction->operands[0]->identifier);
+    printf("TYPE GF@%%check1 LF@%s\n", instruction->operands[0]->identifier);
+    printf("EQ LF@%s GF@%%check0 GF@%%check1\n", instruction->id);
+    printf("NOT LF@%s LF@%s\n", instruction->id, instruction->id);
 }
 
 int generate(Generator *generator) {
@@ -446,12 +459,14 @@ int generate(Generator *generator) {
             case gt:
                 break;
             case eq:
+                gen_eq(generator->instructions[i]);
                 break;
             case lte:
                 break;
             case gte:
                 break;
             case neq:
+                gen_neq(generator->instructions[i]);
                 break;
             case floatval:
                 break;
@@ -494,6 +509,17 @@ int generate(Generator *generator) {
             case end:
                 printf("EXIT int@0\n");
                 break;
+            case start_fn:    
+                printf("LABEL $%s\n", generator->instructions[i]->operands[0]->identifier);
+                printf("PUSHFRAME\n");
+                printf("DEFVAR LF@$$retval\n");
+                printf("MOVE LF@$$retval nil@nil\n");
+                break;
+            case end_fn:
+                if (generator->instructions[i]->operands != NULL) 
+                    printf("MOVE LF@$$retval LF@%s\n", generator->instructions[i]->operands[0]->identifier);
+                printf("POPFRAME\n");
+                printf("RET\n");
             default:
                 break;
         }

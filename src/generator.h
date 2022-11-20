@@ -19,9 +19,9 @@ typedef enum {
     substring,
     ord,
     chr,
+    strval,
     floatval,
     intval,
-    strval,
     write,
     concat,
     assign,
@@ -40,7 +40,9 @@ typedef enum {
     gte,
     neq,
     main_,
-    end
+    end,
+    start_fn,
+    end_fn
 }InstructionType;
 
 typedef struct {
