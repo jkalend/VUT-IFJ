@@ -326,8 +326,8 @@ void gen_concat(Instruction *instruction, Generator *generator) {
 void gen_call(Instruction *instruction) {
     printf("CREATEFRAME\n");
     for (int i = 0; i < instruction->params_count; i++) {
-        printf("DEFVAR TF@%d\n", i);
-        printf("MOVE TF@%d LF@%s\n", i, instruction->params[i]->identifier);
+        printf("DEFVAR TF@%s\n", instruction->operands[0]->param_names[i]);
+        printf("MOVE TF@%s LF@%s\n", instruction->operands[0]->param_names[i], instruction->params[i]->identifier);
     }
     printf("CALL $!%s\n", instruction->operands[0]->identifier);
 }
@@ -439,6 +439,7 @@ int generate(Generator *generator) {
                 printf("MOVE LF@$$retval nil@nil\n");
                 break;
             case end_fn:
+                printf("MOVE LF@$$retval LF@%s", generator->instructions[i]->operands[0]->identifier);
                 printf("POPFRAME\n");
                 printf("RET\n");
             default:

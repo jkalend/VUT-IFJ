@@ -1130,6 +1130,8 @@ int parse(Generator *gen) {
                 if (parser.expect_ret) {
                     if (parser.val_returned != parser.val_expected) exit(BAD_TYPE_OR_RETURN);
                     Instruction *instr = malloc(sizeof(Instruction));
+                    instr->operands = malloc(1);
+                    instr->operands[0] = parser.val_returned;
                     instr->instruct = end_fn;
                     generator_add_instruction(gen, instr);
                 }
