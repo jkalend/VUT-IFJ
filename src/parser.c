@@ -595,14 +595,14 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
                     if (stack_top(reversal)->bucket->value_type == D_INT ||
                         stack_top(reversal)->bucket->value_type == D_FLOAT ||
                         stack_top(reversal)->bucket->value_type == D_VOID) {
-                        continue;
+                        // is ok
                     } else {
                         exit(BAD_TYPE_OR_RETURN);
                     }
                 } else if (last_fn->params[i] == D_STRING) {
                     if (stack_top(reversal)->bucket->value_type == D_STRING ||
                         stack_top(reversal)->bucket->value_type == D_VOID) {
-                        continue;
+                        // is ok
                     } else {
                         exit(BAD_TYPE_OR_RETURN);
                     }
