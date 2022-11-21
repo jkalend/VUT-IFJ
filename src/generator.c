@@ -416,7 +416,7 @@ void gen_gt(Instruction *instruction, Generator *generator, char op[], bool inve
     /* operands are not null and have the same type -we can compare */
     printf("%s LF@%s LF@%s LF@%s\n", op, instruction->id, instruction->operands[0]->identifier, instruction->operands[1]->identifier);
     if (invert) printf("NOT LF@%s LF@%s\n", instruction->id);
-    printf("JUMP %d\n", generator->label_count + 4);
+    printf("JUMP !!%d\n", generator->label_count + 4);
 
     printf("LABEL !!%d\n", generator->label_count++);
     printf("JUMPIFEQ !!%d GF@%%check0 nil@nil\n", generator->label_count + 2);
@@ -441,7 +441,7 @@ void gen_gt(Instruction *instruction, Generator *generator, char op[], bool inve
 
     printf("LABEL !!%d\n", generator->label_count++);
     printf("MOVE LF@%s bool@false\n", instruction->id);
-    printf("LABEL %d\n", generator->label_count++);
+    printf("LABEL !!%d\n", generator->label_count++);
 
 }
 

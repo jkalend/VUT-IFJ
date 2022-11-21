@@ -480,6 +480,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
                     rel->operands[1] = op_one->bucket;
                     rel->operands[0] = op_two->bucket;
                     rel->operands_count = 2;
+                    generator_add_instruction(gen, rel);
                     break;
                 case T_LESS:
                     rel->instruct = lt;
@@ -488,6 +489,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
                     rel->operands[1] = op_one->bucket;
                     rel->operands[0] = op_two->bucket;
                     rel->operands_count = 2;
+                    generator_add_instruction(gen, rel);
                     break;
                 case T_GREATER_EQUAL:
                     rel->instruct = gte;
@@ -496,6 +498,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
                     rel->operands[1] = op_one->bucket;
                     rel->operands[0] = op_two->bucket;
                     rel->operands_count = 2;
+                    generator_add_instruction(gen, rel);
                     break;
                 case T_LESS_EQUAL:
                     rel->instruct = lte;
@@ -504,6 +507,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
                     rel->operands[1] = op_one->bucket;
                     rel->operands[0] = op_two->bucket;
                     rel->operands_count = 2;
+                    generator_add_instruction(gen, rel);
                     break;
                 default:
                     exit(BAD_SYNTAX);
