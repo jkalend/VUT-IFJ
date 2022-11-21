@@ -578,6 +578,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
 
     function:
     if (fn) {
+        data->bucket->type = H_FUNC_ID;
         //symtable is used here to check for number of args
         int brackets = 0;
         int E = 0;
@@ -1056,7 +1057,7 @@ int parse(Generator *gen) {
                 else if (token->type == T_RIGHT_BRACE) {
                     parser.bracket_counter--;
                     if (!stack_isEmpty(brackets)) {
-                        TData *data = stack_top(brackets);
+                        TData *data = stack_pop(brackets);
                         if (data->value == parser.bracket_counter) {
                             Instruction *instr = malloc(sizeof(Instruction));
                             if (data->type == KW_IF) {
@@ -1079,11 +1080,11 @@ int parse(Generator *gen) {
                         if (stack_isEmpty(parser.local_tabs)) parser.temporary_tab = parser.glob_tab;
                         else parser.temporary_tab = stack_top(parser.local_tabs)->htab;
 
-                        if (parser.val_returned != NULL && parser.val_returned->value_type != parser.val_expected) {
-                            printf("%d %d\n", parser.val_expected, parser.val_returned->value);
+                        if (parser.val_returned != NULL && (parser.val_returned->value_type != parser.val_expected)) {
+                            printf("%d %d\n", parser.val_expected, parser.val_returned->value_type);
                             exit(BAD_TERM);
                         } 
-
+                        parser.in_function = false;
                         Instruction *instr = malloc(sizeof(Instruction));
                         switch (parser.val_expected) {
                             case D_INT:
@@ -1202,6 +1203,10 @@ int parse(Generator *gen) {
                     data->value = parser.bracket_counter;
                     data->type = KW_WHILE;
                     stack_push(brackets, data);
+
+                    Instruction *instr = malloc(sizeof(Instruction));
+                    instr->instruct = while_;
+                    generator_add_instruction(gen, instr);
                 }
 
                 if (token->value.keyword == KW_ELSE) {
@@ -1215,7 +1220,8 @@ int parse(Generator *gen) {
                     stack_push(brackets, data);
                 }
 
-                if ((token->value.keyword == KW_IF || token->value.keyword == KW_WHILE) && !parser.in_func) {
+                /* FIX ME - this doesn't work, in_func == NULL once fn definition is over  */
+                if ((token->value.keyword == KW_IF || token->value.keyword == KW_WHILE) && !parser.in_function) {
                     parser.main_found = true;
                 }
                 if (token->value.keyword == KW_RETURN) {
@@ -1227,6 +1233,7 @@ int parse(Generator *gen) {
 
                 /* function definition - create new item in tab */
                 if (parser.tmp_token->value.keyword == KW_FUNCTION && token->type == T_IDENTIFIER) { 
+                    parser.in_function = true;
                     parser.bracket_counter = 0;
                     char id[100] = "69";
                     strcat(id, token->value.identifier);
@@ -1333,9 +1340,11 @@ int parse(Generator *gen) {
             if (val == 0) val = LL_TABLE[row_idx][EPS];
 
             printf("%d ", val);
-            if (val >= 7 && val <= 12 && !parser.in_func) {
+
+            /* FIX ME */
+            if (val >= 7 && val <= 12 && !parser.in_function) {
                 parser.main_found = true;
-            } else if ((val == 4 || val == 3) && !parser.in_func) {
+            } else if ((val == 4 || val == 3) && !parser.in_function) {
                 parser.main_found = true;
             }
             apply_rule(stack, val);
@@ -1521,6 +1530,7 @@ int main(void) {
     parser.val_expected = D_VOID;
     parser.if_eval = false;
     parser.while_eval = false;
+    parser.in_function = false;
 
     insert_builtins();
 
