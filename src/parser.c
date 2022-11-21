@@ -1021,7 +1021,8 @@ int parse(Generator *gen) {
     stack = stack_init(stack);
     TStack *prec = NULL;
     prec = stack_init(prec);
-    
+    TStack *brackets = NULL;
+    brackets = stack_init(brackets);
     stack_push(stack, stack_data(T_EOF, T_TERM));
     stack_push(stack, stack_data(N_PROG, T_NONTERM));
 
@@ -1049,9 +1050,24 @@ int parse(Generator *gen) {
         TData *top = stack_pop(stack);
         if (top->type == T_TERM) {
             if (top->value == token->type) { 
-                if (token->type == T_LEFT_BRACE) parser.bracket_counter++;
+                if (token->type == T_LEFT_BRACE) {
+                    parser.bracket_counter++;
+                }
                 else if (token->type == T_RIGHT_BRACE) {
                     parser.bracket_counter--;
+                    if (!stack_isEmpty(brackets)) {
+                        TData *data = stack_top(brackets);
+                        if (data->value == parser.bracket_counter) {
+                            Instruction *instr = malloc(sizeof(Instruction));
+                            if (data->type == KW_IF) {
+                                instr->instruct = else_end;
+                            }
+                            else if (data->type == KW_WHILE) {
+                                instr->instruct = while_end;
+                            }
+                            generator_add_instruction(gen, instr);
+                        }
+                    }
                     if (parser.bracket_counter == 0 && parser.temporary_tab != parser.glob_tab) {
 
                         /* missing closing brace */
@@ -1064,11 +1080,25 @@ int parse(Generator *gen) {
                         else parser.temporary_tab = stack_top(parser.local_tabs)->htab;
 
                         if (parser.val_returned != NULL && parser.val_returned->value_type != parser.val_expected) {
-                            exit(BAD_TYPE_OR_RETURN);
+                            printf("%d %d\n", parser.val_expected, parser.val_returned->value);
+                            exit(BAD_TERM);
                         } 
 
                         Instruction *instr = malloc(sizeof(Instruction));
-                        instr->instruct = end_fn_float; /* call corresponding end_fn according to type */
+                        switch (parser.val_expected) {
+                            case D_INT:
+                                instr->instruct = end_fn_int;
+                                break;
+                            case D_FLOAT:
+                                instr->instruct = end_fn_float;
+                                break;
+                            case D_STRING:
+                                instr->instruct = end_fn_string;
+                                break;
+                            case D_VOID:
+                                instr->instruct = end_fn_void;
+                                break;
+                        }
                         generator_add_instruction(gen, instr);
                     }
                     
@@ -1167,12 +1197,22 @@ int parse(Generator *gen) {
                 }
                 if (token->value.keyword == KW_WHILE) {
                     parser.while_eval = true;
+
+                    TData *data = malloc(sizeof(TData));
+                    data->value = parser.bracket_counter;
+                    data->type = KW_WHILE;
+                    stack_push(brackets, data);
                 }
 
                 if (token->value.keyword == KW_ELSE) {
                     Instruction *instr = malloc(sizeof(Instruction));
                     instr->instruct = else_;
                     generator_add_instruction(gen, instr);
+
+                    TData *data = malloc(sizeof(TData));
+                    data->value = parser.bracket_counter;
+                    data->type = KW_IF;
+                    stack_push(brackets, data);
                 }
 
                 if ((token->value.keyword == KW_IF || token->value.keyword == KW_WHILE) && !parser.in_func) {
@@ -1251,12 +1291,27 @@ int parse(Generator *gen) {
 
                 if (parser.expect_ret) {
                     if (parser.temporary_tab != parser.glob_tab && parser.val_returned != NULL && parser.val_returned->value_type != parser.val_expected) 
-                        exit(BAD_TYPE_OR_RETURN);
+                        exit(BAD_TERM);
                     if (!parser.empty_expr) {
+
                         Instruction *instr = malloc(sizeof(Instruction));
                         instr->operands = malloc(sizeof(htab_pair_t *));
                         instr->operands[0] = parser.val_returned;
-                        instr->instruct = end_fn_float; /* call corresponding end_fn according to return type */
+
+                        switch (parser.val_expected) {
+                            case D_INT:
+                                instr->instruct = end_fn_int;
+                                break;
+                            case D_FLOAT:
+                                instr->instruct = end_fn_float;
+                                break;
+                            case D_STRING:
+                                instr->instruct = end_fn_string;
+                                break;
+                            case D_VOID:
+                                instr->instruct = end_fn_void;
+                                break;
+                        }
                         generator_add_instruction(gen, instr);
                     } 
                 }

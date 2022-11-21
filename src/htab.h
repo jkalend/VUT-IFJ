@@ -14,7 +14,7 @@
 #define AVG_LEN_MAX 15
 #define AVG_LEN_MIN 2
 
-typedef const char * htab_key_t; 
+typedef char * htab_key_t; 
 
 // float > int
 
