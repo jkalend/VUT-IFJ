@@ -445,7 +445,6 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
             conc_->operands_count = 2;
             generator_add_instruction(gen, conc_);
             
-
             pair->value_type = D_STRING;
 
             printf("6p ");
@@ -462,9 +461,54 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
             if (fn) goto function;
             while (cnt < 5) {stack_pop(shelf); cnt++;}
             if (cnt != 5) goto cleanup;
-            stack_pop(temps);
-            stack_pop(temps);
+            op_one = stack_pop(temps);
+            op_two = stack_pop(temps);
             pair->value_type = D_BOOL;
+
+            Instruction *_rel = malloc(sizeof(Instruction));
+            _rel->instruct = defvar;
+            _rel->id = tmp;
+            generator_add_instruction(gen, _rel);
+
+            Instruction *rel = malloc(sizeof(Instruction));
+
+            switch (parser.relation_operator) {
+                case T_GREATER:
+                    rel->instruct = gt;
+                    rel->id = tmp;
+                    rel->operands = malloc(sizeof(htab_pair_t*) * 2);
+                    rel->operands[1] = op_one->bucket;
+                    rel->operands[0] = op_two->bucket;
+                    rel->operands_count = 2;
+                    break;
+                case T_LESS:
+                    rel->instruct = lt;
+                    rel->id = tmp;
+                    rel->operands = malloc(sizeof(htab_pair_t*) * 2);
+                    rel->operands[1] = op_one->bucket;
+                    rel->operands[0] = op_two->bucket;
+                    rel->operands_count = 2;
+                    break;
+                case T_GREATER_EQUAL:
+                    rel->instruct = gte;
+                    rel->id = tmp;
+                    rel->operands = malloc(sizeof(htab_pair_t*) * 2);
+                    rel->operands[1] = op_one->bucket;
+                    rel->operands[0] = op_two->bucket;
+                    rel->operands_count = 2;
+                    break;
+                case T_LESS_EQUAL:
+                    rel->instruct = lte;
+                    rel->id = tmp;
+                    rel->operands = malloc(sizeof(htab_pair_t*) * 2);
+                    rel->operands[1] = op_one->bucket;
+                    rel->operands[0] = op_two->bucket;
+                    rel->operands_count = 2;
+                    break;
+                default:
+                    exit(BAD_SYNTAX);
+                    break;
+            }
 
             printf("8p ");
             stack_push(temps, data);

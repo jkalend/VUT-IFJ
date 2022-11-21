@@ -423,14 +423,14 @@ void gen_gt(Instruction *instruction, Generator *generator, char op[], bool inve
 
     printf("JUMPIFEQ !!%d GF@%%check1 nil@nil\n", generator->label_count + 1);
 
-    printf("JUMPIFEQ $!!EXIT_7 GF@check0 string@string\n");
-    printf("JUMPIFEQ $!!EXIT_7 GF@check1 string@string\n");
+    printf("JUMPIFEQ $!!EXIT_7 GF@%%check0 string@string\n");
+    printf("JUMPIFEQ $!!EXIT_7 GF@%%check1 string@string\n");
 
-    printf("JUMPIFNEQ !!%d GF@check0 string@int\n", generator->label_count);
+    printf("JUMPIFNEQ !!%d GF@%%check0 string@int\n", generator->label_count);
     printf("INT2FLOAT LF@%s LF@%s\n", instruction->operands[0]->identifier);
     printf("JUMP !!%d\n", generator->label_count - 2);
 
-    pritnf("LABEL !!%d\n", generator->label_count++);
+    printf("LABEL !!%d\n", generator->label_count++);
     printf("INT2FLOAT LF@%s LF@%s\n", instruction->operands[1]->identifier);
     printf("JUMP !!%d\n", generator->label_count - 3);  
 
@@ -446,6 +446,7 @@ void gen_gt(Instruction *instruction, Generator *generator, char op[], bool inve
 }
 
 int generate(Generator *generator) {
+    TData *data = malloc(sizeof(TData));
     printf(".IFJcode22\n");
     printf("defvar GF@%%bool\n");
     printf("defvar GF@%%int\n");
@@ -580,7 +581,7 @@ int generate(Generator *generator) {
                 printf("RET\n");
                 break;
             case while_:
-                TData *data = malloc(sizeof(TData));
+                //TData *data = malloc(sizeof(TData));
                 data->value = generator->label_count++;
                 data->type = generator->label_count++;
                 stack_push(generator->label_stack, data);
@@ -619,12 +620,11 @@ int generate(Generator *generator) {
                 break;
 
             case if_:
-                TData *data = malloc(sizeof(TData));
                 data->value = generator->label_count++;
                 data->type = generator->label_count++;
                 stack_push(generator->label_stack, data);
 
-                printf("TYPE GF%%check0 LF@%s\n", generator->instructions[i]->id);
+                printf("TYPE GF@%%check0 LF@%s\n", generator->instructions[i]->id);
                 printf("JUMPIFEQ !!%d GF@%%check0 GF@%%string\n", generator->label_count);
                 printf("JUMPIFEQ !!%d GF@%%check0 GF@%%int\n", generator->label_count + 1);
                 printf("JUMPIFEQ !!%d GF@%%check0 GF@%%float\n", generator->label_count + 2);
