@@ -37,7 +37,7 @@ void gen_substring(Instruction *instruction, Generator *generator) {
 	printf("JUMP !!%d\n", generator->label_count + 4);
 
 	printf("LABEL !!%d\n", generator->label_count);
-	//tady mam string
+	//string checked
 	printf("TYPE GF@%%check0 LF@%s\n", instruction->params[1]->identifier);
 	printf("JUMPIFEQ !!%d GF@%%int GF@%%check0\n", generator->label_count + 1);
 	printf("TYPE GF@%%check0 LF@%s\n", instruction->params[1]->identifier);
@@ -49,7 +49,7 @@ void gen_substring(Instruction *instruction, Generator *generator) {
 	printf("FLOAT2INT LF@%s LF@%s\n", instruction->params[1]->identifier, instruction->params[1]->identifier);
 
 	printf("LABEL !!%d\n", generator->label_count + 1);
-	//tady mam prvni index jako int
+	//first int checked
 
 	printf("TYPE GF@%%check0 LF@%s\n", instruction->params[2]->identifier);
 	printf("JUMPIFEQ !!%d GF@%%int GF@%%check0\n", generator->label_count + 6);
@@ -61,8 +61,7 @@ void gen_substring(Instruction *instruction, Generator *generator) {
 	printf("FLOAT2INT LF@%s LF@%s\n", instruction->params[2]->identifier, instruction->params[2]->identifier);
 
 	printf("LABEL !!%d\n", generator->label_count + 6);
-	//tady mam druhy index jako int
-	//cas na kontrolu indexu *despair*
+	//second int checked
 	printf("LT GF@%%check0 LF@%s int@0\n", instruction->params[1]->identifier);
 	printf("JUMPIFEQ !!%d GF@%%check0 bool@true\n", generator->label_count + 4);
 	printf("LT GF@%%check0 LF@%s int@0\n", instruction->params[2]->identifier);
@@ -81,7 +80,6 @@ void gen_substring(Instruction *instruction, Generator *generator) {
 	printf("GT GF@%%check0 LF@%s LF@tmpvar\n", instruction->params[2]->identifier);
 	printf("JUMPIFEQ !!%d GF@%%check0 bool@true\n", generator->label_count + 4);
 	//error checking done
-
 	printf("MOVE LF@tmpvar string@\n");
 	printf("LABEL !!%d\n", generator->label_count + 7);
 	printf("GETCHAR GF@%%check0 LF@%s LF@%s\n", instruction->params[0]->identifier, instruction->params[1]->identifier);
@@ -91,10 +89,58 @@ void gen_substring(Instruction *instruction, Generator *generator) {
 	printf("MOVE LF@%s LF@tmpvar\n", instruction->id);
 
 	printf("JUMP !!%d\n", generator->label_count + 5);
-	printf("LABEL !!%d\n", generator->label_count + 4); //tuto error stav, resp vracim null
+	printf("LABEL !!%d\n", generator->label_count + 4); //error
 	printf("MOVE LF@%s nil@nil\n", instruction->id);
 	printf("LABEL !!%d\n", generator->label_count + 5);
 	generator->label_count += 8;
+}
+
+void gen_floatval(Instruction *instruction, Generator *generator){
+	printf("TYPE GF@%%check0 LF@%s\n", instruction->params[0]->identifier);
+	printf("JUMPIFEQ !!%d GF@%%float GF@%%check0\n", generator->label_count);
+	printf("JUMPIFEQ !!%d GF@%%int GF@%%check0\n", generator->label_count + 1);
+	printf("MOVE LF@%s float@0x0.0p+0\n", instruction->id);
+	printf("JUMP !!%d\n", generator->label_count + 2);
+
+	printf("LABEL !!%d\n", generator->label_count + 1);
+	printf("INT2FLOAT LF@%s LF@%s\n", instruction->id, instruction->params[0]->identifier);
+	printf("JUMP !!%d\n", generator->label_count + 2);
+
+	printf("LABEL !!%d\n", generator->label_count);
+	printf("MOVE LF@%s LF@%s\n", instruction->id, instruction->params[0]->identifier);
+
+	printf("LABEL !!%d\n", generator->label_count + 2);
+}
+
+void gen_intval(Instruction *instruction, Generator *generator) {
+	printf("TYPE GF@%%check0 LF@%s\n", instruction->params[0]->identifier);
+	printf("JUMPIFEQ !!%d GF@%%int GF@%%check0\n", generator->label_count);
+	printf("JUMPIFEQ !!%d GF@%%float GF@%%check0\n", generator->label_count + 1);
+	printf("MOVE LF@%s int@0\n", instruction->id);
+	printf("JUMP !!%d\n", generator->label_count + 2);
+
+	printf("LABEL !!%d\n", generator->label_count + 1);
+	printf("FLOAT2INT LF@%s LF@%s\n", instruction->id, instruction->params[0]->identifier);
+	printf("JUMP !!%d\n", generator->label_count + 2);
+
+	printf("LABEL !!%d\n", generator->label_count);
+	printf("MOVE LF@%s LF@%s\n", instruction->id, instruction->params[0]->identifier);
+
+	printf("LABEL !!%d\n", generator->label_count + 2);
+	generator->label_count += 3;
+}
+
+void gen_strval(Instruction *instruction, Generator *generator){
+	printf("TYPE GF@%%check0 LF@%s\n", instruction->params[0]->identifier);
+	printf("JUMPIFEQ !!%d GF@%%string GF@%%check0\n", generator->label_count);
+	printf("MOVE LF@%s string@\n", instruction->id);
+	printf("JUMP !!%d\n", generator->label_count + 1);
+
+	printf("LABEL !!%d\n", generator->label_count);
+	printf("MOVE LF@%s LF@%s\n", instruction->id, instruction->params[0]->identifier);
+
+	printf("LABEL !!%d\n", generator->label_count + 1);
+	generator->label_count += 2;
 }
 
 void gen_ord(Instruction *instruction, Generator *generator) {
@@ -523,10 +569,13 @@ int generate(Generator *generator) {
                 printf("NOT LF@%s LF@%s\n", generator->instructions[i]->id, generator->instructions[i]->id);
                 break;
             case floatval:
+				gen_floatval(generator->instructions[i], generator);
                 break;
             case intval:
+				gen_intval(generator->instructions[i], generator);
                 break;
             case strval:
+				gen_strval(generator->instructions[i], generator);
                 break;
             case substring:
 				gen_substring(generator->instructions[i], generator);
