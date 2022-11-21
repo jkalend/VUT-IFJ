@@ -67,6 +67,8 @@ typedef struct {
     bool allow_expr_empty;
     bool expect_ret;
     bool main_found;
+    bool if_eval;
+    bool while_eval;
     char relation_operator;
     char **builtins;
     int tmp_counter;

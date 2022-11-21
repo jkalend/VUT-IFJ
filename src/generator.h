@@ -43,9 +43,16 @@ typedef enum {
     main_,
     end,
     start_fn,
-    end_fn,
+    end_fn_string,
+    end_fn_float,
+    end_fn_int,
+    end_fn_void,
     while_,
-    if_
+    while_start,
+    while_end,
+    if_,
+    else_,
+    else_end
 }InstructionType;
 
 typedef struct {
@@ -71,8 +78,9 @@ typedef struct {
     Instruction **instructions;
     long instruction_count;
     int fn_temps;
+    TStack *label_stack;
 
-}Generator;
+} Generator;
 
 void generator_init(Generator *);
 

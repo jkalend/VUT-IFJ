@@ -695,6 +695,22 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
         unsigned int sym = PREC_TABLE[row][column];
         if (end && !sym) {
             TData *top = stack_top(temps);
+            if (parser.if_eval) {
+                Instruction *instr = malloc(sizeof(Instruction));
+                instr->instruct = if_;
+                instr->id = top->bucket->identifier;
+                generator_add_instruction(gen, instr);
+                parser.if_eval = false;
+            }
+
+            if (parser.while_eval) {
+                Instruction *instr = malloc(sizeof(Instruction));
+                instr->instruct = while_;
+                instr->id = top->bucket->identifier;
+                generator_add_instruction(gen, instr);
+                parser.while_eval = false;
+            }
+
             if (parser.expect_ret && top != NULL) parser.val_returned = top->bucket;
             if (parser.in_assign != NULL && top != NULL) {
                 parser.in_assign->value_type = top->bucket->value_type;
@@ -911,6 +927,22 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 return 0;
             } else {
                 TData *top = stack_top(temps);
+                if (parser.if_eval) {
+                    Instruction *instr = malloc(sizeof(Instruction));
+                    instr->instruct = if_;
+                    instr->id = top->bucket->identifier;
+                    generator_add_instruction(gen, instr);
+                    parser.if_eval = false;
+                }
+                
+                if (parser.while_eval) {
+                    Instruction *instr = malloc(sizeof(Instruction));
+                    instr->instruct = while_;
+                    instr->id = top->bucket->identifier;
+                    generator_add_instruction(gen, instr);
+                    parser.while_eval = false;
+                }
+
                 if (parser.expect_ret) parser.val_returned = top->bucket;
                 if (parser.in_assign != NULL && top != NULL) {
                     parser.in_assign->value_type = top->bucket->value_type;
@@ -988,7 +1020,7 @@ int parse(Generator *gen) {
                         } 
 
                         Instruction *instr = malloc(sizeof(Instruction));
-                        instr->instruct = end_fn;
+                        instr->instruct = end_fn_float; /* call corresponding end_fn according to type */
                         generator_add_instruction(gen, instr);
                     }
                     
@@ -1082,6 +1114,19 @@ int parse(Generator *gen) {
         }
         else if (top->type == T_KW) {
             if (token->type == T_KEYWORD && top->value == token->value.keyword) {
+                if (token->value.keyword == KW_IF) {
+                    parser.if_eval = true;
+                }
+                if (token->value.keyword == KW_WHILE) {
+                    parser.while_eval = true;
+                }
+
+                if (token->value.keyword == KW_ELSE) {
+                    Instruction *instr = malloc(sizeof(Instruction));
+                    instr->instruct = else_;
+                    generator_add_instruction(gen, instr);
+                }
+
                 if ((token->value.keyword == KW_IF || token->value.keyword == KW_WHILE) && !parser.in_func) {
                     parser.main_found = true;
                 }
@@ -1163,7 +1208,7 @@ int parse(Generator *gen) {
                         Instruction *instr = malloc(sizeof(Instruction));
                         instr->operands = malloc(sizeof(htab_pair_t *));
                         instr->operands[0] = parser.val_returned;
-                        instr->instruct = end_fn;
+                        instr->instruct = end_fn_float; /* call corresponding end_fn according to return type */
                         generator_add_instruction(gen, instr);
                     } 
                 }
@@ -1371,6 +1416,8 @@ int main(void) {
     parser.bracket_counter = 0;
     parser.val_returned = NULL;
     parser.val_expected = D_VOID;
+    parser.if_eval = false;
+    parser.while_eval = false;
 
     insert_builtins();
 
