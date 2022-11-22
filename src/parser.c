@@ -817,8 +817,8 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 instr->instruct = while_start;
                 instr->id = top->bucket->identifier;
                 generator_add_instruction(gen, instr);
-
-                parser.in_while = instr;
+                parser.while_eval = false;
+                //parser.in_while = instr;
             }
 
             if (parser.expect_ret && top != NULL) parser.val_returned = top->bucket;
@@ -1153,7 +1153,10 @@ int parse(Generator *gen) {
                                 instr->instruct = while_end;
                             }
                             generator_add_instruction(gen, instr);
-                            if (data->type == KW_WHILE) generator_add_instruction(gen, parser.in_while);
+                            if (data->type == KW_WHILE) {
+                                generator_add_instruction(gen, parser.in_while);
+                                parser.in_while = NULL;
+                            }
                         }
                     }
                     if (parser.bracket_counter == 0 && parser.temporary_tab != parser.glob_tab) {
@@ -1395,14 +1398,14 @@ int parse(Generator *gen) {
                 parser.in_assign = NULL;
                 get_next_token(&token, &keep_prev_token, &return_back);
 
-                if (parser.while_eval) {
-                    parser.while_eval = false;
+                // if (parser.while_eval) {
+                //     parser.while_eval = false;
 
-                    Instruction *instr = malloc(sizeof(Instruction));
-                    instr->instruct = while_start;
+                //     Instruction *instr = malloc(sizeof(Instruction));
+                //     instr->instruct = while_start;
 
-                    generator_add_instruction(gen, instr);
-                }
+                //     generator_add_instruction(gen, instr);
+                // }
 
                 if (parser.expect_ret) {
                     if (parser.temporary_tab != parser.glob_tab && parser.val_returned != NULL && parser.val_returned->value_type != parser.val_expected) 
