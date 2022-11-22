@@ -620,7 +620,8 @@ int generate(Generator *generator) {
             case start_fn:    
                 printf("LABEL $%s\n", generator->instructions[i]->operands[0]->identifier);
                 printf("PUSHFRAME\n");
-
+                
+                printf("LABEL !!%s\n", generator->instructions[i]->operands[0]->identifier);
                 data = malloc(sizeof(TData));
                 data->value = generator->label_count++;
                 data->bucket = generator->instructions[i]->operands[0];
@@ -630,14 +631,14 @@ int generate(Generator *generator) {
                 printf("DEFVAR LF@$$retval\n");
                 printf("MOVE LF@$$retval nil@nil\n");
                 break;
-                
+
             case fn_defs:
                 printf("JUMP !!%d\n", generator->label_count);
                 printf("LABEL !!%d\n", stack_top(generator->label_stack)->value);
                 for (int j = 0; j < generator->instructions[i]->operands_count; j++) {
                     printf("DEFVAR LF@%s\n", generator->instructions[i]->operands[j]->identifier);
                 }
-                printf("JUMP $%s\n", stack_pop(generator->label_stack)->bucket->identifier);
+                printf("JUMP !!%s\n", stack_pop(generator->label_stack)->bucket->identifier);
                 printf("LABEL !!%d\n", generator->label_count++);
                 break;
                 
