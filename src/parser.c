@@ -1442,9 +1442,9 @@ int parse(Generator *gen) {
                     generator_add_instruction(gen, instr);
 
                     Instruction *temp = malloc(sizeof(Instruction));
-                    instr->instruct = fn_defs;
-                    instr->operands = NULL;
-                    instr->operands_count = 0;
+                    temp->instruct = fn_defs;
+                    temp->operands = NULL;
+                    temp->operands_count = 0;
                     parser.in_fn = temp;
                 }  
             }
