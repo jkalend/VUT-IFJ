@@ -689,7 +689,7 @@ int generate(Generator *generator) {
                 break;
 
             case while_start:
-                printf("TYPE GF%%check0 LF@%s\n", generator->instructions[i]->id);
+                printf("TYPE GF@%%check0 LF@%s\n", generator->instructions[i]->id);
                 printf("JUMPIFEQ !!%d GF@%%check0 GF@%%string\n", generator->label_count);
                 printf("JUMPIFEQ !!%d GF@%%check0 GF@%%int\n", generator->label_count + 1);
                 printf("JUMPIFEQ !!%d GF@%%check0 GF@%%float\n", generator->label_count + 2);
