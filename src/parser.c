@@ -1445,6 +1445,7 @@ int parse(Generator *gen) {
                     instr->instruct = fn_defs;
                     instr->operands = NULL;
                     instr->operands_count = 0;
+                    parser.in_fn = temp;
                 }  
             }
             else {
