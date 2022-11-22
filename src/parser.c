@@ -312,7 +312,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
                 pair->value_type = D_INT;
             }
 
-            if (parser.in_while == NULL) {
+            if (parser.in_while == NULL && !parser.in_function) {
                 Instruction *mul_var = malloc(sizeof(Instruction));
                 mul_var->instruct = defvar;
                 mul_var->id = tmp;
@@ -347,7 +347,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
             op_two = stack_pop(temps);
             pair->value_type = D_FLOAT;
 
-            if (parser.in_while == NULL) {
+            if (parser.in_while == NULL && !parser.in_function) {
                 Instruction *div_var = malloc(sizeof(Instruction));
                 div_var->instruct = defvar;
                 div_var->id = tmp;
@@ -388,7 +388,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
                 pair->value_type = D_INT;
             }
 
-            if (parser.in_while == NULL) {
+            if (parser.in_while == NULL && !parser.in_function) {
                 Instruction *add = malloc(sizeof(Instruction));
                 add->instruct = defvar;
                 add->id = tmp;
@@ -429,7 +429,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
                 pair->value_type = D_INT;
             }
 
-            if (parser.in_while == NULL) {
+            if (parser.in_while == NULL && !parser.in_function) {
                 Instruction *sub_var = malloc(sizeof(Instruction));
                 sub_var->instruct = defvar;
                 sub_var->id = tmp;
@@ -473,7 +473,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
                 exit(BAD_TYPE_COMPATIBILTY);
             }
 
-            if (parser.in_while == NULL) {
+            if (parser.in_while == NULL && !parser.in_function) {
                 Instruction *conc = malloc(sizeof(Instruction));
                 conc->instruct = defvar;
                 conc->id = tmp;
@@ -517,7 +517,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
             op_two = stack_pop(temps);
             pair->value_type = D_BOOL;
 
-            if (parser.in_while == NULL) {
+            if (parser.in_while == NULL && !parser.in_function) {
                 Instruction *_rel = malloc(sizeof(Instruction));
                 _rel->instruct = defvar;
                 _rel->id = tmp;
@@ -588,7 +588,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
             op_two = stack_pop(temps);
             pair->value_type = D_BOOL;
 
-            if (parser.in_while == NULL) {
+            if (parser.in_while == NULL && !parser.in_function) {
                 Instruction *_eq = malloc(sizeof(Instruction));
                 _eq->instruct = defvar;
                 _eq->id = tmp;
@@ -624,7 +624,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
             op_two = stack_pop(temps);
             pair->value_type = D_BOOL;
 
-            if (parser.in_while == NULL) {
+            if (parser.in_while == NULL && !parser.in_function) {
                 Instruction *_neq = malloc(sizeof(Instruction));
                 _neq->instruct = defvar;
                 _neq->id = tmp;
@@ -693,7 +693,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
         }
         
         if (builtin) {
-            if (parser.in_while == NULL) {
+            if (parser.in_while == NULL && !parser.in_function) {
                 Instruction *fnc = malloc(sizeof(Instruction));
                 fnc->instruct = defvar;
                 fnc->id = tmp;
@@ -742,7 +742,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
             generator_add_instruction(gen, fnc_);
         } else {
             // creates a temporary variable
-            if (parser.in_while == NULL) {
+            if (parser.in_while == NULL && !parser.in_function) {
                 Instruction *fnc = malloc(sizeof(Instruction));
                 fnc->instruct = defvar;
                 fnc->id = tmp;
@@ -936,7 +936,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                     pair->value_type = D_FLOAT;
                     pair->type = H_CONSTANT;
 
-                    if (parser.in_while == NULL) {
+                    if (parser.in_while == NULL && !parser.in_function) {
                         Instruction *instr = malloc(sizeof(Instruction));
                         instr->instruct = defvar;
                         instr->id = tmp;
@@ -980,7 +980,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                     pair->value_type = D_INT;
                     pair->type = H_CONSTANT;
 
-                    if (parser.in_while == NULL) {
+                    if (parser.in_while == NULL && !parser.in_function) {
                         Instruction *instr = malloc(sizeof(Instruction));
                         instr->instruct = defvar;
                         instr->id = tmp;
@@ -1022,7 +1022,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                     pair->value_type = D_STRING;
                     pair->type = H_CONSTANT;
 
-                    if (parser.in_while == NULL) {
+                    if (parser.in_while == NULL && !parser.in_function) {
                         Instruction *instr = malloc(sizeof(Instruction));
                         instr->instruct = defvar;
                         instr->id = tmp;
@@ -1082,7 +1082,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                     pair->value_type = D_VOID;
                     pair->type = H_CONSTANT;
 
-                    if (parser.in_while == NULL) {
+                    if (parser.in_while == NULL && !parser.in_function) {
                         Instruction *instr = malloc(sizeof(Instruction));
                         instr->instruct = defvar;
                         instr->id = tmp;
@@ -1335,7 +1335,7 @@ int parse(Generator *gen) {
                         parser.in_assign = htab_insert(parser.temporary_tab, parser.tmp_token, parser.tmp_token->value.identifier);
                         parser.in_assign->value_type = D_NONE;
 
-                        if (parser.in_while == NULL) {
+                        if (parser.in_while == NULL && !parser.in_function) {
                             Instruction *inst = malloc(sizeof(Instruction));
                             inst->instruct = defvar;
                             inst->id = parser.tmp_token->value.identifier;
