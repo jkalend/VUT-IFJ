@@ -682,7 +682,7 @@ int generate(Generator *generator) {
                 printf("JUMP !!%d\n", generator->label_count);
                 printf("LABEL !!%d\n", stack_top(generator->label_stack)->value);
                 for (int j = 0; j < generator->instructions[i]->operands_count; j++) {
-                    printf("DEFVAR LF@%s\n", generator->instructions[i]->operands[j]);
+                    printf("DEFVAR LF@%s\n", generator->instructions[i]->operands[j]->identifier);
                 }
                 printf("JUMP !!%d\n", stack_pop(generator->label_stack)->type);
                 printf("LABEL !!%d\n", generator->label_count++);

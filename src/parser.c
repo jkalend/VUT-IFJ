@@ -812,14 +812,14 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 parser.if_eval = false;
             }
 
-            // if (parser.while_eval) {
-            //     Instruction *instr = malloc(sizeof(Instruction));
-            //     instr->instruct = while_;
-            //     instr->id = top->bucket->identifier;
-            //     generator_add_instruction(gen, instr);
+            if (parser.while_eval) {
+                Instruction *instr = malloc(sizeof(Instruction));
+                instr->instruct = while_start;
+                instr->id = top->bucket->identifier;
+                generator_add_instruction(gen, instr);
 
-            //     parser.in_while = instr;
-            // }
+                parser.in_while = instr;
+            }
 
             if (parser.expect_ret && top != NULL) parser.val_returned = top->bucket;
             if (parser.in_assign != NULL && top != NULL) {
@@ -1069,13 +1069,13 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                     parser.if_eval = false;
                 }
                 
-                // if (parser.while_eval) {
-                //     Instruction *instr = malloc(sizeof(Instruction));
-                //     instr->instruct = while_;
-                //     instr->id = top->bucket->identifier;
-                //     generator_add_instruction(gen, instr);
-                //     //parser.while_eval = false;
-                // }
+                if (parser.while_eval) {
+                    Instruction *instr = malloc(sizeof(Instruction));
+                    instr->instruct = while_start;
+                    instr->id = top->bucket->identifier;
+                    generator_add_instruction(gen, instr);
+                    parser.while_eval = false;
+                }
 
                 if (parser.expect_ret) parser.val_returned = top->bucket;
                 if (parser.in_assign != NULL && top != NULL) {
@@ -1400,6 +1400,7 @@ int parse(Generator *gen) {
 
                     Instruction *instr = malloc(sizeof(Instruction));
                     instr->instruct = while_start;
+
                     generator_add_instruction(gen, instr);
                 }
 
