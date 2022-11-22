@@ -318,9 +318,9 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
                 mul_var->id = tmp;
                 generator_add_instruction(gen, mul_var);
             } else {
-                parser.in_while->operands = realloc(parser.in_while->operands, parser.in_while->operands_count + 1);
+                parser.in_while->operands = realloc(parser.in_while->operands, sizeof(htab_pair_t *) * (parser.in_while->operands_count + 1));
                 if (parser.in_while->operands == NULL) exit(BAD_INTERNAL);
-                parser.in_while->operands[parser.in_while->operands_count++]->identifier = tmp;
+                parser.in_while->operands[parser.in_while->operands_count++ ]= pair;
             }
 
             Instruction *mul_ins = malloc(sizeof(Instruction));
@@ -349,9 +349,9 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
                 div_var->id = tmp;
                 generator_add_instruction(gen, div_var);
             } else {
-                parser.in_while->operands = realloc(parser.in_while->operands, parser.in_while->operands_count + 1);
+                parser.in_while->operands = realloc(parser.in_while->operands, sizeof(htab_pair_t *) * (parser.in_while->operands_count + 1));
                 if (parser.in_while->operands == NULL) exit(BAD_INTERNAL);
-                parser.in_while->operands[parser.in_while->operands_count++]->identifier = tmp;
+                parser.in_while->operands[parser.in_while->operands_count++ ] = pair;
             }
 
             Instruction *div_ins = malloc(sizeof(Instruction));
@@ -386,9 +386,9 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
                 add->id = tmp;
                 generator_add_instruction(gen, add);
             } else {
-                parser.in_while->operands = realloc(parser.in_while->operands, parser.in_while->operands_count + 1);
+                parser.in_while->operands = realloc(parser.in_while->operands, sizeof(htab_pair_t *) * (parser.in_while->operands_count + 1));
                 if (parser.in_while->operands == NULL) exit(BAD_INTERNAL);
-                parser.in_while->operands[parser.in_while->operands_count++]->identifier = tmp;
+                parser.in_while->operands[parser.in_while->operands_count++ ] = pair;
             }
 
             Instruction *add_ = malloc(sizeof(Instruction));
@@ -423,9 +423,9 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
                 sub_var->id = tmp;
                 generator_add_instruction(gen, sub_var);
             } else {
-                parser.in_while->operands = realloc(parser.in_while->operands, parser.in_while->operands_count + 1);
+                parser.in_while->operands = realloc(parser.in_while->operands, sizeof(htab_pair_t *) * (parser.in_while->operands_count + 1));
                 if (parser.in_while->operands == NULL) exit(BAD_INTERNAL);
-                parser.in_while->operands[parser.in_while->operands_count++]->identifier = tmp;
+                parser.in_while->operands[parser.in_while->operands_count++ ] = pair;
             }
 
             Instruction *sub_ins = malloc(sizeof(Instruction));
@@ -461,9 +461,9 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
                 conc->id = tmp;
                 generator_add_instruction(gen, conc);
             } else {
-                parser.in_while->operands = realloc(parser.in_while->operands, parser.in_while->operands_count + 1);
+                parser.in_while->operands = realloc(parser.in_while->operands, sizeof(htab_pair_t *) * (parser.in_while->operands_count + 1));
                 if (parser.in_while->operands == NULL) exit(BAD_INTERNAL);
-                parser.in_while->operands[parser.in_while->operands_count++]->identifier = tmp;
+                parser.in_while->operands[parser.in_while->operands_count++ ] = pair;
             }
 
             Instruction *conc_ = malloc(sizeof(Instruction));
@@ -501,9 +501,9 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
                 _rel->id = tmp;
                 generator_add_instruction(gen, _rel);
             } else {
-                parser.in_while->operands = realloc(parser.in_while->operands, parser.in_while->operands_count + 1);
+                parser.in_while->operands = realloc(parser.in_while->operands, sizeof(htab_pair_t *) * (parser.in_while->operands_count + 1));
                 if (parser.in_while->operands == NULL) exit(BAD_INTERNAL);
-                parser.in_while->operands[parser.in_while->operands_count++]->identifier = tmp;
+                parser.in_while->operands[parser.in_while->operands_count++ ] = pair;
             }
 
             Instruction *rel = malloc(sizeof(Instruction));
@@ -568,9 +568,9 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
                 _eq->id = tmp;
                 generator_add_instruction(gen, _eq);
             } else {
-                parser.in_while->operands = realloc(parser.in_while->operands, parser.in_while->operands_count + 1);
+                parser.in_while->operands = realloc(parser.in_while->operands, sizeof(htab_pair_t *) * (parser.in_while->operands_count + 1));
                 if (parser.in_while->operands == NULL) exit(BAD_INTERNAL);
-                parser.in_while->operands[parser.in_while->operands_count++]->identifier = tmp;
+                parser.in_while->operands[parser.in_while->operands_count++ ] = pair;
             }
 
             Instruction *eq_ = malloc(sizeof(Instruction));
@@ -600,9 +600,9 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
                 _neq->id = tmp;
                 generator_add_instruction(gen, _neq);
             } else {
-                parser.in_while->operands = realloc(parser.in_while->operands, parser.in_while->operands_count + 1);
+                parser.in_while->operands = realloc(parser.in_while->operands, sizeof(htab_pair_t *) * (parser.in_while->operands_count + 1));
                 if (parser.in_while->operands == NULL) exit(BAD_INTERNAL);
-                parser.in_while->operands[parser.in_while->operands_count++]->identifier = tmp;
+                parser.in_while->operands[parser.in_while->operands_count++ ] = pair;
             }
 
             Instruction *neq_ = malloc(sizeof(Instruction));
@@ -665,9 +665,9 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
                 fnc->id = tmp;
                 generator_add_instruction(gen, fnc);
             } else {
-                parser.in_while->operands = realloc(parser.in_while->operands, parser.in_while->operands_count + 1);
+                parser.in_while->operands = realloc(parser.in_while->operands, sizeof(htab_pair_t *) * (parser.in_while->operands_count + 1));
                 if (parser.in_while->operands == NULL) exit(BAD_INTERNAL);
-                parser.in_while->operands[parser.in_while->operands_count++]->identifier = tmp;
+                parser.in_while->operands[parser.in_while->operands_count++ ] = pair;
             }
 
             Instruction *fnc_ = malloc(sizeof(Instruction));
@@ -710,9 +710,9 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
                 fnc->id = tmp;
                 generator_add_instruction(gen, fnc);
             } else {
-                parser.in_while->operands = realloc(parser.in_while->operands, parser.in_while->operands_count + 1);
+                parser.in_while->operands = realloc(parser.in_while->operands, sizeof(htab_pair_t *) * (parser.in_while->operands_count + 1));
                 if (parser.in_while->operands == NULL) exit(BAD_INTERNAL);
-                parser.in_while->operands[parser.in_while->operands_count++]->identifier = tmp;
+                parser.in_while->operands[parser.in_while->operands_count++ ] = pair;
             }
 
             // prepares the call instruction
@@ -899,9 +899,9 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                         instr->id = tmp;
                         generator_add_instruction(gen, instr);
                     } else {
-                        parser.in_while->operands = realloc(parser.in_while->operands, parser.in_while->operands_count + 1);
+                        parser.in_while->operands = realloc(parser.in_while->operands, sizeof(htab_pair_t *) * (parser.in_while->operands_count + 1));
                         if (parser.in_while->operands == NULL) exit(BAD_INTERNAL);
-                        parser.in_while->operands[parser.in_while->operands_count++]->identifier = tmp;
+                        parser.in_while->operands[parser.in_while->operands_count++ ] = pair;
                     }
 
                     Instruction *inst = malloc(sizeof(Instruction));
@@ -939,9 +939,9 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                         instr->id = tmp;
                         generator_add_instruction(gen, instr);
                     } else {
-                        parser.in_while->operands = realloc(parser.in_while->operands, parser.in_while->operands_count + 1);
+                        parser.in_while->operands = realloc(parser.in_while->operands, sizeof(htab_pair_t *) * (parser.in_while->operands_count + 1));
                         if (parser.in_while->operands == NULL) exit(BAD_INTERNAL);
-                        parser.in_while->operands[parser.in_while->operands_count++]->identifier = tmp;
+                        parser.in_while->operands[parser.in_while->operands_count++ ] = pair;
                     }
 
                     Instruction *inst = malloc(sizeof(Instruction));
@@ -977,9 +977,9 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                         instr->id = tmp;
                         generator_add_instruction(gen, instr);
                     } else {
-                        parser.in_while->operands = realloc(parser.in_while->operands, parser.in_while->operands_count + 1);
+                        parser.in_while->operands = realloc(parser.in_while->operands, sizeof(htab_pair_t *) * (parser.in_while->operands_count + 1));
                         if (parser.in_while->operands == NULL) exit(BAD_INTERNAL);
-                        parser.in_while->operands[parser.in_while->operands_count++]->identifier = tmp;
+                        parser.in_while->operands[parser.in_while->operands_count++ ] = pair;
                     }
 
                     Instruction *inst = malloc(sizeof(Instruction));
@@ -1033,9 +1033,9 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                         instr->id = tmp;
                         generator_add_instruction(gen, instr);
                     } else {
-                        parser.in_while->operands = realloc(parser.in_while->operands, parser.in_while->operands_count + 1);
+                        parser.in_while->operands = realloc(parser.in_while->operands, sizeof(htab_pair_t *) * (parser.in_while->operands_count + 1));
                         if (parser.in_while->operands == NULL) exit(BAD_INTERNAL);
-                        parser.in_while->operands[parser.in_while->operands_count++]->identifier = tmp;
+                        parser.in_while->operands[parser.in_while->operands_count++ ] = pair;
                     }
 
                     Instruction *inst = malloc(sizeof(Instruction));
@@ -1272,9 +1272,9 @@ int parse(Generator *gen) {
                             inst->id = parser.tmp_token->value.identifier;
                             generator_add_instruction(gen, inst);
                         } else {
-                            parser.in_while->operands = realloc(parser.in_while->operands, parser.in_while->operands_count + 1);
+                            parser.in_while->operands = realloc(parser.in_while->operands, sizeof(htab_pair_t *) * (parser.in_while->operands_count + 1));
                             if (parser.in_while->operands == NULL) exit(BAD_INTERNAL);
-                            parser.in_while->operands[parser.in_while->operands_count++]->identifier = parser.tmp_token->value.identifier;
+                            parser.in_while->operands[parser.in_while->operands_count++] = parser.in_assign;
                         }
                     }
                     
