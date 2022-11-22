@@ -617,16 +617,20 @@ int generate(Generator *generator) {
                 printf("LABEL $!!EXIT_6\n");
                 printf("EXIT int@6\n");
                 break;
-            case start_fn:    
-                printf("LABEL $%s\n", generator->instructions[i]->operands[0]->identifier);
-                printf("PUSHFRAME\n");
-                
-                printf("LABEL !!%s\n", generator->instructions[i]->operands[0]->identifier);
+            case start_fn:  
                 data = malloc(sizeof(TData));
                 data->value = generator->label_count++;
+                data->type = generator->label_count++;
                 data->bucket = generator->instructions[i]->operands[0];
-                stack_push(generator->label_stack, data);
+                stack_push(generator->label_stack, data); 
+                printf("JUMP !!%d\n", stack_top(generator->label_stack)->type);
+                printf("LABEL $%s\n", generator->instructions[i]->operands[0]->identifier);
+                printf("PUSHFRAME\n");
+               
                 printf("JUMP !!%d\n", stack_top(generator->label_stack)->value);
+                
+                printf("LABEL !!%s\n", generator->instructions[i]->operands[0]->identifier);
+                
 
                 printf("DEFVAR LF@$$retval\n");
                 printf("MOVE LF@$$retval nil@nil\n");
@@ -638,8 +642,9 @@ int generate(Generator *generator) {
                 for (int j = 0; j < generator->instructions[i]->operands_count; j++) {
                     printf("DEFVAR LF@%s\n", generator->instructions[i]->operands[j]->identifier);
                 }
-                printf("JUMP !!%s\n", stack_pop(generator->label_stack)->bucket->identifier);
+                printf("JUMP !!%s\n", stack_top(generator->label_stack)->bucket->identifier);
                 printf("LABEL !!%d\n", generator->label_count++);
+                printf("LABEL !!%d\n", stack_pop(generator->label_stack)->type);
                 break;
                 
             case end_fn_float:
