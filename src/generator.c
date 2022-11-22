@@ -463,6 +463,7 @@ void gen_gt(Instruction *instruction, Generator *generator, char op[], bool inve
     printf("JUMPIFEQ !!%d LF@%s nil@nil\n", generator->label_count + 4, instruction->operands[0]->identifier); /* jump to end of false */
 
     printf("LABEL !!%d\n", generator->label_count++);
+
     /* operands are not null and have the same type -we can compare */
     printf("%s LF@%s LF@%s LF@%s\n", op, instruction->id, instruction->operands[0]->identifier, instruction->operands[1]->identifier);
     if (invert) printf("NOT LF@%s LF@%s\n", instruction->id, instruction->id);
@@ -497,27 +498,27 @@ void gen_gt(Instruction *instruction, Generator *generator, char op[], bool inve
 }
 
 int generate(Generator *generator) {
-    TData *data = malloc(sizeof(TData));
+    TData *data;
     printf(".IFJcode22\n");
-    printf("defvar GF@%%bool\n");
-    printf("defvar GF@%%int\n");
-    printf("defvar GF@%%float\n");
-    printf("defvar GF@%%string\n");
-    printf("defvar GF@%%nil\n");
-    printf("defvar GF@%%check0\n");
-    printf("defvar GF@%%check1\n");
-    printf("defvar GF@%%check2\n");
-    printf("defvar GF@%%index\n");
-    printf("defvar GF@%%true\n");
-    printf("defvar GF@%%false\n");
-    printf("move GF@%%bool string@bool\n");
-    printf("move GF@%%int string@int\n");
-    printf("move GF@%%float string@float\n");
-    printf("move GF@%%string string@string\n");
-    printf("move GF@%%nil string@nil\n");
-    printf("move GF@%%true bool@true\n");
-    printf("move GF@%%false bool@false\n");
-    printf("jump $$main\n");
+    printf("DEFVAR GF@%%bool\n");
+    printf("DEFVAR GF@%%int\n");
+    printf("DEFVAR GF@%%float\n");
+    printf("DEFVAR GF@%%string\n");
+    printf("DEFVAR GF@%%nil\n");
+    printf("DEFVAR GF@%%check0\n");
+    printf("DEFVAR GF@%%check1\n");
+    printf("DEFVAR GF@%%check2\n");
+    printf("DEFVAR GF@%%index\n");
+    printf("DEFVAR GF@%%true\n");
+    printf("DEFVAR GF@%%false\n");
+    printf("MOVE GF@%%bool string@bool\n");
+    printf("MOVE GF@%%int string@int\n");
+    printf("MOVE GF@%%float string@float\n");
+    printf("MOVE GF@%%string string@string\n");
+    printf("MOVE GF@%%nil string@nil\n");
+    printf("MOVE GF@%%true bool@true\n");
+    printf("MOVE GF@%%false bool@false\n");
+    printf("JUMP $$main\n");
 
     for (long i = 0; i < generator->instruction_count; i++) {
         //individual instruction generation
@@ -527,7 +528,7 @@ int generate(Generator *generator) {
                 gen_assign(generator->instructions[i]);
                 break;
             case defvar:
-                printf("defvar LF@%s\n", generator->instructions[i]->id);
+                printf("DEFVAR LF@%s\n", generator->instructions[i]->id);
                 break;
             case call:
                 gen_call(generator->instructions[i]);
@@ -665,7 +666,7 @@ int generate(Generator *generator) {
                 printf("RETURN\n");
                 break;
             case while_:
-                //TData *data = malloc(sizeof(TData));
+                data = malloc(sizeof(TData));
                 data->value = generator->label_count++;
                 data->type = generator->label_count++;
                 stack_push(generator->label_stack, data);
@@ -704,6 +705,7 @@ int generate(Generator *generator) {
                 break;
 
             case if_:
+                data = malloc(sizeof(TData));
                 data->value = generator->label_count++;
                 data->type = generator->label_count++;
                 stack_push(generator->label_stack, data);

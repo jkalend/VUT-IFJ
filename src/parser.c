@@ -757,7 +757,8 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 instr->instruct = while_;
                 instr->id = top->bucket->identifier;
                 generator_add_instruction(gen, instr);
-                parser.while_eval = false;
+
+                parser.in_while = instr;
             }
 
             if (parser.expect_ret && top != NULL) parser.val_returned = top->bucket;
@@ -989,7 +990,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                     instr->instruct = while_;
                     instr->id = top->bucket->identifier;
                     generator_add_instruction(gen, instr);
-                    parser.while_eval = false;
+                    //parser.while_eval = false;
                 }
 
                 if (parser.expect_ret) parser.val_returned = top->bucket;
@@ -1057,8 +1058,9 @@ int parse(Generator *gen) {
                 else if (token->type == T_RIGHT_BRACE) {
                     parser.bracket_counter--;
                     if (!stack_isEmpty(brackets)) {
-                        TData *data = stack_pop(brackets);
+                        TData *data = stack_top(brackets);
                         if (data->value == parser.bracket_counter) {
+                            stack_pop(brackets);
                             Instruction *instr = malloc(sizeof(Instruction));
                             if (data->type == KW_IF) {
                                 instr->instruct = else_end;
@@ -1188,7 +1190,7 @@ int parse(Generator *gen) {
             }
             else {
                 fprintf(stderr, "terms not matching\n");
-                exit(1);
+                exit(BAD_SYNTAX);
             }
         }
         else if (top->type == T_KW) {
@@ -1207,6 +1209,7 @@ int parse(Generator *gen) {
                     Instruction *instr = malloc(sizeof(Instruction));
                     instr->instruct = while_;
                     generator_add_instruction(gen, instr);
+
                 }
 
                 if (token->value.keyword == KW_ELSE) {
@@ -1220,7 +1223,6 @@ int parse(Generator *gen) {
                     stack_push(brackets, data);
                 }
 
-                /* FIX ME - this doesn't work, in_func == NULL once fn definition is over  */
                 if ((token->value.keyword == KW_IF || token->value.keyword == KW_WHILE) && !parser.in_function) {
                     parser.main_found = true;
                 }
@@ -1296,6 +1298,14 @@ int parse(Generator *gen) {
                 parser.in_assign = NULL;
                 get_next_token(&token, &keep_prev_token, &return_back);
 
+                if (parser.while_eval) {
+                    parser.while_eval = false;
+
+                    Instruction *instr = malloc(sizeof(Instruction));
+                    instr->instruct = while_start;
+                    generator_add_instruction(gen, instr);
+                }
+
                 if (parser.expect_ret) {
                     if (parser.temporary_tab != parser.glob_tab && parser.val_returned != NULL && parser.val_returned->value_type != parser.val_expected) 
                         exit(BAD_TERM);
@@ -1341,7 +1351,6 @@ int parse(Generator *gen) {
 
             printf("%d ", val);
 
-            /* FIX ME */
             if (val >= 7 && val <= 12 && !parser.in_function) {
                 parser.main_found = true;
             } else if ((val == 4 || val == 3) && !parser.in_function) {
@@ -1531,6 +1540,7 @@ int main(void) {
     parser.if_eval = false;
     parser.while_eval = false;
     parser.in_function = false;
+    parser.in_while = NULL;
 
     insert_builtins();
 
