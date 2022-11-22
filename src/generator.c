@@ -616,52 +616,78 @@ int generate(Generator *generator) {
                 printf("LABEL $!!EXIT_6\n");
                 printf("EXIT int@6\n");
                 break;
-            case start_fn:    
+            case start_fn:  
+                data = malloc(sizeof(TData));
+                data->value = generator->label_count++;
+                data->type = generator->label_count++;
+                data->bucket = generator->instructions[i]->operands[0];
+                stack_push(generator->label_stack, data); 
+                printf("JUMP !!%d\n", stack_top(generator->label_stack)->type);
                 printf("LABEL $%s\n", generator->instructions[i]->operands[0]->identifier);
                 printf("PUSHFRAME\n");
+               
+                printf("JUMP !!%d\n", stack_top(generator->label_stack)->value);
+                
+                printf("LABEL !!%s\n", generator->instructions[i]->operands[0]->identifier);
+                
+
                 printf("DEFVAR LF@$$retval\n");
                 printf("MOVE LF@$$retval nil@nil\n");
                 break;
+
+            case fn_defs:
+                printf("JUMP !!%d\n", generator->label_count);
+                printf("LABEL !!%d\n", stack_top(generator->label_stack)->value);
+                for (int j = 0; j < generator->instructions[i]->operands_count; j++) {
+                    printf("DEFVAR LF@%s\n", generator->instructions[i]->operands[j]->identifier);
+                }
+                printf("JUMP !!%s\n", stack_top(generator->label_stack)->bucket->identifier);
+                printf("LABEL !!%d\n", generator->label_count++);
+                printf("LABEL !!%d\n", stack_pop(generator->label_stack)->type);
+                break;
                 
             case end_fn_float:
-                if (generator->instructions[i]->operands != NULL) {
+                //if (generator->instructions[i]->operands != NULL) {
                     printf("TYPE GF@%%check0 LF@%s\n", generator->instructions[i]->operands[0]->identifier);
                     printf("JUMPIFNEQ $!!EXIT_6 GF@%%check0 string@float\n");
                     printf("MOVE LF@$$retval LF@%s\n", generator->instructions[i]->operands[0]->identifier);
-                }
+                //}
                 printf("POPFRAME\n");
                 printf("RETURN\n");
                 break;
 
             case end_fn_string:
-                if (generator->instructions[i]->operands != NULL) {
+                //if (generator->instructions[i]->operands != NULL) {
                     printf("TYPE GF@%%check0 LF@%s\n", generator->instructions[i]->operands[0]->identifier);
                     printf("JUMPIFNEQ $!!EXIT_6 GF@%%check0 string@string\n");
                     printf("MOVE LF@$$retval LF@%s\n", generator->instructions[i]->operands[0]->identifier);
-                }
+                //}
                 printf("POPFRAME\n");
                 printf("RETURN\n");
                 break;
 
             case end_fn_int:
-                if (generator->instructions[i]->operands != NULL) {
+                //if (generator->instructions[i]->operands != NULL) {
                     printf("TYPE GF@%%check0 LF@%s\n", generator->instructions[i]->operands[0]->identifier);
                     printf("JUMPIFNEQ $!!EXIT_6 GF@%%check0 string@int\n");
                     printf("MOVE LF@$$retval LF@%s\n", generator->instructions[i]->operands[0]->identifier);
-                }
+                //}
+                printf("POPFRAME\n");
+                printf("RETURN\n");
+                break;
+            case err_quit:
+                printf("JUMP $!!EXIT_6\n");
+                break;
+            case end_fn_void:
+                // if (generator->instructions[i]->operands != NULL) {
+                //     printf("TYPE GF@%%check0 LF@%s\n", generator->instructions[i]->operands[0]->identifier);
+                //     printf("JUMPIFNEQ $!!EXIT_6 GF@%%check0 string@nil\n");
+                //     printf("MOVE LF@$$retval LF@%s\n", generator->instructions[i]->operands[0]->identifier);
+                // }
                 printf("POPFRAME\n");
                 printf("RETURN\n");
                 break;
 
-            case end_fn_void:
-                if (generator->instructions[i]->operands != NULL) {
-                    printf("TYPE GF@%%check0 LF@%s\n", generator->instructions[i]->operands[0]->identifier);
-                    printf("JUMPIFNEQ $!!EXIT_6 GF@%%check0 string@nil\n");
-                    printf("MOVE LF@$$retval LF@%s\n", generator->instructions[i]->operands[0]->identifier);
-                }
-                printf("POPFRAME\n");
-                printf("RETURN\n");
-                break;
             case while_:
                 data = malloc(sizeof(TData));
                 data->value = generator->label_count++;
@@ -681,7 +707,7 @@ int generate(Generator *generator) {
                 printf("JUMP !!%d\n", generator->label_count);
                 printf("LABEL !!%d\n", stack_top(generator->label_stack)->value);
                 for (int j = 0; j < generator->instructions[i]->operands_count; j++) {
-                    printf("DEFVAR LF@%s\n", generator->instructions[i]->operands[j]);
+                    printf("DEFVAR LF@%s\n", generator->instructions[i]->operands[j]->identifier);
                 }
                 printf("JUMP !!%d\n", stack_pop(generator->label_stack)->type);
                 printf("LABEL !!%d\n", generator->label_count++);
@@ -699,18 +725,23 @@ int generate(Generator *generator) {
                 printf("LABEL !!%d\n", generator->label_count++);
                 printf("STRLEN GF@%%check0 LF@%s\n", generator->instructions[i]->id);
                 printf("JUMPIFEQ !!%d GF@%%check0 int@0\n", stack_top(generator->label_stack)->value);
+                printf("JUMP !!%d\n", generator->label_count + 3);
 
                 /* int conversion */
                 printf("LABEL !!%d\n", generator->label_count++);
-                printf("JUMPIFEQ !!%d GF@%%check0 int@0\n", stack_top(generator->label_stack)->value);
+                printf("JUMPIFEQ !!%d LF@%s int@0\n", stack_top(generator->label_stack)->value, generator->instructions[i]->id);
+                printf("JUMP !!%d\n", generator->label_count + 2);
 
                 /* float conversion */
                 printf("LABEL !!%d\n", generator->label_count++);
-                printf("JUMPIFEQ !!%d GF@%%check0 float@%a\n", stack_top(generator->label_stack)->value, 0.0);
+                printf("JUMPIFEQ !!%d LF@%s float@%a\n", stack_top(generator->label_stack)->value, generator->instructions[i]->id, 0.0);
+                printf("JUMP !!%d\n", generator->label_count + 1);
 
                 /* bool conversion */
                 printf("LABEL !!%d\n", generator->label_count++);
-                printf("JUMPIFEQ !!%d GF@%%check0 bool@false\n", stack_top(generator->label_stack)->value);
+                
+                printf("JUMPIFEQ !!%d LF@%s bool@false\n", stack_top(generator->label_stack)->value, generator->instructions[i]->id);
+                printf("LABEL !!%d\n", generator->label_count++);
                 break;
 
             case while_end:
@@ -735,20 +766,23 @@ int generate(Generator *generator) {
                 printf("LABEL !!%d\n", generator->label_count++);
                 printf("STRLEN GF@%%check0 LF@%s\n", generator->instructions[i]->id);
                 printf("JUMPIFEQ !!%d GF@%%check0 int@0\n", stack_top(generator->label_stack)->value);
+                printf("JUMP !!%d\n", generator->label_count + 3);
 
                 /* int conversion */
                 printf("LABEL !!%d\n", generator->label_count++);
                 printf("JUMPIFEQ !!%d LF@%s int@0\n", stack_top(generator->label_stack)->value, generator->instructions[i]->id);
+                printf("JUMP !!%d\n", generator->label_count + 2);
 
                 /* float conversion */
                 printf("LABEL !!%d\n", generator->label_count++);
                 printf("JUMPIFEQ !!%d LF@%s float@%a\n", stack_top(generator->label_stack)->value, generator->instructions[i]->id, 0.0);
+                printf("JUMP !!%d\n", generator->label_count + 1);
 
                 /* bool conversion */
                 printf("LABEL !!%d\n", generator->label_count++);
                 
                 printf("JUMPIFEQ !!%d LF@%s bool@false\n", stack_top(generator->label_stack)->value, generator->instructions[i]->id);
-                
+                printf("LABEL !!%d\n", generator->label_count++);
                 break;
 
             case else_:
