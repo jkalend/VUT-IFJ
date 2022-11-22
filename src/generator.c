@@ -68,7 +68,6 @@ void gen_substring(Instruction *instruction, Generator *generator) {
 	printf("GT GF@%%check0 LF@%s LF@%s\n", instruction->params[1]->identifier, instruction->params[2]->identifier);
 	printf("JUMPIFEQ !!%d GF@%%check0 bool@true\n", generator->label_count + 4);
 
-	printf("DEFVAR GF@%%check1\n");
 	printf("STRLEN GF@%%check1 LF@%s\n", instruction->params[0]->identifier);
 	printf("GT GF@%%check0 LF@%s GF@%%check1\n", instruction->params[1]->identifier);
 	printf("JUMPIFEQ !!%d GF@%%check0 bool@true\n", generator->label_count + 4);
