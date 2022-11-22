@@ -68,24 +68,24 @@ void gen_substring(Instruction *instruction, Generator *generator) {
 	printf("GT GF@%%check0 LF@%s LF@%s\n", instruction->params[1]->identifier, instruction->params[2]->identifier);
 	printf("JUMPIFEQ !!%d GF@%%check0 bool@true\n", generator->label_count + 4);
 
-	printf("DEFVAR LF@tmpvar\n");
-	printf("STRLEN LF@tmpvar LF@%s\n", instruction->params[0]->identifier);
-	printf("GT GF@%%check0 LF@%s LF@tmpvar\n", instruction->params[1]->identifier);
+	printf("DEFVAR GF@%%check1\n");
+	printf("STRLEN GF@%%check1 LF@%s\n", instruction->params[0]->identifier);
+	printf("GT GF@%%check0 LF@%s GF@%%check1\n", instruction->params[1]->identifier);
 	printf("JUMPIFEQ !!%d GF@%%check0 bool@true\n", generator->label_count + 4);
-	printf("GT GF@%%check0 LF@%s LF@tmpvar\n", instruction->params[1]->identifier);
+	printf("GT GF@%%check0 LF@%s GF@%%check1\n", instruction->params[1]->identifier);
 	printf("JUMPIFEQ !!%d GF@%%check0 bool@true\n", generator->label_count + 4);
-	printf("EQ GF@%%check0 LF@%s LF@tmpvar\n", instruction->params[1]->identifier);
+	printf("EQ GF@%%check0 LF@%s GF@%%check1\n", instruction->params[1]->identifier);
 	printf("JUMPIFEQ !!%d GF@%%check0 bool@true\n", generator->label_count + 4);
-	printf("GT GF@%%check0 LF@%s LF@tmpvar\n", instruction->params[2]->identifier);
+	printf("GT GF@%%check0 LF@%s GF@%%check1\n", instruction->params[2]->identifier);
 	printf("JUMPIFEQ !!%d GF@%%check0 bool@true\n", generator->label_count + 4);
 	//error checking done
-	printf("MOVE LF@tmpvar string@\n");
+	printf("MOVE GF@%%check1 string@\n");
 	printf("LABEL !!%d\n", generator->label_count + 7);
 	printf("GETCHAR GF@%%check0 LF@%s LF@%s\n", instruction->params[0]->identifier, instruction->params[1]->identifier);
-	printf("CONCAT LF@tmpvar LF@tmpvar GF@%%check0\n");
+	printf("CONCAT GF@%%check1 GF@%%check1 GF@%%check0\n");
 	printf("ADD LF@%s LF@%s int@1\n", instruction->params[1]->identifier, instruction->params[1]->identifier);
 	printf("JUMPIFNEQ !!%d LF@%s LF@%s\n", generator->label_count + 7, instruction->params[1]->identifier, instruction->params[2]->identifier);
-	printf("MOVE LF@%s LF@tmpvar\n", instruction->id);
+	printf("MOVE LF@%s GF@%%check1\n", instruction->id);
 
 	printf("JUMP !!%d\n", generator->label_count + 5);
 	printf("LABEL !!%d\n", generator->label_count + 4); //error
