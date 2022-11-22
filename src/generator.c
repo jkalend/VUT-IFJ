@@ -493,7 +493,6 @@ void gen_gt(Instruction *instruction, Generator *generator, char op[], bool inve
     printf("LABEL !!%d\n", generator->label_count++);
     printf("MOVE LF@%s bool@false\n", instruction->id);
     printf("LABEL !!%d\n", generator->label_count++);
-
 }
 
 int generate(Generator *generator) {
@@ -667,11 +666,28 @@ int generate(Generator *generator) {
             case while_:
                 data = malloc(sizeof(TData));
                 data->value = generator->label_count++;
+                data->type = generator->label_count + 1;
+                stack_push(generator->label_stack, data);
+                printf("JUMP !!%d\n", stack_top(generator->label_stack)->value);
+
+
+                data = malloc(sizeof(TData));
+                data->value = generator->label_count++;
                 data->type = generator->label_count++;
                 stack_push(generator->label_stack, data);
                 printf("LABEL !!%d\n", stack_top(generator->label_stack)->type);
 
                 break;
+            case while_defs:
+                printf("JUMP !!%d\n", generator->label_count);
+                printf("LABEL !!%d\n", stack_top(generator->label_stack)->value);
+                for (int j = 0; j < generator->instructions[i]->operands_count; j++) {
+                    printf("DEFVAR LF@%s\n", generator->instructions[i]->operands[j]);
+                }
+                printf("JUMP !!%d\n", stack_pop(generator->label_stack)->type);
+                printf("LABEL !!%d\n", generator->label_count++);
+                break;
+
             case while_start:
                 printf("TYPE GF%%check0 LF@%s\n", generator->instructions[i]->id);
                 printf("JUMPIFEQ !!%d GF@%%check0 GF@%%string\n", generator->label_count);

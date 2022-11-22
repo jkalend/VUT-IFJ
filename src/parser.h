@@ -77,7 +77,7 @@ typedef struct {
     int bracket_counter;
     htab_pair_t *val_returned;
     DataType val_expected;
-    struct Instruction *while_smt;
+    struct Instruction *in_while;
 } parser_t;
 
 // * float > int, str is always converted

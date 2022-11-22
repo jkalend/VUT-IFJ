@@ -52,7 +52,8 @@ typedef enum {
     while_end,
     if_,
     else_,
-    else_end
+    else_end,
+    while_defs
 }InstructionType;
 
 typedef struct Instruction {
