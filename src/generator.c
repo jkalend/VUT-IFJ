@@ -4,7 +4,6 @@
 
 #include "generator.h"
 #include <stdio.h>
-#include <math.h>
 
 
 void generator_init(Generator *generator) {

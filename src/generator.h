@@ -55,7 +55,7 @@ typedef enum {
     else_end
 }InstructionType;
 
-typedef struct {
+typedef struct Instruction {
     InstructionType instruct;
     const char *id; // for call and defvar
     htab_pair_t **operands; // for call op0 will be the label
@@ -64,7 +64,7 @@ typedef struct {
     htab_pair_t **params;
     int params_count;
     DataType retval;
-}Instruction;
+} Instruction;
 
 typedef struct {
     // these 3 might not be needed at all
