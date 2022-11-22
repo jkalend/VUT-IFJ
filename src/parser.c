@@ -321,7 +321,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
                 parser.in_while->operands = realloc(parser.in_while->operands, sizeof(htab_pair_t *) * (parser.in_while->operands_count + 1));
                 if (parser.in_while->operands == NULL) exit(BAD_INTERNAL);
                 parser.in_while->operands[parser.in_while->operands_count++ ]= pair;
-            } else if (parser.in_fn) {
+            } else if (parser.in_function) {
                 parser.in_fn->operands = realloc(parser.in_fn->operands, sizeof(htab_pair_t *) * (parser.in_fn->operands_count + 1));
                 if (parser.in_fn->operands == NULL) exit(BAD_INTERNAL);
                 parser.in_fn->operands[parser.in_fn->operands_count++ ]= pair;
@@ -356,7 +356,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
                 parser.in_while->operands = realloc(parser.in_while->operands, sizeof(htab_pair_t *) * (parser.in_while->operands_count + 1));
                 if (parser.in_while->operands == NULL) exit(BAD_INTERNAL);
                 parser.in_while->operands[parser.in_while->operands_count++ ]= pair;
-            } else if (parser.in_fn) {
+            } else if (parser.in_function) {
                 parser.in_fn->operands = realloc(parser.in_fn->operands, sizeof(htab_pair_t *) * (parser.in_fn->operands_count + 1));
                 if (parser.in_fn->operands == NULL) exit(BAD_INTERNAL);
                 parser.in_fn->operands[parser.in_fn->operands_count++ ]= pair;
@@ -397,7 +397,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
                 parser.in_while->operands = realloc(parser.in_while->operands, sizeof(htab_pair_t *) * (parser.in_while->operands_count + 1));
                 if (parser.in_while->operands == NULL) exit(BAD_INTERNAL);
                 parser.in_while->operands[parser.in_while->operands_count++ ]= pair;
-            } else if (parser.in_fn) {
+            } else if (parser.in_function) {
                 parser.in_fn->operands = realloc(parser.in_fn->operands, sizeof(htab_pair_t *) * (parser.in_fn->operands_count + 1));
                 if (parser.in_fn->operands == NULL) exit(BAD_INTERNAL);
                 parser.in_fn->operands[parser.in_fn->operands_count++ ]= pair;
@@ -438,7 +438,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
                 parser.in_while->operands = realloc(parser.in_while->operands, sizeof(htab_pair_t *) * (parser.in_while->operands_count + 1));
                 if (parser.in_while->operands == NULL) exit(BAD_INTERNAL);
                 parser.in_while->operands[parser.in_while->operands_count++ ]= pair;
-            } else if (parser.in_fn) {
+            } else if (parser.in_function) {
                 parser.in_fn->operands = realloc(parser.in_fn->operands, sizeof(htab_pair_t *) * (parser.in_fn->operands_count + 1));
                 if (parser.in_fn->operands == NULL) exit(BAD_INTERNAL);
                 parser.in_fn->operands[parser.in_fn->operands_count++ ]= pair;
@@ -480,7 +480,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
                 parser.in_while->operands = realloc(parser.in_while->operands, sizeof(htab_pair_t *) * (parser.in_while->operands_count + 1));
                 if (parser.in_while->operands == NULL) exit(BAD_INTERNAL);
                 parser.in_while->operands[parser.in_while->operands_count++ ]= pair;
-            } else if (parser.in_fn) {
+            } else if (parser.in_function) {
                 parser.in_fn->operands = realloc(parser.in_fn->operands, sizeof(htab_pair_t *) * (parser.in_fn->operands_count + 1));
                 if (parser.in_fn->operands == NULL) exit(BAD_INTERNAL);
                 parser.in_fn->operands[parser.in_fn->operands_count++ ]= pair;
@@ -524,7 +524,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
                 parser.in_while->operands = realloc(parser.in_while->operands, sizeof(htab_pair_t *) * (parser.in_while->operands_count + 1));
                 if (parser.in_while->operands == NULL) exit(BAD_INTERNAL);
                 parser.in_while->operands[parser.in_while->operands_count++ ]= pair;
-            } else if (parser.in_fn) {
+            } else if (parser.in_function) {
                 parser.in_fn->operands = realloc(parser.in_fn->operands, sizeof(htab_pair_t *) * (parser.in_fn->operands_count + 1));
                 if (parser.in_fn->operands == NULL) exit(BAD_INTERNAL);
                 parser.in_fn->operands[parser.in_fn->operands_count++ ]= pair;
@@ -595,7 +595,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
                 parser.in_while->operands = realloc(parser.in_while->operands, sizeof(htab_pair_t *) * (parser.in_while->operands_count + 1));
                 if (parser.in_while->operands == NULL) exit(BAD_INTERNAL);
                 parser.in_while->operands[parser.in_while->operands_count++ ]= pair;
-            } else if (parser.in_fn) {
+            } else if (parser.in_function) {
                 parser.in_fn->operands = realloc(parser.in_fn->operands, sizeof(htab_pair_t *) * (parser.in_fn->operands_count + 1));
                 if (parser.in_fn->operands == NULL) exit(BAD_INTERNAL);
                 parser.in_fn->operands[parser.in_fn->operands_count++ ]= pair;
@@ -631,7 +631,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
                 parser.in_while->operands = realloc(parser.in_while->operands, sizeof(htab_pair_t *) * (parser.in_while->operands_count + 1));
                 if (parser.in_while->operands == NULL) exit(BAD_INTERNAL);
                 parser.in_while->operands[parser.in_while->operands_count++ ]= pair;
-            } else if (parser.in_fn) {
+            } else if (parser.in_function) {
                 parser.in_fn->operands = realloc(parser.in_fn->operands, sizeof(htab_pair_t *) * (parser.in_fn->operands_count + 1));
                 if (parser.in_fn->operands == NULL) exit(BAD_INTERNAL);
                 parser.in_fn->operands[parser.in_fn->operands_count++ ]= pair;
@@ -700,7 +700,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
                 parser.in_while->operands = realloc(parser.in_while->operands, sizeof(htab_pair_t *) * (parser.in_while->operands_count + 1));
                 if (parser.in_while->operands == NULL) exit(BAD_INTERNAL);
                 parser.in_while->operands[parser.in_while->operands_count++ ]= pair;
-            } else if (parser.in_fn) {
+            } else if (parser.in_function) {
                 parser.in_fn->operands = realloc(parser.in_fn->operands, sizeof(htab_pair_t *) * (parser.in_fn->operands_count + 1));
                 if (parser.in_fn->operands == NULL) exit(BAD_INTERNAL);
                 parser.in_fn->operands[parser.in_fn->operands_count++ ]= pair;
@@ -749,7 +749,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
                 parser.in_while->operands = realloc(parser.in_while->operands, sizeof(htab_pair_t *) * (parser.in_while->operands_count + 1));
                 if (parser.in_while->operands == NULL) exit(BAD_INTERNAL);
                 parser.in_while->operands[parser.in_while->operands_count++ ]= pair;
-            } else if (parser.in_fn) {
+            } else if (parser.in_function) {
                 parser.in_fn->operands = realloc(parser.in_fn->operands, sizeof(htab_pair_t *) * (parser.in_fn->operands_count + 1));
                 if (parser.in_fn->operands == NULL) exit(BAD_INTERNAL);
                 parser.in_fn->operands[parser.in_fn->operands_count++ ]= pair;
@@ -943,7 +943,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                         parser.in_while->operands = realloc(parser.in_while->operands, sizeof(htab_pair_t *) * (parser.in_while->operands_count + 1));
                         if (parser.in_while->operands == NULL) exit(BAD_INTERNAL);
                         parser.in_while->operands[parser.in_while->operands_count++ ]= pair;
-                    } else if (parser.in_fn) {
+                    } else if (parser.in_function) {
                         parser.in_fn->operands = realloc(parser.in_fn->operands, sizeof(htab_pair_t *) * (parser.in_fn->operands_count + 1));
                         if (parser.in_fn->operands == NULL) exit(BAD_INTERNAL);
                         parser.in_fn->operands[parser.in_fn->operands_count++ ]= pair;
@@ -987,7 +987,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                         parser.in_while->operands = realloc(parser.in_while->operands, sizeof(htab_pair_t *) * (parser.in_while->operands_count + 1));
                         if (parser.in_while->operands == NULL) exit(BAD_INTERNAL);
                         parser.in_while->operands[parser.in_while->operands_count++ ]= pair;
-                    } else if (parser.in_fn) {
+                    } else if (parser.in_function) {
                         parser.in_fn->operands = realloc(parser.in_fn->operands, sizeof(htab_pair_t *) * (parser.in_fn->operands_count + 1));
                         if (parser.in_fn->operands == NULL) exit(BAD_INTERNAL);
                         parser.in_fn->operands[parser.in_fn->operands_count++ ]= pair;
@@ -1029,7 +1029,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                         parser.in_while->operands = realloc(parser.in_while->operands, sizeof(htab_pair_t *) * (parser.in_while->operands_count + 1));
                         if (parser.in_while->operands == NULL) exit(BAD_INTERNAL);
                         parser.in_while->operands[parser.in_while->operands_count++ ]= pair;
-                    } else if (parser.in_fn) {
+                    } else if (parser.in_function) {
                         parser.in_fn->operands = realloc(parser.in_fn->operands, sizeof(htab_pair_t *) * (parser.in_fn->operands_count + 1));
                         if (parser.in_fn->operands == NULL) exit(BAD_INTERNAL);
                         parser.in_fn->operands[parser.in_fn->operands_count++ ]= pair;
@@ -1089,7 +1089,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                         parser.in_while->operands = realloc(parser.in_while->operands, sizeof(htab_pair_t *) * (parser.in_while->operands_count + 1));
                         if (parser.in_while->operands == NULL) exit(BAD_INTERNAL);
                         parser.in_while->operands[parser.in_while->operands_count++ ]= pair;
-                    } else if (parser.in_fn) {
+                    } else if (parser.in_function) {
                         parser.in_fn->operands = realloc(parser.in_fn->operands, sizeof(htab_pair_t *) * (parser.in_fn->operands_count + 1));
                         if (parser.in_fn->operands == NULL) exit(BAD_INTERNAL);
                         parser.in_fn->operands[parser.in_fn->operands_count++ ]= pair;
@@ -1342,7 +1342,7 @@ int parse(Generator *gen) {
                             parser.in_while->operands = realloc(parser.in_while->operands, sizeof(htab_pair_t *) * (parser.in_while->operands_count + 1));
                             if (parser.in_while->operands == NULL) exit(BAD_INTERNAL);
                             parser.in_while->operands[parser.in_while->operands_count++ ] = parser.in_assign;
-                        } else if (parser.in_fn) {
+                        } else if (parser.in_function) {
                             parser.in_fn->operands = realloc(parser.in_fn->operands, sizeof(htab_pair_t *) * (parser.in_fn->operands_count + 1));
                             if (parser.in_fn->operands == NULL) exit(BAD_INTERNAL);
                             parser.in_fn->operands[parser.in_fn->operands_count++ ] = parser.in_assign;
