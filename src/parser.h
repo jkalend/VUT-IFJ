@@ -78,6 +78,7 @@ typedef struct {
     htab_pair_t *val_returned;
     DataType val_expected;
     struct Instruction *in_while;
+    struct Instruction *in_fn;
 } parser_t;
 
 // * float > int, str is always converted

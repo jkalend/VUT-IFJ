@@ -867,7 +867,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
             snprintf(number, number_size, "%d", parser.tmp_counter);
 
             if (lookahead->type == T_IDENTIFIER) {
-                char *id = malloc(strlen(lookahead->value.identifier) + 3);
+                char *id = calloc(strlen(lookahead->value.identifier) + 3, strlen(lookahead->value.identifier) + 3);
                 if (id == NULL) exit(BAD_INTERNAL);
                 strcat(id, "69");
                 strcat(id, lookahead->value.identifier);
@@ -877,6 +877,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 data->bucket = pair;
                 stack_push(stack, data);
                 if (pair == NULL) {
+                    printf("%s\n", id);
                     exit(BAD_DEFINITION);
                 }
             } else if (lookahead->type == T_FLOAT) {
@@ -1170,27 +1171,34 @@ int parse(Generator *gen) {
                         if (stack_isEmpty(parser.local_tabs)) parser.temporary_tab = parser.glob_tab;
                         else parser.temporary_tab = stack_top(parser.local_tabs)->htab;
 
-                        if (parser.val_returned != NULL && (parser.val_returned->value_type != parser.val_expected)) {
-                            printf("%d %d\n", parser.val_expected, parser.val_returned->value_type);
-                            exit(BAD_TERM);
-                        } 
+                        // if (parser.val_returned != NULL && (parser.val_returned->value_type != parser.val_expected)) {
+                        //     printf("%d %d\n", parser.val_expected, parser.val_returned->value_type);
+                        //     exit(BAD_TERM);
+                        // } 
                         parser.in_function = false;
                         Instruction *instr = malloc(sizeof(Instruction));
-                        switch (parser.val_expected) {
-                            case D_INT:
-                                instr->instruct = end_fn_int;
-                                break;
-                            case D_FLOAT:
-                                instr->instruct = end_fn_float;
-                                break;
-                            case D_STRING:
-                                instr->instruct = end_fn_string;
-                                break;
-                            case D_VOID:
-                                instr->instruct = end_fn_void;
-                                break;
+                        if (parser.val_expected != D_VOID) {
+                            instr->instruct = err_quit;
                         }
+                        else {
+                            instr->instruct = end_fn_void;
+                        }
+                        // switch (parser.val_expected) {
+                        //     case D_INT:
+                        //         instr->instruct = end_fn_int;
+                        //         break;
+                        //     case D_FLOAT:
+                        //         instr->instruct = end_fn_float;
+                        //         break;
+                        //     case D_STRING:
+                        //         instr->instruct = end_fn_string;
+                        //         break;
+                        //     case D_VOID:
+                        //         instr->instruct = end_fn_void;
+                        //         break;
+                        // }
                         generator_add_instruction(gen, instr);
+                        generator_add_instruction(gen, parser.in_fn);
                     }
                     
                 }
@@ -1346,6 +1354,7 @@ int parse(Generator *gen) {
                     parser.in_func = htab_find(parser.temporary_tab, id);
                     /* redefinition of function -> exit */
                     if (parser.in_func != NULL) {
+                        printf("hh\n");
                         exit(BAD_DEFINITION);
                     }
                     
@@ -1372,6 +1381,11 @@ int parse(Generator *gen) {
                     instr->operands = malloc(sizeof(htab_pair_t *));
                     instr->operands[0] = parser.in_func;
                     generator_add_instruction(gen, instr);
+
+                    Instruction *temp = malloc(sizeof(Instruction));
+                    instr->instruct = fn_defs;
+                    instr->operands = NULL;
+                    instr->operands_count = 0;
                 }  
             }
             else {
@@ -1432,6 +1446,11 @@ int parse(Generator *gen) {
                         }
                         generator_add_instruction(gen, instr);
                     } 
+                    else {
+                        Instruction *instr = malloc(sizeof(Instruction));
+                        instr->instruct = end_fn_void;
+                        generator_add_instruction(gen, instr);
+                    }
                 }
                 
                 parser.expect_ret = false;
@@ -1642,6 +1661,7 @@ int main(void) {
     parser.while_eval = false;
     parser.in_function = false;
     parser.in_while = NULL;
+    parser.in_fn = NULL;
 
     insert_builtins();
 
