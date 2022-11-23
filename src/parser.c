@@ -1185,12 +1185,12 @@ int parse(Generator *gen) {
         if (stack_isEmpty(stack)) {
             break;
         }
-        if (parser.main_found && !gen->started) {
-            Instruction *inst = malloc(sizeof(Instruction));
-            inst->instruct = main_;
-            generator_add_instruction(gen, inst);
-            gen->started = true;
-        }
+//        if (parser.main_found && !gen->started) {
+//            Instruction *inst = malloc(sizeof(Instruction));
+//            inst->instruct = main_;
+//            generator_add_instruction(gen, inst);
+//            gen->started = true;
+//        }
         
         TData *top = stack_pop(stack);
         if (top->type == T_TERM) {
@@ -1394,9 +1394,9 @@ int parse(Generator *gen) {
                     stack_push(brackets, data);
                 }
 
-                if ((token->value.keyword == KW_IF || token->value.keyword == KW_WHILE) && !parser.in_function) {
-                    parser.main_found = true;
-                }
+//                if ((token->value.keyword == KW_IF || token->value.keyword == KW_WHILE) && !parser.in_function) {
+//                    parser.main_found = true;
+//                }
                 if (token->value.keyword == KW_RETURN) {
                     parser.expect_ret = true;
                     parser.allow_expr_empty = true;
@@ -1485,7 +1485,7 @@ int parse(Generator *gen) {
 
                 if (parser.expect_ret) {
                     if (parser.temporary_tab != parser.glob_tab && parser.val_returned != NULL && parser.val_returned->value_type != parser.val_expected) 
-                        exit(BAD_TERM);
+                        exit(BAD_TYPE_OR_RETURN);
                     if (!parser.empty_expr) {
 
                         Instruction *instr = malloc(sizeof(Instruction));
@@ -1533,11 +1533,11 @@ int parse(Generator *gen) {
 
             printf("%d ", val);
 
-            if (val >= 7 && val <= 12 && !parser.in_function) {
-                parser.main_found = true;
-            } else if ((val == 4 || val == 3) && !parser.in_function) {
-                parser.main_found = true;
-            }
+//            if (val >= 7 && val <= 12 && !parser.in_function) {
+//                parser.main_found = true;
+//            } else if ((val == 4 || val == 3) && !parser.in_function) {
+//                parser.main_found = true;
+//            }
             apply_rule(stack, val);
         }
         else {
@@ -1712,7 +1712,7 @@ int main(void) {
     parser.in_param_def = false;
     parser.empty_expr = false;
     parser.allow_expr_empty = false;
-    parser.main_found = false;
+    //parser.main_found = false;
     parser.tmp_counter = 0;
     parser.relation_operator = 0;
     parser.expect_ret = false;

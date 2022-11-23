@@ -515,7 +515,8 @@ int generate(Generator *generator) {
     printf("MOVE GF@%%nil string@nil\n");
     printf("MOVE GF@%%true bool@true\n");
     printf("MOVE GF@%%false bool@false\n");
-    printf("JUMP $$main\n");
+    printf("CREATEFRAME\n");
+    printf("PUSHFRAME\n");
 
     for (long i = 0; i < generator->instruction_count; i++) {
         //individual instruction generation
@@ -602,11 +603,11 @@ int generate(Generator *generator) {
             case strlen_:
                 gen_strlen(generator->instructions[i], generator);
                 break;
-            case main_:
-                printf("LABEL $$main\n");
-                printf("CREATEFRAME\n");
-                printf("PUSHFRAME\n");
-                break;
+//            case main_:
+//                printf("LABEL $$main\n");
+//                printf("CREATEFRAME\n");
+//                printf("PUSHFRAME\n");
+//                break;
             case end:
                 printf("EXIT int@0\n");
                 printf("LABEL $!!EXIT_4\n");
@@ -676,7 +677,7 @@ int generate(Generator *generator) {
                 printf("RETURN\n");
                 break;
             case err_quit:
-                printf("JUMP $!!EXIT_6\n");
+                printf("JUMP $!!EXIT_4\n");
                 break;
             case end_fn_void:
                 // if (generator->instructions[i]->operands != NULL) {
