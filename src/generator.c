@@ -149,14 +149,19 @@ void gen_strval(Instruction *instruction, Generator *generator){
 }
 
 void gen_ord(Instruction *instruction, Generator *generator) {
-	//printf("TYPE GF@%%check0 LF@%s\n", instruction->params[0]->identifier);
-	//printf("JUMPIFEQ !!%d GF@%%string GF@%%check0\n", generator->label_count);
+	printf("TYPE GF@%%check0 LF@%s\n", instruction->params[0]->identifier);
+	printf("JUMPIFEQ !!%d GF@%%string GF@%%check0\n", generator->label_count);
 
-	printf("JUMPIFEQ !!%d LF%s string@\n", generator->label_count, instruction->params[0]->identifier);
-	printf("STRI2INT LF@%s LF@%s int@0\n", instruction->id, instruction->params[0]->identifier);
+	printf("LABEL !!%d\n", generator->label_count + 2);
+	printf("MOVE LF@%s int@0\n", instruction->id);
+	printf("JUMP !!%d\n", generator->label_count + 1);
 
 	printf("LABEL !!%d\n", generator->label_count);
-	generator->label_count += 1;
+	printf("JUMPIFEQ !!%d LF@%s string@\n", generator->label_count + 2, instruction->params[0]->identifier);
+	printf("STRI2INT LF@%s LF@%s int@0\n", instruction->id, instruction->params[0]->identifier);
+
+	printf("LABEL !!%d\n", generator->label_count + 1);
+	generator->label_count += 3;
 }
 
 void gen_chr(Instruction *instruction, Generator *generator) {
