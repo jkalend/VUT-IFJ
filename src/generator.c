@@ -90,14 +90,14 @@ void gen_substring(Instruction *instruction, Generator *generator) {
 	printf("MOVE LF@%s GF@%%check1\n", instruction->id);
 
 	printf("JUMP !!%d\n", generator->label_count + 5);
-	printf("LABEL !!%d\n", generator->label_count + 4);
+	printf("LABEL !!%d\n", generator->label_count + 8);
 	printf("MOVE LF@%s string@\n", instruction->id);
 
 	printf("JUMP !!%d\n", generator->label_count + 5);
 	printf("LABEL !!%d\n", generator->label_count + 4); //error
 	printf("MOVE LF@%s nil@nil\n", instruction->id);
 	printf("LABEL !!%d\n", generator->label_count + 5);
-	generator->label_count += 8;
+	generator->label_count += 9;
 }
 
 void gen_floatval(Instruction *instruction, Generator *generator){
