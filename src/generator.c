@@ -650,7 +650,7 @@ int generate(Generator *generator) {
             case end_fn_float:
                 //if (generator->instructions[i]->operands != NULL) {
                     printf("TYPE GF@%%check0 LF@%s\n", generator->instructions[i]->operands[0]->identifier);
-                    printf("JUMPIFNEQ $!!EXIT_4 GF@%%check0 string@float\n");
+                    printf("JUMPIFNEQ $!!EXIT_4 GF@%%check0 string@float\n"); //could be 6
                     printf("MOVE LF@$$retval LF@%s\n", generator->instructions[i]->operands[0]->identifier);
                 //}
                 printf("POPFRAME\n");
@@ -660,7 +660,7 @@ int generate(Generator *generator) {
             case end_fn_string:
                 //if (generator->instructions[i]->operands != NULL) {
                     printf("TYPE GF@%%check0 LF@%s\n", generator->instructions[i]->operands[0]->identifier);
-                    printf("JUMPIFNEQ $!!EXIT_4 GF@%%check0 string@string\n");
+                    printf("JUMPIFNEQ $!!EXIT_4 GF@%%check0 string@string\n"); //could be 6
                     printf("MOVE LF@$$retval LF@%s\n", generator->instructions[i]->operands[0]->identifier);
                 //}
                 printf("POPFRAME\n");
@@ -670,14 +670,17 @@ int generate(Generator *generator) {
             case end_fn_int:
                 //if (generator->instructions[i]->operands != NULL) {
                     printf("TYPE GF@%%check0 LF@%s\n", generator->instructions[i]->operands[0]->identifier);
-                    printf("JUMPIFNEQ $!!EXIT_4 GF@%%check0 string@int\n");
+                    printf("JUMPIFNEQ $!!EXIT_4 GF@%%check0 string@int\n"); //could be 6
                     printf("MOVE LF@$$retval LF@%s\n", generator->instructions[i]->operands[0]->identifier);
                 //}
                 printf("POPFRAME\n");
                 printf("RETURN\n");
                 break;
-            case err_quit:
-                printf("JUMP $!!EXIT_4\n");
+            case err_quit4:
+                printf("JUMP $!!EXIT_4\n"); //could be 6
+                break;
+            case err_quit6:
+                printf("JUMP $!!EXIT_6\n");
                 break;
             case end_fn_void:
                 // if (generator->instructions[i]->operands != NULL) {

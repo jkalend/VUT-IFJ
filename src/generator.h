@@ -54,7 +54,8 @@ typedef enum {
     else_,
     else_end,
     while_defs,
-    err_quit,
+    err_quit4,
+    err_quit6,
     fn_defs
 }InstructionType;
 

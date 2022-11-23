@@ -693,6 +693,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
         }
         
         if (builtin) {
+            data->bucket->type = H_VAR;
             if (parser.in_while == NULL && !parser.in_function) {
                 Instruction *fnc = malloc(sizeof(Instruction));
                 fnc->instruct = defvar;
@@ -1236,7 +1237,7 @@ int parse(Generator *gen) {
                         parser.in_function = false;
                         Instruction *instr = malloc(sizeof(Instruction));
                         if (parser.val_expected != D_VOID) {
-                            instr->instruct = err_quit;
+                            instr->instruct = err_quit4;
                         }
                         else {
                             instr->instruct = end_fn_void;
@@ -1397,9 +1398,12 @@ int parse(Generator *gen) {
 //                if ((token->value.keyword == KW_IF || token->value.keyword == KW_WHILE) && !parser.in_function) {
 //                    parser.main_found = true;
 //                }
-                if (token->value.keyword == KW_RETURN) {
+                if (token->value.keyword == KW_RETURN && parser.val_expected == D_VOID) {
                     parser.expect_ret = true;
                     parser.allow_expr_empty = true;
+                } else if (token->value.keyword == KW_RETURN) {
+                    parser.expect_ret = true;
+                    parser.allow_expr_empty = false;
                 }
 
                 get_next_token(&token, &keep_prev_token, &return_back);
@@ -1415,7 +1419,6 @@ int parse(Generator *gen) {
                     parser.in_func = htab_find(parser.temporary_tab, id);
                     /* redefinition of function -> exit */
                     if (parser.in_func != NULL) {
-                        printf("hh\n");
                         exit(BAD_DEFINITION);
                     }
                     
@@ -1470,7 +1473,7 @@ int parse(Generator *gen) {
                 
                 if (!result) exit(5); //TODO bad code
 
-                else if (parser.empty_expr && !parser.allow_expr_empty) exit(5);
+                else if (parser.empty_expr && !parser.allow_expr_empty) exit(6);
                 parser.in_assign = NULL;
                 get_next_token(&token, &keep_prev_token, &return_back);
 
@@ -1485,7 +1488,7 @@ int parse(Generator *gen) {
 
                 if (parser.expect_ret) {
                     if (parser.temporary_tab != parser.glob_tab && parser.val_returned != NULL && parser.val_returned->value_type != parser.val_expected) 
-                        exit(BAD_TYPE_OR_RETURN);
+                        exit(BAD_TYPE_OR_RETURN); //could be 6
                     if (!parser.empty_expr) {
 
                         Instruction *instr = malloc(sizeof(Instruction));
