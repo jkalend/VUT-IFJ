@@ -67,6 +67,9 @@ void gen_substring(Instruction *instruction, Generator *generator) {
 	printf("JUMPIFEQ !!%d GF@%%check0 bool@true\n", generator->label_count + 4);
 	printf("GT GF@%%check0 LF@%s LF@%s\n", instruction->params[1]->identifier, instruction->params[2]->identifier);
 	printf("JUMPIFEQ !!%d GF@%%check0 bool@true\n", generator->label_count + 4);
+	printf("GT GF@%%check0 LF@%s LF@%s\n", instruction->params[1]->identifier, instruction->params[2]->identifier);
+	printf("JUMPIFEQ !!%d GF@%%check0 bool@true\n", generator->label_count + 4);
+	printf("JUMPIFEQ !!%d LF@%s LF@%s\n", generator->label_count + 8, instruction->params[1]->identifier, instruction->params[2]->identifier);
 
 	printf("STRLEN GF@%%check1 LF@%s\n", instruction->params[0]->identifier);
 	printf("GT GF@%%check0 LF@%s GF@%%check1\n", instruction->params[1]->identifier);
@@ -85,6 +88,10 @@ void gen_substring(Instruction *instruction, Generator *generator) {
 	printf("ADD LF@%s LF@%s int@1\n", instruction->params[1]->identifier, instruction->params[1]->identifier);
 	printf("JUMPIFNEQ !!%d LF@%s LF@%s\n", generator->label_count + 7, instruction->params[1]->identifier, instruction->params[2]->identifier);
 	printf("MOVE LF@%s GF@%%check1\n", instruction->id);
+
+	printf("JUMP !!%d\n", generator->label_count + 5);
+	printf("LABEL !!%d\n", generator->label_count + 4);
+	printf("MOVE LF@%s string@\n", instruction->id);
 
 	printf("JUMP !!%d\n", generator->label_count + 5);
 	printf("LABEL !!%d\n", generator->label_count + 4); //error
