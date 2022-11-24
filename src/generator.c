@@ -506,6 +506,22 @@ void gen_gt(Instruction *instruction, Generator *generator, char op[], bool inve
     printf("LABEL !!%d\n", generator->label_count++);
 }
 
+void gen_check(Instruction *instruction, bool operand_not_param) {
+    if (operand_not_param) {
+        for (int i = 0; i < instruction->operands_count; i++) {
+            printf("TYPE GF@%%check0 LF@%s", instruction->operands[i]->identifier);
+            printf("EQ GF@%%check0 LF@%s string@", instruction->operands[i]->identifier);
+            printf("JUMPIFEQ $!!EXIT_5 GF@%%check0 bool@true\n");
+        }
+    } else {
+        for (int i = 0; i < instruction->params_count; i++) {
+            printf("TYPE GF@%%check0 LF@%s", instruction->params[i]->identifier);
+            printf("EQ GF@%%check0 LF@%s string@", instruction->params[i]->identifier);
+            printf("JUMPIFEQ $!!EXIT_5 GF@%%check0 bool@true\n");
+        }
+    }
+}
+
 int generate(Generator *generator) {
     TData *data;
     printf(".IFJcode22\n");
@@ -530,7 +546,6 @@ int generate(Generator *generator) {
     printf("CREATEFRAME\n");
     printf("PUSHFRAME\n");
 
-    struct Instruction *a;
 
     for (long i = 0; i < generator->instruction_count; i++) {
         //individual instruction generation
@@ -543,60 +558,77 @@ int generate(Generator *generator) {
                 printf("DEFVAR LF@%s\n", generator->instructions[i]->id);
                 break;
             case call:
+                gen_check(generator->instructions[i], true);
                 gen_call(generator->instructions[i]);
                 break;
             case ret: //not needed?
                 break;
             case addition:
+                gen_check(generator->instructions[i], true);
                 gen_add(generator->instructions[i], generator);
                 break;
             case sub:
+                gen_check(generator->instructions[i], true);
                 gen_sub(generator->instructions[i], generator);
                 break;
             case mul:
+                gen_check(generator->instructions[i], true);
                 gen_mul(generator->instructions[i], generator);
                 break;
             case div_:
+                gen_check(generator->instructions[i], true);
                 gen_div(generator->instructions[i], generator);
                 break;
             case idiv: //never happens
                 gen_div(generator->instructions[i], generator);
                 break;
             case lt:
+                gen_check(generator->instructions[i], true);
                 gen_gt(generator->instructions[i], generator, "LT", false);
                 break;
             case gt:
+                gen_check(generator->instructions[i], true);
                 gen_gt(generator->instructions[i], generator, "GT", false);
                 break;
             case eq:
+                gen_check(generator->instructions[i], true);
                 gen_eq(generator->instructions[i], generator);
                 break;
             case lte:
+                gen_check(generator->instructions[i], true);
                 gen_gt(generator->instructions[i], generator, "GT", true);
                 break;
             case gte:
+                gen_check(generator->instructions[i], true);
                 gen_gt(generator->instructions[i], generator, "LT", true);
                 break;
             case neq:
+                gen_check(generator->instructions[i], true);
                 gen_eq(generator->instructions[i], generator);
                 printf("NOT LF@%s LF@%s\n", generator->instructions[i]->id, generator->instructions[i]->id);
                 break;
             case floatval:
+                gen_check(generator->instructions[i], false);
 				gen_floatval(generator->instructions[i], generator);
                 break;
             case intval:
+                gen_check(generator->instructions[i], false);
 				gen_intval(generator->instructions[i], generator);
                 break;
             case strval:
+                gen_check(generator->instructions[i], false);
 				gen_strval(generator->instructions[i], generator);
                 break;
             case substring:
+                gen_check(generator->instructions[i], false);
 				gen_substring(generator->instructions[i], generator);
                 break;
             case ord:
+                gen_check(generator->instructions[i], false);
 				gen_ord(generator->instructions[i], generator);
                 break;
             case chr:
+                gen_check(generator->instructions[i], false);
 				gen_chr(generator->instructions[i], generator);
                 break;
             case reads:
@@ -609,12 +641,15 @@ int generate(Generator *generator) {
 				printf("READ LF@%s int\n", generator->instructions[i]->id);
                 break;
             case write:
+                gen_check(generator->instructions[i], false);
                 gen_write(generator->instructions[i]);
                 break;
             case concat:
+                gen_check(generator->instructions[i], true);
                 gen_concat(generator->instructions[i], generator);
                 break;
             case strlen_:
+                gen_check(generator->instructions[i], false);
                 gen_strlen(generator->instructions[i], generator);
                 break;
 //            case main_:
@@ -630,8 +665,11 @@ int generate(Generator *generator) {
                 printf("EXIT int@7\n");
                 printf("LABEL $!!EXIT_6\n");
                 printf("EXIT int@6\n");
+                printf("LABEL $!!EXIT_5\n");
+                printf("EXIT int@5\n");
                 break;
-            case start_fn:  
+            case start_fn:
+                gen_check(generator->instructions[i], true);
                 data = malloc(sizeof(TData));
                 data->value = generator->label_count++;
                 data->type = generator->label_count++;
@@ -667,6 +705,7 @@ int generate(Generator *generator) {
                 break;
                 
             case end_fn_float:
+                gen_check(generator->instructions[i], true);
                 //if (generator->instructions[i]->operands != NULL) {
                     printf("TYPE GF@%%check0 LF@%s\n", generator->instructions[i]->operands[0]->identifier);
                     printf("JUMPIFNEQ $!!EXIT_4 GF@%%check0 string@float\n"); //could be 6
@@ -677,6 +716,7 @@ int generate(Generator *generator) {
                 break;
 
             case end_fn_string:
+                gen_check(generator->instructions[i], true);
                 //if (generator->instructions[i]->operands != NULL) {
                     printf("TYPE GF@%%check0 LF@%s\n", generator->instructions[i]->operands[0]->identifier);
                     printf("JUMPIFNEQ $!!EXIT_4 GF@%%check0 string@string\n"); //could be 6
@@ -687,6 +727,7 @@ int generate(Generator *generator) {
                 break;
 
             case end_fn_int:
+                gen_check(generator->instructions[i], true);
                 //if (generator->instructions[i]->operands != NULL) {
                     printf("TYPE GF@%%check0 LF@%s\n", generator->instructions[i]->operands[0]->identifier);
                     printf("JUMPIFNEQ $!!EXIT_4 GF@%%check0 string@int\n"); //could be 6
@@ -702,6 +743,7 @@ int generate(Generator *generator) {
                 printf("JUMP $!!EXIT_6\n");
                 break;
             case end_fn_void:
+                gen_check(generator->instructions[i], true);
                 if (generator->instructions[i]->operands != NULL) {
                     printf("TYPE GF@%%check0 LF@%s\n", generator->instructions[i]->operands[0]->identifier);
                     printf("JUMPIFNEQ $!!EXIT_6 GF@%%check0 string@nil\n");
