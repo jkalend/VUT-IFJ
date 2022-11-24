@@ -450,6 +450,7 @@ void gen_call(Instruction *instruction) {
         printf("MOVE TF@%s LF@%s\n", instruction->operands[0]->param_names[i], instruction->params[i]->identifier);
     }
     printf("CALL $%s\n", instruction->operands[0]->identifier);
+    printf("MOVE LF@%s TF@$$retval\n", instruction->id);
 }
 
 void gen_eq(Instruction *instruction, Generator *generator) {
@@ -596,9 +597,7 @@ int generate(Generator *generator) {
 				gen_chr(generator->instructions[i], generator);
                 break;
             case reads:
-				printf("LABEL $%s\n", generator->instructions[i]->operands[0]->identifier);
 				printf("READ LF@%s string\n", generator->instructions[i]->id);
-				printf("RETURN\n");
                 break;
             case readf:
 				printf("READ LF@%s float\n", generator->instructions[i]->id);
