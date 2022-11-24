@@ -48,6 +48,7 @@ void gen_substring(Instruction *instruction, Generator *generator) {
 	printf("FLOAT2INT LF@%s LF@%s\n", instruction->params[1]->identifier, instruction->params[1]->identifier);
 
 	printf("LABEL !!%d\n", generator->label_count + 1);
+	printf("MOVE GF@%%check2 LF@%s\n", instruction->params[1]->identifier);
 	//first int checked
 
 	printf("TYPE GF@%%check0 LF@%s\n", instruction->params[2]->identifier);
@@ -85,8 +86,8 @@ void gen_substring(Instruction *instruction, Generator *generator) {
 	printf("LABEL !!%d\n", generator->label_count + 7);
 	printf("GETCHAR GF@%%check0 LF@%s LF@%s\n", instruction->params[0]->identifier, instruction->params[1]->identifier);
 	printf("CONCAT GF@%%check1 GF@%%check1 GF@%%check0\n");
-	printf("ADD LF@%s LF@%s int@1\n", instruction->params[1]->identifier, instruction->params[1]->identifier);
-	printf("JUMPIFNEQ !!%d LF@%s LF@%s\n", generator->label_count + 7, instruction->params[1]->identifier, instruction->params[2]->identifier);
+	printf("ADD GF@%%check2 GF@%%check2 int@1\n");
+	printf("JUMPIFNEQ !!%d GF@%%check2 LF@%s\n", generator->label_count + 7, instruction->params[2]->identifier);
 	printf("MOVE LF@%s GF@%%check1\n", instruction->id);
 
 	printf("JUMP !!%d\n", generator->label_count + 5);
@@ -808,9 +809,7 @@ int generate(Generator *generator) {
             case else_end:
                 printf("LABEL !!%d\n", stack_pop(generator->label_stack)->type);
                 break;
-            case exit_success:
-                printf("EXIT int@0\n");
-                break;
+
             default:
                 break;
         }
