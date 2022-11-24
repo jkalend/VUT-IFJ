@@ -509,14 +509,14 @@ void gen_gt(Instruction *instruction, Generator *generator, char op[], bool inve
 void gen_check(Instruction *instruction, bool operand_not_param) {
     if (operand_not_param) {
         for (int i = 0; i < instruction->operands_count; i++) {
-            printf("TYPE GF@%%check0 LF@%s", instruction->operands[i]->identifier);
-            printf("EQ GF@%%check0 LF@%s string@", instruction->operands[i]->identifier);
+            printf("TYPE GF@%%check0 LF@%s\n", instruction->operands[i]->identifier);
+            printf("EQ GF@%%check0 LF@%s string@\n", instruction->operands[i]->identifier);
             printf("JUMPIFEQ $!!EXIT_5 GF@%%check0 bool@true\n");
         }
     } else {
         for (int i = 0; i < instruction->params_count; i++) {
-            printf("TYPE GF@%%check0 LF@%s", instruction->params[i]->identifier);
-            printf("EQ GF@%%check0 LF@%s string@", instruction->params[i]->identifier);
+            printf("TYPE GF@%%check0 LF@%s\n", instruction->params[i]->identifier);
+            printf("EQ GF@%%check0 LF@%s string@\n", instruction->params[i]->identifier);
             printf("JUMPIFEQ $!!EXIT_5 GF@%%check0 bool@true\n");
         }
     }
