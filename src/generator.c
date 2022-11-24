@@ -115,6 +115,7 @@ void gen_floatval(Instruction *instruction, Generator *generator){
 	printf("MOVE LF@%s LF@%s\n", instruction->id, instruction->params[0]->identifier);
 
 	printf("LABEL !!%d\n", generator->label_count + 2);
+    generator->label_count = generator->label_count + 2;
 }
 
 void gen_intval(Instruction *instruction, Generator *generator) {
@@ -446,8 +447,8 @@ void gen_concat(Instruction *instruction, Generator *generator) {
 void gen_call(Instruction *instruction) {
     printf("CREATEFRAME\n");
     for (int i = 0; i < instruction->params_count; i++) {
-        printf("DEFVAR TF@%s\n", instruction->operands[0]->param_names[i]);
-        printf("MOVE TF@%s LF@%s\n", instruction->operands[0]->param_names[i], instruction->params[i]->identifier);
+        printf("DEFVAR TF@%d\n", i);
+        printf("MOVE TF@%d LF@%s\n", i, instruction->params[i]->identifier);
     }
     printf("CALL $%s\n", instruction->operands[0]->identifier);
     printf("MOVE LF@%s TF@$$retval\n", instruction->id);
@@ -528,6 +529,8 @@ int generate(Generator *generator) {
     printf("MOVE GF@%%false bool@false\n");
     printf("CREATEFRAME\n");
     printf("PUSHFRAME\n");
+
+    struct Instruction *a;
 
     for (long i = 0; i < generator->instruction_count; i++) {
         //individual instruction generation

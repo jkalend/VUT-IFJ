@@ -253,7 +253,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
     }
     unsigned int res = 0;
     bool fn = false;
-    const htab_pair_t *last_fn;
+    htab_pair_t *last_fn;
 
     while (stack_top(stack)->value != P_OPEN && stack_top(stack)->value != P_END) {
         const TData *data = stack_pop(stack);
@@ -673,7 +673,12 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
             else if (tmp_data->value == P_RIGHT_BRACKET) brackets++;
             else if (tmp_data->value == P_E) {
                 E++;
-                stack_push(reversal, stack_pop(temps));
+                tmp_data = stack_pop(temps);
+                stack_push(reversal, tmp_data);
+                if (last_fn->return_type == D_NONE) {
+                    last_fn->params = realloc(last_fn->params, sizeof(DataType) * E);
+                    last_fn->params[last_fn->param_count++] = tmp_data->bucket->value_type;
+                }
             }
         }
         if (brackets != 0) exit(BAD_SYNTAX);
@@ -766,11 +771,11 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
             fnc_->operands[0] = last_fn;
             fnc_->operands_count = 1;
             fnc_->retval = last_fn->return_type;
-            fnc_->params_count = last_fn->param_count;
+            fnc_->params_count = last_fn->param_count + (last_fn->return_type == D_NONE) ? E : 0;
             fnc_->params = malloc(sizeof(htab_pair_t*) * last_fn->param_count);
             fnc_->types = last_fn->params;
 
-            for (int i = 0; i < last_fn->param_count; i++) {
+            for (int i = 0; i < last_fn->param_count && last_fn->return_type != D_NONE; i++) {
                 if (last_fn->params[i] == D_INT || last_fn->params[i] == D_FLOAT) {
                     if (stack_top(reversal)->bucket->value_type == D_INT ||
                         stack_top(reversal)->bucket->value_type == D_FLOAT ||
@@ -1060,9 +1065,9 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 stack_push(stack, stack_data(P_I, P_I));
             } else if (lookahead->type == T_VAR) {
                 htab_pair_t *pair = htab_find(parser.temporary_tab, lookahead->value.identifier);
-                if (pair == NULL || pair->value_type == D_NONE) {
-                    exit(BAD_UNDEFINED_VAR);
-                }
+//                if (pair == NULL || pair->value_type == D_NONE) {
+//                    exit(BAD_UNDEFINED_VAR);
+//                }
                 TData *data = stack_data(P_I, P_I);
                 data->bucket = pair;
 
@@ -1465,7 +1470,7 @@ int parse(Generator *gen) {
 
         }
         else if (top->type == T_NONTERM) {
-            if (top->value == N_SMALL_ST && (token->type != T_ASSIGN && token->type != T_SEMICOLON)) {
+            if (top->value == N_SMALL_ST && token->type != T_ASSIGN) {
                 return_back = true;
             }
             if (top->value == N_EXPR) {
@@ -1699,7 +1704,7 @@ void insert_builtins(void) {
 
 int main(void) {
     stream = stdin;
-    //stream = fopen("test.php", "r");
+    stream = fopen("test.php", "r");
    // if (stream == NULL) exit(1);
 
     Generator *gen = malloc(sizeof(Generator));

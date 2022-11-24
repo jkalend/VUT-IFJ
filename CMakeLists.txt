@@ -22,7 +22,7 @@ set(LEX_ALL tests/lextest_empty.c tests/lex_all.c tests/lex_all.h tests/lextest_
 set(GEN src/generator.c src/generator.h src/error.h src/htab.h src/htab.c)
 
 add_executable(IFJ ${PARSER} ${SCANNER} ${GEN})
-add_coverage(IFJ)
+# add_coverage(IFJ)
 target_link_libraries(IFJ m)
 
 add_executable(parser
