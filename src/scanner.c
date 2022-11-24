@@ -257,16 +257,12 @@ int get_token(Token *token) {
 														line++;
 													}
 													if (c2 == EOF) {
-														token->type = T_ERROR;
-														token->line = line;
-														return BAD_LEXEM;
+														exit(1);
 													}
 												}
 												c2 = fgetc(stream);
 												if (c2 == EOF) {
-													token->type = T_ERROR;
-													token->line = line;
-													return LEX_OK;
+													exit(1);
 												} else if (c2 == '/') {
 													break;
 												} else {
