@@ -33,7 +33,7 @@ int get_token(Token *token) {
 				exit(BAD_INTERNAL);
 			}
             while(c != EOF && (isalnum(c) || c == '_')) {
-                if(i == size) {
+                if(i == (size / 2)) {
                     size *= 2;
 					char *tmp = realloc(identifier, size * sizeof(char));
 					if(tmp == NULL){
@@ -69,7 +69,7 @@ int get_token(Token *token) {
             int plus_minus = 0;
             int dot = 0;
             while ((c >= '0' && c <= '9') || c == '.' || c == 'e' || c == 'E' || c == '+' || c == '-'){
-                if (i == size - 10) {
+                if (i == (size / 2)) {
                     size *= 2;
                     char *tmp = realloc(str, size);
 					if(tmp == NULL){
@@ -495,7 +495,7 @@ int get_token(Token *token) {
 				}
                 int i = 0;
                 while((c2 == '_') || (c2 >= '0' && c2 <= '9') || (c2 >= 'A' && c2 <= 'Z') || (c2 >= 'a' && c2 <= 'z')){
-                    if(i == size - 10){
+                    if(i == ((size / 2))){
                         size *= 2;
                         char *tmp = realloc(str, size);
 						if(tmp == NULL){
@@ -534,7 +534,7 @@ int get_token(Token *token) {
                     int size = 40;
                     int i = 0;
                     while (c2 >= 'a' && c2 <= 'z') {
-                        if (i == size - 10) {
+                        if (i == (size / 2)) {
                             size *= 2;
                             char *tmp = realloc(str, size);
 							if(tmp == NULL){
@@ -579,7 +579,7 @@ int get_token(Token *token) {
                 int size = 40;
                 int i = 0;
                 while (true) {
-                    if (i == size - 10) {
+                    if (i == (size / 2)) {
                         size *= 2;
                         char *tmp = realloc(str, size);
 						if(tmp == NULL){
