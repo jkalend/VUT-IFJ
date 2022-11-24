@@ -775,17 +775,19 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
             fnc_->params = malloc(sizeof(htab_pair_t*) * last_fn->param_count);
             fnc_->types = last_fn->params;
 
-            for (int i = 0; i < last_fn->param_count && last_fn->return_type != D_NONE; i++) {
-                if (last_fn->params[i] == D_INT || last_fn->params[i] == D_FLOAT) {
-                    if (stack_top(reversal)->bucket->value_type == D_INT ||
-                        stack_top(reversal)->bucket->value_type == D_FLOAT ||
+            for (int i = 0; i < last_fn->param_count; i++) {
+                if (last_fn->return_type == D_NONE) {
+                    // is ok
+                } else if (last_fn->params[i] == D_STRING) {
+                    if (stack_top(reversal)->bucket->value_type == D_STRING ||
                         stack_top(reversal)->bucket->value_type == D_VOID) {
                         // is ok
                     } else {
                         exit(BAD_TYPE_OR_RETURN);
                     }
-                } else if (last_fn->params[i] == D_STRING) {
-                    if (stack_top(reversal)->bucket->value_type == D_STRING ||
+                } else if (last_fn->params[i] == D_INT || last_fn->params[i] == D_FLOAT) {
+                    if (stack_top(reversal)->bucket->value_type == D_INT ||
+                        stack_top(reversal)->bucket->value_type == D_FLOAT ||
                         stack_top(reversal)->bucket->value_type == D_VOID) {
                         // is ok
                     } else {
