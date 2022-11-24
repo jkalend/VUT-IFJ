@@ -11,11 +11,13 @@
 #include "htab.h"
 
 
+
 typedef struct tdata {
 	unsigned int value;
 	unsigned int type;
 	htab_t * htab;
     htab_pair_t *bucket;
+	struct Instruction * in_while;
 } TData;
 
 typedef struct telement {

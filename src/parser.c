@@ -1221,7 +1221,8 @@ int parse(Generator *gen) {
                             generator_add_instruction(gen, instr);
                             if (data->type == KW_WHILE) {
                                 generator_add_instruction(gen, parser.in_while);
-                                parser.in_while = NULL;
+                                stack_pop(parser.while_stack);
+                                //parser.in_while = NULL;
                             }
                         }
                     }
@@ -1375,9 +1376,11 @@ int parse(Generator *gen) {
                     instr->instruct = while_defs;
                     instr->operands_count = 0;
                     instr->operands = NULL;
-                    ///generator_add_instruction(gen, instr);
 
-                    parser.in_while = instr;
+                    //parser.in_while = instr;
+                    TData *whl = malloc(sizeof(TData));
+                    whl->in_while = instr;
+                    stack_push(parser.while_stack, whl);
                 }
 
                 if (token->value.keyword == KW_ELSE) {
@@ -1391,9 +1394,6 @@ int parse(Generator *gen) {
                     stack_push(brackets, data);
                 }
 
-//                if ((token->value.keyword == KW_IF || token->value.keyword == KW_WHILE) && !parser.in_function) {
-//                    parser.main_found = true;
-//                }
                 if (token->value.keyword == KW_RETURN && parser.val_expected == D_VOID) {
                     parser.expect_ret = true;
                     parser.allow_expr_empty = true;
@@ -1720,6 +1720,7 @@ int main(void) {
     parser.in_function = false;
     parser.in_while = NULL;
     parser.in_fn = NULL;
+    parser.while_stack = stack_init(parser.while_stack);
 
     insert_builtins();
 
