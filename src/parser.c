@@ -684,7 +684,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
             exit(BAD_TYPE_OR_RETURN);
         }
         
-        int builtin = 0;
+        int builtin = -1;
         for (int j = 0; j < 11; j++) {
             if(strcmp(last_fn->identifier, parser.builtins[j]) == 0) {
                 builtin = j;
@@ -692,7 +692,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
             }
         }
         
-        if (builtin) {
+        if (builtin != -1) {
             data->bucket->type = H_VAR;
             if (parser.in_while == NULL && !parser.in_function) {
                 Instruction *fnc = malloc(sizeof(Instruction));
