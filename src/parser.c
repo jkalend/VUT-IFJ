@@ -1222,6 +1222,11 @@ int parse(Generator *gen) {
                             if (data->type == KW_IF) {
                                 instr->instruct = else_end;
                                 generator_add_instruction(gen, instr); 
+                                parser.while_count -= 1;
+                                if (parser.while_count == 0) {
+                                    generator_add_instruction(gen, parser.in_while);
+                                    parser.in_while = NULL;
+                                }
                                 
                             }
                             else if (data->type == KW_WHILE) {
@@ -1375,6 +1380,15 @@ int parse(Generator *gen) {
             if (token->type == T_KEYWORD && top->value == token->value.keyword) {
                 if (token->value.keyword == KW_IF) {
                     parser.if_eval = true;
+                    parser.while_count += 1;
+                    if (parser.in_while == NULL) {
+                        Instruction *instr = malloc(sizeof(Instruction));
+                        instr->instruct = while_defs;
+                        instr->operands_count = 0;
+                        instr->operands = NULL;
+                        parser.in_while = instr;
+                    }
+
                 }
                 if (token->value.keyword == KW_WHILE) {
                     parser.while_eval = true;
@@ -1719,7 +1733,7 @@ void insert_builtins(void) {
 
 int main(void) {
     stream = stdin;
-    stream = fopen("test.php", "r");
+    //stream = fopen("test.php", "r");
     if (stream == NULL) exit(BAD_INTERNAL);
 
     Generator *gen = malloc(sizeof(Generator));
