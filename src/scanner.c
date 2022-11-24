@@ -802,6 +802,15 @@ char* convert_string_for_ifjcode(char *str, int size) {
 					str[i+2] = '3';
 					str[i+3] = '6';
 					break;
+				case '"':
+					while (j > i + 1) {
+						str[j] = str[j - 2];
+						j--;
+					}
+					str[i+1] = '0';
+					str[i+2] = '3';
+					str[i+3] = '4';
+					break;
 				default:
 					while (j > i + 2) {
 						str[j] = str[j - 3];
