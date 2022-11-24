@@ -61,7 +61,6 @@ typedef struct {
     htab_t *glob_tab;
     htab_t *temporary_tab;
     TStack *local_tabs;
-    TStack *while_stack;
     htab_pair_t *in_func;
     htab_pair_t *in_assign;
     bool in_param_def;
