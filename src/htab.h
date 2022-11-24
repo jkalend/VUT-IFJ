@@ -31,7 +31,8 @@ typedef enum {
     D_STRING,
     D_FLOAT,
     D_VOID,
-    D_BOOL
+    D_BOOL,
+    D_UNDEF
 } DataType;
 
 // Dvojice dat v tabulce:

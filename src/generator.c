@@ -447,8 +447,8 @@ void gen_concat(Instruction *instruction, Generator *generator) {
 void gen_call(Instruction *instruction) {
     printf("CREATEFRAME\n");
     for (int i = 0; i < instruction->params_count; i++) {
-        printf("DEFVAR TF@%d\n", i);
-        printf("MOVE TF@%d LF@%s\n", i, instruction->params[i]->identifier);
+        printf("DEFVAR TF@%%%d\n", i);
+        printf("MOVE TF@%%%d LF@%s\n", i, instruction->params[i]->identifier);
     }
     printf("CALL $%s\n", instruction->operands[0]->identifier);
     printf("MOVE LF@%s TF@$$retval\n", instruction->id);
@@ -641,9 +641,9 @@ int generate(Generator *generator) {
                 printf("LABEL $%s\n", generator->instructions[i]->operands[0]->identifier);
                 printf("PUSHFRAME\n");
 
-                for (int j = 0; j < generator->instructions[i]->operands[0]->identifier; j++) {
+                for (int j = 0; j < generator->instructions[i]->operands[0]->param_count; j++) {
                     printf("DEFVAR LF@%s\n", generator->instructions[i]->operands[0]->param_names[j]);
-                    printf("MOVE LF@%s LF@%d\n", generator->instructions[i]->operands[0]->param_names[j], j);
+                    printf("MOVE LF@%s LF@%%%d\n", generator->instructions[i]->operands[0]->param_names[j], j);
                 }
 
                 printf("JUMP !!%d\n", stack_top(generator->label_stack)->value);

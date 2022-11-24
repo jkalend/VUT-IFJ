@@ -1184,6 +1184,7 @@ int parse(Generator *gen) {
     brackets = stack_init(brackets);
     stack_push(stack, stack_data(T_EOF, T_TERM));
     stack_push(stack, stack_data(N_PROG, T_NONTERM));
+    int E = 0;
 
     Token *token = malloc(sizeof(Token));
     if (token == NULL)  exit(BAD_INTERNAL);
@@ -1263,6 +1264,7 @@ int parse(Generator *gen) {
                         parser.in_param_def = false;
                     }
                     else if (!parser.in_param_def && token->type == T_TYPE) {
+                        if (parser.in_func->return_type == D_NONE && parser.in_func->param_count != E) exit(BAD_TYPE_OR_RETURN);
                         switch (token->value.keyword) {
                             case KW_INT:
                                 parser.in_func->return_type = D_INT;
@@ -1279,31 +1281,39 @@ int parse(Generator *gen) {
                             default:
                                 exit(BAD_SYNTAX); // unknown data type
                         }
+                        E = 0;
                         parser.val_expected = parser.in_func->return_type;
                         parser.val_returned = NULL;
                         parser.in_func = NULL;
                     }
                     else if (parser.in_param_def && token->type == T_TYPE) {
-                        parser.in_func->param_count += 1;
-                        
-                        parser.in_func->params = realloc(parser.in_func->params, sizeof(Value) * parser.in_func->param_count);
-                        if (parser.in_func->params == NULL) exit(BAD_INTERNAL); // realloc failed
-                        
-                        
-
+                        DataType type;
                         switch (token->value.keyword) {
                             case KW_INT:
-                                parser.in_func->params[parser.in_func->param_count - 1] = D_INT;
+                                type = D_INT;
                                 break;
                             case KW_FLOAT:
-                                parser.in_func->params[parser.in_func->param_count - 1] = D_FLOAT;
+                                type = D_FLOAT;
                                 break;
                             case KW_STRING:
-                                parser.in_func->params[parser.in_func->param_count - 1] = D_STRING;
+                                type = D_STRING;
                                 break;
                             default:
                                 exit(1); // unknown data type
                         }
+                        if (parser.in_func->return_type != D_NONE) {
+                            parser.in_func->param_count += 1;
+                        
+                            parser.in_func->params = realloc(parser.in_func->params, sizeof(Value) * parser.in_func->param_count);
+                            if (parser.in_func->params == NULL) exit(BAD_INTERNAL); // realloc failed
+
+                            parser.in_func->params[parser.in_func->param_count - 1] = type;
+                        }
+                        else {
+                            if (E >= parser.in_func->param_count) exit(BAD_TYPE_OR_RETURN);
+                            if (parser.in_func->params[E++] != type) exit (BAD_TYPE_OR_RETURN);
+                        }
+                        
                     }
                     else if (parser.in_param_def && token->type == T_VAR) {
                         htab_pair_t *frame_item = htab_find(parser.temporary_tab, token->value.identifier);
@@ -1312,12 +1322,16 @@ int parse(Generator *gen) {
                             exit(1); // two parameters with the same name
                         }
                         else {
+                            int idx = E - 1;
+                            if (parser.in_func->return_type != D_NONE) {
+                                idx = parser.in_func->param_count - 1;
+                            }
                             frame_item = htab_insert(parser.temporary_tab, token, token->value.identifier);
-                            frame_item->value_type = parser.in_func->params[parser.in_func->param_count - 1];
+                            frame_item->value_type = parser.in_func->params[idx];
 
-                            parser.in_func->param_names = realloc(parser.in_func->param_names, sizeof(char *) * parser.in_func->param_count);
-                            parser.in_func->param_names[parser.in_func->param_count - 1] = malloc(sizeof(char) * strlen(token->value.identifier));
-                            strcpy(parser.in_func->param_names[parser.in_func->param_count - 1], token->value.identifier);
+                            parser.in_func->param_names = realloc(parser.in_func->param_names, sizeof(char *) * (idx + 1));
+                            parser.in_func->param_names[idx] = malloc(sizeof(char) * strlen(token->value.identifier));
+                            strcpy(parser.in_func->param_names[idx], token->value.identifier);
                         }
                     }
                 }
@@ -1432,7 +1446,7 @@ int parse(Generator *gen) {
                     }
                     parser.in_func->param_count = 0;
                     parser.in_func->params = NULL;
-                    parser.in_func->return_type = D_NONE;
+                    parser.in_func->return_type = D_UNDEF;
                     parser.in_func->param_names = NULL;
                     parser.in_param_def = true;
 
