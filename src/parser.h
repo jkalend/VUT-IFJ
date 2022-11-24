@@ -70,6 +70,7 @@ typedef struct {
     bool main_found;
     bool if_eval;
     bool while_eval;
+    bool while_count;
     bool in_function;
     char relation_operator;
     char **builtins;

@@ -1212,15 +1212,21 @@ int parse(Generator *gen) {
                         if (data->value == parser.bracket_counter) {
                             stack_pop(brackets);
                             Instruction *instr = malloc(sizeof(Instruction));
+                            
                             if (data->type == KW_IF) {
                                 instr->instruct = else_end;
-                                generator_add_instruction(gen, instr);
+                                generator_add_instruction(gen, instr); 
+                                
                             }
                             else if (data->type == KW_WHILE) {
                                 instr->instruct = while_end;
-                                generator_add_instruction(gen, parser.in_while);
-                                parser.in_while = NULL;
-                            }                      
+                                generator_add_instruction(gen, instr); 
+                                parser.while_count -= 1;
+                                if (parser.while_count == 0) {
+                                    generator_add_instruction(gen, parser.in_while);
+                                    parser.in_while = NULL;
+                                }
+                            }               
                         }
                     }
                     if (parser.bracket_counter == 0) {
@@ -1359,15 +1365,20 @@ int parse(Generator *gen) {
                 }
                 if (token->value.keyword == KW_WHILE) {
                     parser.while_eval = true;
-                    
+                    parser.while_count += 1;
+
                     Instruction *instr;
+                    instr = malloc(sizeof(Instruction));
+                    instr->instruct = while_;
+                    instr->params_count = parser.in_while == NULL;
+                    generator_add_instruction(gen, instr);
+
+                    TData *data = malloc(sizeof(TData));
+                    data->value = parser.bracket_counter;
+                    data->type = KW_WHILE;
+                    stack_push(brackets, data);
+
                     if (parser.in_while == NULL) {
-                        TData *data = malloc(sizeof(TData));
-                        data->value = parser.bracket_counter;
-                        data->type = KW_WHILE;
-                        stack_push(brackets, data);
-
-
                         instr = malloc(sizeof(Instruction));
                         instr->instruct = while_defs;
                         instr->operands_count = 0;
@@ -1377,10 +1388,10 @@ int parse(Generator *gen) {
                     }
                     
 
-                    instr = malloc(sizeof(Instruction));
-                    instr->instruct = while_;
-                    instr->params_count = parser.in_while == NULL;
-                    generator_add_instruction(gen, instr);
+                    // instr = malloc(sizeof(Instruction));
+                    // instr->instruct = while_;
+                    // instr->params_count = parser.in_while == NULL;
+                    // generator_add_instruction(gen, instr);
                 }
 
                 if (token->value.keyword == KW_ELSE) {
@@ -1723,6 +1734,7 @@ int main(void) {
     parser.in_function = false;
     parser.in_while = NULL;
     parser.in_fn = NULL;
+    parser.while_count = 0;
 
     insert_builtins();
 
