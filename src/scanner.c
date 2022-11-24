@@ -161,16 +161,12 @@ int get_token(Token *token) {
                             line++;
                         }
                         if (c2 == EOF) {
-                            token->type = T_EOF;
-                            token->line = line;
-                            return LEX_OK;
+                            exit(1);
                         }
                     }
                     c2 = fgetc(stream);
                     if (c2 == EOF) {
-                        token->type = T_EOF;
-                        token->line = line;
-                        return LEX_OK;
+                        exit(1);
                     }else if (c2 == '/') {
                         break;
                     } else {
@@ -257,16 +253,12 @@ int get_token(Token *token) {
 														line++;
 													}
 													if (c2 == EOF) {
-														token->type = T_ERROR;
-														token->line = line;
-														return BAD_LEXEM;
+														exit(1);
 													}
 												}
 												c2 = fgetc(stream);
 												if (c2 == EOF) {
-													token->type = T_ERROR;
-													token->line = line;
-													return LEX_OK;
+													exit(1);
 												} else if (c2 == '/') {
 													break;
 												} else {
@@ -598,7 +590,7 @@ int get_token(Token *token) {
                     }
                     str[i] = (char) c2;
                     i++;
-                    if(c2 == '\''){
+                    if(c2 == '\\'){
                         c2 = fgetc(stream);
                         str[i] = (char) c2;
                         i++;
@@ -809,6 +801,15 @@ char* convert_string_for_ifjcode(char *str, int size) {
 					str[i+1] = '0';
 					str[i+2] = '3';
 					str[i+3] = '6';
+					break;
+				case '"':
+					while (j > i + 1) {
+						str[j] = str[j - 2];
+						j--;
+					}
+					str[i+1] = '0';
+					str[i+2] = '3';
+					str[i+3] = '4';
 					break;
 				default:
 					while (j > i + 2) {

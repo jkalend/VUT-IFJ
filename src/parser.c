@@ -1392,7 +1392,6 @@ int parse(Generator *gen) {
                         instr->instruct = while_defs;
                         instr->operands_count = 0;
                         instr->operands = NULL;
-                        ///generator_add_instruction(gen, instr);
                         parser.in_while = instr;
                     }
                     
