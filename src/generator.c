@@ -116,6 +116,7 @@ void gen_floatval(Instruction *instruction, Generator *generator){
 	printf("MOVE LF@%s LF@%s\n", instruction->id, instruction->params[0]->identifier);
 
 	printf("LABEL !!%d\n", generator->label_count + 2);
+	generator->label_count += 3;
 }
 
 void gen_intval(Instruction *instruction, Generator *generator) {
