@@ -1069,9 +1069,9 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 stack_push(stack, stack_data(P_I, P_I));
             } else if (lookahead->type == T_VAR) {
                 htab_pair_t *pair = htab_find(parser.temporary_tab, lookahead->value.identifier);
-                // if (pair == NULL || pair->value_type == D_NONE) {
-                //     exit(BAD_UNDEFINED_VAR);
-                // }
+                 if (pair == NULL) {
+                     exit(BAD_UNDEFINED_VAR);
+                 }
                 TData *data = stack_data(P_I, P_I);
                 data->bucket = pair;
 
