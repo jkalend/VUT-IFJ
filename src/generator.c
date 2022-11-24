@@ -84,7 +84,7 @@ void gen_substring(Instruction *instruction, Generator *generator) {
 	//error checking done
 	printf("MOVE GF@%%check1 string@\n");
 	printf("LABEL !!%d\n", generator->label_count + 7);
-	printf("GETCHAR GF@%%check0 LF@%s LF@%s\n", instruction->params[0]->identifier, instruction->params[1]->identifier);
+	printf("GETCHAR GF@%%check0 LF@%s GF@%%check2\n", instruction->params[0]->identifier);
 	printf("CONCAT GF@%%check1 GF@%%check1 GF@%%check0\n");
 	printf("ADD GF@%%check2 GF@%%check2 int@1\n");
 	printf("JUMPIFNEQ !!%d GF@%%check2 LF@%s\n", generator->label_count + 7, instruction->params[2]->identifier);
