@@ -1229,34 +1229,28 @@ int parse(Generator *gen) {
                             }               
                         }
                     }
-                    if (parser.bracket_counter == 0) {
+                    if (parser.bracket_counter == 0 && parser.temporary_tab != parser.glob_tab) {
                         Instruction *instr;
-                        if (parser.temporary_tab == parser.glob_tab) {
-                            instr = malloc(sizeof(Instruction));
-                            instr->instruct = exit_success;
-                            generator_add_instruction(gen, instr);
+                    
+                        /* missing closing brace */
+                        if (stack_isEmpty(parser.local_tabs)) {
+                            exit(BAD_SYNTAX); 
+                        }
+                        /* return from a function */
+                        stack_pop(parser.local_tabs);
+                        if (stack_isEmpty(parser.local_tabs)) parser.temporary_tab = parser.glob_tab;
+                        else parser.temporary_tab = stack_top(parser.local_tabs)->htab;
+
+                        parser.in_function = false;
+                        instr = malloc(sizeof(Instruction));
+                        if (parser.val_expected != D_VOID) {
+                            instr->instruct = err_quit4;
                         }
                         else {
-                                /* missing closing brace */
-                            if (stack_isEmpty(parser.local_tabs)) {
-                                exit(BAD_SYNTAX); 
-                            }
-                            /* return from a function */
-                            stack_pop(parser.local_tabs);
-                            if (stack_isEmpty(parser.local_tabs)) parser.temporary_tab = parser.glob_tab;
-                            else parser.temporary_tab = stack_top(parser.local_tabs)->htab;
-
-                            parser.in_function = false;
-                            instr = malloc(sizeof(Instruction));
-                            if (parser.val_expected != D_VOID) {
-                                instr->instruct = err_quit4;
-                            }
-                            else {
-                                instr->instruct = end_fn_void;
-                            }
-                            generator_add_instruction(gen, instr);
-                            generator_add_instruction(gen, parser.in_fn);
+                            instr->instruct = end_fn_void;
                         }
+                        generator_add_instruction(gen, instr);
+                        generator_add_instruction(gen, parser.in_fn);
                        
                     }
                     
@@ -1704,9 +1698,9 @@ void insert_builtins(void) {
 }
 
 int main(void) {
-    //stream = stdin;
-    stream = fopen("test.php", "r");
-    if (stream == NULL) exit(1);
+    stream = stdin;
+    //stream = fopen("test.php", "r");
+   // if (stream == NULL) exit(1);
 
     Generator *gen = malloc(sizeof(Generator));
     generator_init(gen);
