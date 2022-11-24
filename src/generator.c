@@ -115,6 +115,7 @@ void gen_floatval(Instruction *instruction, Generator *generator){
 	printf("MOVE LF@%s LF@%s\n", instruction->id, instruction->params[0]->identifier);
 
 	printf("LABEL !!%d\n", generator->label_count + 2);
+    generator->label_count += 3;
 }
 
 void gen_intval(Instruction *instruction, Generator *generator) {
@@ -637,7 +638,12 @@ int generate(Generator *generator) {
                 printf("JUMP !!%d\n", stack_top(generator->label_stack)->type);
                 printf("LABEL $%s\n", generator->instructions[i]->operands[0]->identifier);
                 printf("PUSHFRAME\n");
-               
+
+                for (int j = 0; j < generator->instructions[i]->operands[0]->identifier; j++) {
+                    printf("DEFVAR LF@%s\n", generator->instructions[i]->operands[0]->param_names[j]);
+                    printf("MOVE LF@%s LF@%d\n", generator->instructions[i]->operands[0]->param_names[j], j);
+                }
+
                 printf("JUMP !!%d\n", stack_top(generator->label_stack)->value);
                 
                 printf("LABEL !!%s\n", generator->instructions[i]->operands[0]->identifier);
@@ -741,6 +747,7 @@ int generate(Generator *generator) {
                 printf("LABEL !!%d\n", generator->label_count++);
                 printf("STRLEN GF@%%check0 LF@%s\n", generator->instructions[i]->id);
                 printf("JUMPIFEQ !!%d GF@%%check0 int@0\n", stack_top(generator->label_stack)->value);
+                printf("JUMPIFEQ !!%d LF@%s string@0\n", stack_top(generator->label_stack)->value, generator->instructions[i]->id);
                 printf("JUMP !!%d\n", generator->label_count + 3);
 
                 /* int conversion */
@@ -782,6 +789,7 @@ int generate(Generator *generator) {
                 printf("LABEL !!%d\n", generator->label_count++);
                 printf("STRLEN GF@%%check0 LF@%s\n", generator->instructions[i]->id);
                 printf("JUMPIFEQ !!%d GF@%%check0 int@0\n", stack_top(generator->label_stack)->value);
+                printf("JUMPIFEQ !!%d LF@%s string@0\n", stack_top(generator->label_stack)->value, generator->instructions[i]->id);
                 printf("JUMP !!%d\n", generator->label_count + 3);
 
                 /* int conversion */

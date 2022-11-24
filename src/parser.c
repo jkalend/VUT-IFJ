@@ -1060,9 +1060,9 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 stack_push(stack, stack_data(P_I, P_I));
             } else if (lookahead->type == T_VAR) {
                 htab_pair_t *pair = htab_find(parser.temporary_tab, lookahead->value.identifier);
-                if (pair == NULL || pair->value_type == D_NONE) {
-                    exit(BAD_UNDEFINED_VAR);
-                }
+                // if (pair == NULL || pair->value_type == D_NONE) {
+                //     exit(BAD_UNDEFINED_VAR);
+                // }
                 TData *data = stack_data(P_I, P_I);
                 data->bucket = pair;
 
@@ -1192,12 +1192,6 @@ int parse(Generator *gen) {
         if (stack_isEmpty(stack)) {
             break;
         }
-//        if (parser.main_found && !gen->started) {
-//            Instruction *inst = malloc(sizeof(Instruction));
-//            inst->instruct = main_;
-//            generator_add_instruction(gen, inst);
-//            gen->started = true;
-//        }
         
         TData *top = stack_pop(stack);
         if (top->type == T_TERM) {
@@ -1465,7 +1459,7 @@ int parse(Generator *gen) {
 
         }
         else if (top->type == T_NONTERM) {
-            if (top->value == N_SMALL_ST && (token->type != T_ASSIGN && token->type != T_SEMICOLON)) {
+            if (top->value == N_SMALL_ST && token->type != T_ASSIGN) {
                 return_back = true;
             }
             if (top->value == N_EXPR) {
@@ -1476,7 +1470,10 @@ int parse(Generator *gen) {
                 int result = precedence(prec, &token, &keep_prev_token, &return_back, gen);
                 stack_dispose(prec);
                 
-                if (!result) exit(5); //TODO bad code
+                if (!result) {
+                    printf("%d\n", result);
+                    exit(5);
+                }  //TODO bad code
 
                 else if (parser.empty_expr && !parser.allow_expr_empty) exit(6);
                 parser.in_assign = NULL;
@@ -1699,7 +1696,7 @@ void insert_builtins(void) {
 
 int main(void) {
     stream = stdin;
-    //stream = fopen("test.php", "r");
+    stream = fopen("test.php", "r");
    // if (stream == NULL) exit(1);
 
     Generator *gen = malloc(sizeof(Generator));
