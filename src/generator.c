@@ -596,7 +596,9 @@ int generate(Generator *generator) {
 				gen_chr(generator->instructions[i], generator);
                 break;
             case reads:
+				printf("LABEL $%s\n", generator->instructions[i]->operands[0]->identifier);
 				printf("READ LF@%s string\n", generator->instructions[i]->id);
+				printf("RETURN\n");
                 break;
             case readf:
 				printf("READ LF@%s float\n", generator->instructions[i]->id);
