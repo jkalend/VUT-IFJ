@@ -510,13 +510,13 @@ void gen_check(Instruction *instruction, bool operand_not_param) {
     if (operand_not_param) {
         for (int i = 0; i < instruction->operands_count; i++) {
             printf("TYPE GF@%%check0 LF@%s\n", instruction->operands[i]->identifier);
-            printf("EQ GF@%%check0 LF@%s string@\n", instruction->operands[i]->identifier);
+            printf("EQ GF@%%check0 GF@%%check0 string@\n");
             printf("JUMPIFEQ $!!EXIT_5 GF@%%check0 bool@true\n");
         }
     } else {
         for (int i = 0; i < instruction->params_count; i++) {
             printf("TYPE GF@%%check0 LF@%s\n", instruction->params[i]->identifier);
-            printf("EQ GF@%%check0 LF@%s string@\n", instruction->params[i]->identifier);
+            printf("EQ GF@%%check0 GF@%%check0 string@\n");
             printf("JUMPIFEQ $!!EXIT_5 GF@%%check0 bool@true\n");
         }
     }
