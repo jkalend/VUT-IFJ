@@ -56,7 +56,8 @@ typedef enum {
     while_defs,
     err_quit4,
     err_quit6,
-    fn_defs
+    fn_defs,
+    exit_success
 }InstructionType;
 
 typedef struct Instruction {

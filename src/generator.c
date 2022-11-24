@@ -809,7 +809,9 @@ int generate(Generator *generator) {
             case else_end:
                 printf("LABEL !!%d\n", stack_pop(generator->label_stack)->type);
                 break;
-
+            case exit_success:
+                printf("EXIT int@0\n");
+                break;
             default:
                 break;
         }
