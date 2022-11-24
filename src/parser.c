@@ -67,13 +67,14 @@ void get_next_token(Token **token, bool *keep_token, bool *return_back) {
 
         /* get new token from scanner */
         get_token(*token);
+        if ((*token)->type == T_ERROR) exit(BAD_LEXEM);
     }
     *keep_token = false;
 }
 
 int apply_rule(TStack *stack, unsigned int val) {
     switch (val) {
-        case 0: exit(1); /* syntax error */
+        case 0: exit(BAD_SYNTAX); /* syntax error */
         case 1:
             stack_push(stack, stack_data(N_ST_LIST, T_NONTERM));
             stack_push(stack, stack_data(T_VALID, T_TERM));
@@ -175,8 +176,8 @@ int apply_rule(TStack *stack, unsigned int val) {
         case 22:
             /* eps */
             break;
-        default: fprintf(stderr, "no rule found\n");
-                 exit(1);
+        default: /* no rule found */
+            exit(BAD_SYNTAX);
     }
     return 1;
 }
@@ -1069,9 +1070,9 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 stack_push(stack, stack_data(P_I, P_I));
             } else if (lookahead->type == T_VAR) {
                 htab_pair_t *pair = htab_find(parser.temporary_tab, lookahead->value.identifier);
-                // if (pair == NULL || pair->value_type == D_NONE) {
-                //     exit(BAD_UNDEFINED_VAR);
-                // }
+                if (pair == NULL) {
+                    exit(BAD_UNDEFINED_VAR);
+                }
                 TData *data = stack_data(P_I, P_I);
                 data->bucket = pair;
 
@@ -1196,6 +1197,7 @@ int parse(Generator *gen) {
     bool keep_prev_token = false;
     bool return_back = false;
     get_token(token);
+    if (token->type == T_ERROR) exit(BAD_LEXEM);
     printf("# ");
 
     while(1) {
@@ -1301,7 +1303,7 @@ int parse(Generator *gen) {
                                 type = D_STRING;
                                 break;
                             default:
-                                exit(1); // unknown data type
+                                exit(BAD_INTERNAL); // unknown data type
                         }
                         if (parser.in_func->return_type != D_NONE) {
                             parser.in_func->param_count += 1;
@@ -1321,7 +1323,7 @@ int parse(Generator *gen) {
                         htab_pair_t *frame_item = htab_find(parser.temporary_tab, token->value.identifier);
                         /* add the var to the table */
                         if (frame_item != NULL) {
-                            exit(1); // two parameters with the same name
+                            exit(BAD_DEFINITION); // two parameters with the same name
                         }
                         else {
                             int idx = E - 1;
@@ -1475,8 +1477,8 @@ int parse(Generator *gen) {
                 }  
             }
             else {
-                fprintf(stderr, "terms not matching\n");
-                exit(1);
+                /* terms not matching */
+                exit(BAD_SYNTAX);
             }
 
         }
@@ -1493,11 +1495,10 @@ int parse(Generator *gen) {
                 stack_dispose(prec);
                 
                 if (!result) {
-                    printf("%d\n", result);
-                    exit(5);
+                    exit(BAD_UNDEFINED_VAR);
                 }  //TODO bad code
 
-                else if (parser.empty_expr && !parser.allow_expr_empty) exit(6);
+                else if (parser.empty_expr && !parser.allow_expr_empty) exit(BAD_TERM);
                 parser.in_assign = NULL;
                 get_next_token(&token, &keep_prev_token, &return_back);
 
@@ -1564,8 +1565,8 @@ int parse(Generator *gen) {
             apply_rule(stack, val);
         }
         else {
-            fprintf(stderr, "terms not matching\n");
-            exit(1);
+            /* terms not matching */
+            exit(BAD_SYNTAX);
         }
     }
     printf("\n");
@@ -1719,7 +1720,7 @@ void insert_builtins(void) {
 int main(void) {
     stream = stdin;
     stream = fopen("test.php", "r");
-   // if (stream == NULL) exit(1);
+    if (stream == NULL) exit(BAD_INTERNAL);
 
     Generator *gen = malloc(sizeof(Generator));
     generator_init(gen);

@@ -33,7 +33,7 @@ int get_token(Token *token) {
 				exit(BAD_INTERNAL);
 			}
             while(c != EOF && (isalnum(c) || c == '_')) {
-                if(i == size) {
+                if(i == (size / 2)) {
                     size *= 2;
 					char *tmp = realloc(identifier, size * sizeof(char));
 					if(tmp == NULL){
@@ -69,7 +69,7 @@ int get_token(Token *token) {
             int plus_minus = 0;
             int dot = 0;
             while ((c >= '0' && c <= '9') || c == '.' || c == 'e' || c == 'E' || c == '+' || c == '-'){
-                if (i == size - 10) {
+                if (i == (size / 2)) {
                     size *= 2;
                     char *tmp = realloc(str, size);
 					if(tmp == NULL){
@@ -495,7 +495,7 @@ int get_token(Token *token) {
 				}
                 int i = 0;
                 while((c2 == '_') || (c2 >= '0' && c2 <= '9') || (c2 >= 'A' && c2 <= 'Z') || (c2 >= 'a' && c2 <= 'z')){
-                    if(i == size - 10){
+                    if(i == ((size / 2))){
                         size *= 2;
                         char *tmp = realloc(str, size);
 						if(tmp == NULL){
@@ -534,7 +534,7 @@ int get_token(Token *token) {
                     int size = 40;
                     int i = 0;
                     while (c2 >= 'a' && c2 <= 'z') {
-                        if (i == size - 10) {
+                        if (i == (size / 2)) {
                             size *= 2;
                             char *tmp = realloc(str, size);
 							if(tmp == NULL){
@@ -579,7 +579,7 @@ int get_token(Token *token) {
                 int size = 40;
                 int i = 0;
                 while (true) {
-                    if (i == size - 10) {
+                    if (i == (size / 2)) {
                         size *= 2;
                         char *tmp = realloc(str, size);
 						if(tmp == NULL){
@@ -810,6 +810,15 @@ char* convert_string_for_ifjcode(char *str, int size) {
 					str[i+1] = '0';
 					str[i+2] = '3';
 					str[i+3] = '4';
+					break;
+				case '\'':
+					while (j > i + 1) {
+						str[j] = str[j - 2];
+						j--;
+					}
+					str[i+1] = '0';
+					str[i+2] = '3';
+					str[i+3] = '9';
 					break;
 				default:
 					while (j > i + 2) {
