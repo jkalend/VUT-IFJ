@@ -702,11 +702,11 @@ int generate(Generator *generator) {
                 printf("JUMP $!!EXIT_6\n");
                 break;
             case end_fn_void:
-                // if (generator->instructions[i]->operands != NULL) {
-                //     printf("TYPE GF@%%check0 LF@%s\n", generator->instructions[i]->operands[0]->identifier);
-                //     printf("JUMPIFNEQ $!!EXIT_6 GF@%%check0 string@nil\n");
-                //     printf("MOVE LF@$$retval LF@%s\n", generator->instructions[i]->operands[0]->identifier);
-                // }
+                if (generator->instructions[i]->operands != NULL) {
+                    printf("TYPE GF@%%check0 LF@%s\n", generator->instructions[i]->operands[0]->identifier);
+                    printf("JUMPIFNEQ $!!EXIT_6 GF@%%check0 string@nil\n");
+                    printf("MOVE LF@$$retval LF@%s\n", generator->instructions[i]->operands[0]->identifier);
+                }
                 printf("POPFRAME\n");
                 printf("RETURN\n");
                 break;

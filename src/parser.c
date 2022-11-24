@@ -1507,9 +1507,9 @@ int parse(Generator *gen) {
                         generator_add_instruction(gen, instr);
                     }
                     else { 
-                        if (parser.val_returned != NULL && parser.val_returned->value_type != parser.val_expected && parser.val_returned->value_type != D_NONE) {
-                            exit(BAD_TYPE_OR_RETURN); //could be 6
-                        }
+                        // if (parser.val_returned != NULL && parser.val_returned->value_type != parser.val_expected && parser.val_returned->value_type != D_NONE) {
+                        //     exit(BAD_TYPE_OR_RETURN); //could be 6
+                        // }
                             
                         if (!parser.empty_expr) {
 
