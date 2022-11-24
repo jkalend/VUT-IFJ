@@ -1220,7 +1220,7 @@ int parse(Generator *gen) {
                             }
                             generator_add_instruction(gen, instr);
                             if (data->type == KW_WHILE) {
-                                generator_add_instruction(gen, parser.in_while);
+                                generator_add_instruction(gen, stack_top(parser.while_stack)->in_while);
                                 stack_pop(parser.while_stack);
                                 //parser.in_while = NULL;
                             }
