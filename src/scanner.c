@@ -590,7 +590,7 @@ int get_token(Token *token) {
                     }
                     str[i] = (char) c2;
                     i++;
-                    if(c2 == '\''){
+                    if(c2 == '\\'){
                         c2 = fgetc(stream);
                         str[i] = (char) c2;
                         i++;
