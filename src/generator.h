@@ -7,7 +7,7 @@
 
 #include "error.h"
 #include "stack.h"
-#include "htab.h"
+#include "symtable.h"
 #include "scanner.h"
 #include "parser.h"
 

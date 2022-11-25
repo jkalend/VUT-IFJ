@@ -1,7 +1,7 @@
 #include "parser.h"
 #include "scanner.h"
 #include "stack.h"
-#include "htab.h"
+#include "symtable.h"
 #include "error.h"
 #include "math.h"
 #include "generator.h"
@@ -916,9 +916,9 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
         }
 
         if (!end) {
-            long long number_size = (long long)((ceil(log10(parser.tmp_counter))+1)*sizeof(char));
+            int number_size = (int)((ceil(log10(parser.tmp_counter))+1)*sizeof(char));
             char *number = malloc(100);
-            snprintf(number, number_size, "%d", parser.tmp_counter);
+            sprintf(number,  "%d", parser.tmp_counter);
 
             if (lookahead->type == T_IDENTIFIER) {
                 char *id = calloc(strlen(lookahead->value.identifier) + 3, strlen(lookahead->value.identifier) + 3);

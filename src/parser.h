@@ -2,7 +2,7 @@
 #define PARSER_H
 
 #include "scanner.h"
-#include "htab.h"
+#include "symtable.h"
 #include "stack.h"
 #include "generator.h"
 

@@ -7,7 +7,7 @@
 #define __STACK_H__
 #include <stdbool.h>
 #include <stdlib.h>
-#include "htab.h"
+#include "symtable.h"
 
 
 typedef struct tdata {

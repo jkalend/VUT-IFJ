@@ -6,20 +6,20 @@ find_package(codecov)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_COMPILER gcc)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprofile-arcs -ftest-coverage -g -O0 -pedantic -Wall -Wextra")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprofile-arcs -ftest-coverage -O3 -pedantic -Wall -Wextra")
 
 include_directories(.)
 include_directories(src)
 include_directories(tests)
 
-set(PARSER src/parser.c src/parser.h src/error.h src/htab.h src/htab.c src/stack.c src/stack.h)
+set(PARSER src/parser.c src/parser.h src/error.h src/symtable.h src/symtable.c src/stack.c src/stack.h)
 set(SCANNER src/scanner.c src/scanner.h src/error.h)
 
 set(LEX_ALL tests/lextest_empty.c tests/lex_all.c tests/lex_all.h tests/lextest_only_prologue.c
         tests/lextest_variables_operations.c tests/lextest_arithmetic_operations.c tests/lextest_cycles.c
         tests/lextest_functions.c tests/lextest_if_statements.c tests/lextest_relation_operators.c
         tests/lextest_error.c)
-set(GEN src/generator.c src/generator.h src/error.h src/htab.h src/htab.c)
+set(GEN src/generator.c src/generator.h src/error.h src/symtable.h src/symtable.c)
 
 add_executable(IFJ ${PARSER} ${SCANNER} ${GEN})
 # add_coverage(IFJ)
