@@ -1381,8 +1381,15 @@ int parse(Generator *gen) {
                 if (token->value.keyword == KW_IF) {
                     parser.if_eval = true;
                     parser.while_count += 1;
+
+                    Instruction *instr;
+                    instr = malloc(sizeof(Instruction));
+                    instr->instruct = if_start;
+                    instr->params_count = parser.in_while == NULL;
+                    generator_add_instruction(gen, instr);
+
                     if (parser.in_while == NULL) {
-                        Instruction *instr = malloc(sizeof(Instruction));
+                        instr = malloc(sizeof(Instruction));
                         instr->instruct = while_defs;
                         instr->operands_count = 0;
                         instr->operands = NULL;

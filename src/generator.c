@@ -818,7 +818,7 @@ int generate(Generator *generator) {
                 printf("LABEL !!%d\n", stack_pop(generator->label_stack)->value);
                 break;
 
-            case if_:
+            case if_start:
                 data = malloc(sizeof(TData));
                 data->value = generator->label_count++;
                 data->type = generator->label_count++;
@@ -830,13 +830,33 @@ int generate(Generator *generator) {
 //                data->type = generator->label_count++;
 //                stack_push(generator->label_stack, data);
 
-                //generator->label_count++;
                 printf("LABEL !!%d\n", stack_top(generator->label_stack)->type);
 
                 data = malloc(sizeof(TData));
                 data->value = generator->label_count++;
                 data->type = generator->label_count++;
                 stack_push(generator->label_stack, data);
+                break;
+
+            case if_:
+//                data = malloc(sizeof(TData));
+//                data->value = generator->label_count++;
+//                data->type = generator->label_count++;
+//                stack_push(generator->label_stack, data);
+//                printf("JUMP !!%d\n", stack_top(generator->label_stack)->value);
+//
+////                data = malloc(sizeof(TData));
+////                data->value = generator->label_count++;
+////                data->type = generator->label_count++;
+////                stack_push(generator->label_stack, data);
+//
+//                //generator->label_count++;
+//                printf("LABEL !!%d\n", stack_top(generator->label_stack)->type);
+//
+//                data = malloc(sizeof(TData));
+//                data->value = generator->label_count++;
+//                data->type = generator->label_count++;
+//                stack_push(generator->label_stack, data);
 
                 printf("TYPE GF@%%check0 LF@%s\n", generator->instructions[i]->id);
                 printf("JUMPIFEQ !!%d GF@%%check0 GF@%%string\n", generator->label_count);
