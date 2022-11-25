@@ -819,12 +819,14 @@ int generate(Generator *generator) {
                 break;
 
             case if_start:
+                printf("# if_start\n");
                 if (generator->instructions[i]->params_count) {
                     data = malloc(sizeof(TData));
                     data->value = generator->label_count++;
                     data->type = generator->label_count++;
                     stack_push(generator->label_stack, data);
                     printf("JUMP !!%d\n", stack_top(generator->label_stack)->value);
+                    printf("LABEL !!%d\n", stack_top(generator->label_stack)->type);
                 }
 
 //                data = malloc(sizeof(TData));
@@ -832,7 +834,6 @@ int generate(Generator *generator) {
 //                data->type = generator->label_count++;
 //                stack_push(generator->label_stack, data);
 
-                printf("LABEL !!%d\n", stack_top(generator->label_stack)->type);
 
                 data = malloc(sizeof(TData));
                 data->value = generator->label_count++;
@@ -841,6 +842,7 @@ int generate(Generator *generator) {
                 break;
 
             case if_:
+                printf("# if_\n");
 //                data = malloc(sizeof(TData));
 //                data->value = generator->label_count++;
 //                data->type = generator->label_count++;
