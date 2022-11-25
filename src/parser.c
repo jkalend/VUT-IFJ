@@ -916,9 +916,20 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
         }
 
         if (!end) {
-            int number_size = (int)((ceil(log10(parser.tmp_counter))+1)*sizeof(char));
+//            long long number_size;
+//            char *number;
+//            if (parser.tmp_counter) {
+//                number_size = (long long) ((ceil(log10(parser.tmp_counter)) + 1) * sizeof(char));
+//                int a = snprintf(NULL, 0, "%d", parser.tmp_counter);
+//                number = malloc(a);
+//                snprintf(number, number_size, "%d", parser.tmp_counter);
+//            } else {
+//                number = malloc(5);
+//                strcat(number,"");
+//            }
+            long long number_size = (long long)((ceil(log10(parser.tmp_counter))+1)*sizeof(char));
             char *number = malloc(100);
-            sprintf(number,  "%d", parser.tmp_counter);
+            snprintf(number, number_size, "%lld", parser.tmp_counter);
 
             if (lookahead->type == T_IDENTIFIER) {
                 char *id = calloc(strlen(lookahead->value.identifier) + 3, strlen(lookahead->value.identifier) + 3);
