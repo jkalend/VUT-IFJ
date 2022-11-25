@@ -471,7 +471,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
             if (op_one->bucket->value_type == D_VOID || op_two->bucket->value_type == D_VOID) {
                 // concat with null
             } else if (op_one->bucket->value_type != D_STRING || op_two->bucket->value_type != D_STRING) {
-                exit(BAD_TYPE_COMPATIBILTY);
+                //exit(BAD_TYPE_COMPATIBILTY);
             }
 
             if (parser.in_while == NULL && !parser.in_function) {
@@ -776,7 +776,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
             fnc_->params = malloc(sizeof(htab_pair_t*) * last_fn->param_count);
             fnc_->types = last_fn->params;
 
-            for (int i = 0; i < last_fn->param_count; i++) {
+            for (int i = 0; i < fnc_->params_count; i++) {
                 if (last_fn->return_type == D_NONE) {
                     // is ok
                 } else if (last_fn->params[i] == D_STRING) {
@@ -799,6 +799,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
                 }
                 fnc_->params[i] = stack_pop(reversal)->bucket;
             }
+            //fflush(stdout);
             generator_add_instruction(gen, fnc_);
         }
 
@@ -1740,7 +1741,7 @@ void insert_builtins(void) {
 
 int main(void) {
     stream = stdin;
-    //stream = fopen("test.php", "r");
+    stream = fopen("test.php", "r");
     if (stream == NULL) exit(BAD_INTERNAL);
 
     Generator *gen = malloc(sizeof(Generator));
