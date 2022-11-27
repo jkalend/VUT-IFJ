@@ -125,7 +125,8 @@ int get_token(Token *token) {
             }else if((dot == 1 && e == 0 && plus_minus == 0) ||
 					(dot == 1 && e == 1 && plus_minus == 1) ||
 					(dot == 0 && e == 1 && plus_minus == 1) ||
-					(dot == 0 && e == 1 && plus_minus == 0)) {
+					(dot == 0 && e == 1 && plus_minus == 0) ||
+				    (dot == 1 && e == 1 && plus_minus == 0)) {
                 token->type = T_FLOAT;
                 token->value.number_float = strtod(str, NULL);
                 token->line = line;
