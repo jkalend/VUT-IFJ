@@ -8,7 +8,11 @@ int first_read = 0;
 int get_token(Token *token) {
     if (first_read == 0){
         int c = fgetc(stream);
-        if (c != '<'){
+		if(c == EOF){
+			token->type = T_EOF;
+			token->line = line;
+			return LEX_OK;
+		}else if (c != '<'){
             token->type = T_ERROR;
             token->line = line;
             return BAD_LEXEM;
