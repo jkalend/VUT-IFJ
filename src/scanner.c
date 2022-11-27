@@ -609,6 +609,12 @@ int get_token(Token *token) {
                         str[i] = (char) c2;
                         i++;
                     }
+					if(c2 < 32){
+						token->type = T_ERROR;
+						token->line = line;
+						free(str);
+						return BAD_LEXEM;
+					}
                     c2 = fgetc(stream);
                     if (c2 == '"') {
                         str[i] = '\0';
