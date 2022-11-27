@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdbool.h>
 
 FILE *stream;
 
@@ -92,10 +93,13 @@ typedef enum {
     
 }Type;
 
+//int strict_type = true
+//?int strict_type = false
 typedef struct {
     Value value;
     Type type;
     int line;
+	bool strict_type;
 }Token;
 
 int get_token(Token*);

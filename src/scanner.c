@@ -6,6 +6,7 @@ int line = 1;
 int first_read = 0;
 
 int get_token(Token *token) {
+	token->strict_type = true;
     if (first_read == 0){
         int c = fgetc(stream);
 		if(c == EOF){
@@ -564,6 +565,7 @@ int get_token(Token *token) {
                         return BAD_LEXEM;
                     }
                     token->line = line;
+					token->strict_type = false;
                     return LEX_OK;
 
                 } else {
