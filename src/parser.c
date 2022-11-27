@@ -33,7 +33,7 @@ const unsigned int LL_TABLE[8][33] = {{1},
                                       {[8] = 16, [14] = 22},
                                       {[7] = 17},
                                       {[11] = 19, [14] = 18},
-                                      {0, 20, 20, 20, 20, 0, 20, 20, 0, 0, 0, 0, 0, 0, 21} };
+                                      {0, 20, 20, 20, 20, 0, 20, 20, 0, 20, 0, 0, 0, 0, 21, [15] = 20, 20, 20, 20} };
 
 
 TData *stack_data(int value, int type) { //unsigned?
@@ -1320,7 +1320,7 @@ int parse(Generator *gen) {
                                 type = D_STRING;
                                 break;
                             default:
-                                exit(BAD_INTERNAL); // unknown data type
+                                exit(BAD_SYNTAX); // unknown data type
                         }
                         if (parser.in_func->return_type != D_NONE) {
                             parser.in_func->param_count += 1;
@@ -1384,7 +1384,7 @@ int parse(Generator *gen) {
                 }
             }
             else {
-                fprintf(stderr, "terms not matching\n");
+                fprintf(stderr, "terms not matching %d %d\n", token->type, top->value);
                 exit(BAD_SYNTAX);
             }
         }
@@ -1564,6 +1564,9 @@ int parse(Generator *gen) {
                                     break;
                                 case D_VOID:
                                     instr->instruct = end_fn_void;
+                                    break;
+                                default:
+                                    exit(BAD_TYPE_COMPATIBILTY);
                                     break;
                             }
                             generator_add_instruction(gen, instr);
@@ -1750,6 +1753,12 @@ void insert_builtins(void) {
 
 }
 
+void fn_check(htab_pair_t *pair) {
+    if (pair->type == H_FUNC_ID && pair->return_type == D_NONE && pair->identifier[0] == '6') {
+        exit(BAD_UNDEFINED_VAR);
+    }
+}
+
 int main(void) {
     stream = stdin;
     stream = fopen("test.php", "r");
@@ -1789,7 +1798,10 @@ int main(void) {
     if (result) {
         return result;
     }
+    /* validate if all functions used were correctly defined */
+    htab_for_each(parser.glob_tab, fn_check);
 
+    /* generate final code */
     generate(gen);
     return 0;
 }
