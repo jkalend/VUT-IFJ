@@ -594,6 +594,12 @@ int get_token(Token *token) {
                     }
                     str[i] = (char) c2;
                     i++;
+					if(c2 == '$'){
+						token->type = T_ERROR;
+						token->line = line;
+						free(str);
+						return BAD_LEXEM;
+					}
                     if(c2 == '\\'){
                         c2 = fgetc(stream);
                         str[i] = (char) c2;
