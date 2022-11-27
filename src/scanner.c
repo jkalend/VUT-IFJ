@@ -165,12 +165,12 @@ int get_token(Token *token) {
                             line++;
                         }
                         if (c2 == EOF) {
-                            exit(1);
+                            exit(BAD_LEXEM);
                         }
                     }
                     c2 = fgetc(stream);
                     if (c2 == EOF) {
-                        exit(1);
+                        exit(BAD_LEXEM);
                     }else if (c2 == '/') {
                         break;
                     } else {
@@ -257,12 +257,12 @@ int get_token(Token *token) {
 														line++;
 													}
 													if (c2 == EOF) {
-														exit(1);
+														exit(BAD_LEXEM);
 													}
 												}
 												c2 = fgetc(stream);
 												if (c2 == EOF) {
-													exit(1);
+													exit(BAD_LEXEM);
 												} else if (c2 == '/') {
 													break;
 												} else {
@@ -527,6 +527,10 @@ int get_token(Token *token) {
             case '?': {
                 int c2 = fgetc(stream);
                 if (c2 == '>') {
+					c2 = fgetc(stream);
+					if(c2 != EOF){
+						exit(BAD_SYNTAX);
+					}
                     token->type = T_END;
                     token->line = line;
                     return LEX_OK;
