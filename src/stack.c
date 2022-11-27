@@ -48,14 +48,14 @@ TData *stack_pop(TStack *stack) {
 	return NULL;
 }
 
-bool stack_isEmpty(TStack *stack) {
+bool stack_isEmpty(const TStack *stack) {
 	if (!stack->topPtr) {
 		return true;
 	}
 	return false;
 }
 
-TData *stack_top(TStack *stack) {
+TData *stack_top(const TStack *stack) {
     if (!stack_isEmpty(stack)) {
         return stack->topPtr->data;
     }

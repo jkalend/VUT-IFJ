@@ -20,6 +20,21 @@ void generator_init(Generator *generator) {
     generator->label_stack = stack_init(generator->label_stack);
 }
 
+void generator_free(Generator *generator) {
+    for (int i = 0; i < generator->instruction_count; i++) {
+        free(generator->instructions[i]->id);
+        for (int j = 0; j < generator->instructions[i]->operands_count; j++) {
+            free(generator->instructions[i]->operands[j]);
+        }
+        free(generator->instructions[i]->operands);
+        for (int j = 0; j < generator->instructions[i]->params_count; j++) {
+            free(generator->instructions[i]->params[j]);
+        }
+        free(generator->instructions[i]->params);
+    }
+    free(generator->instructions);
+}
+
 void gen_strlen(Instruction *instruction, Generator *generator) {
     printf("TYPE GF@%%check0 LF@%s\n", instruction->params[0]->identifier);
     printf("JUMPIFEQ !!%d GF@%%string GF@%%check0\n", generator->label_count);
@@ -199,21 +214,6 @@ void gen_write(Instruction *instruction) {
         printf("WRITE LF@%s\n", instruction->params[i]->identifier);
     }
     printf("MOVE LF@%s nil@nil\n", instruction->id);
-}
-
-void generator_free(Generator *generator) {
-    for (int i = 0; i < generator->instruction_count; i++) {
-        free(generator->instructions[i]->id);
-        for (int j = 0; j < generator->instructions[i]->operands_count; j++) {
-            free(generator->instructions[i]->operands[j]);
-        }
-        free(generator->instructions[i]->operands);
-        for (int j = 0; j < generator->instructions[i]->params_count; j++) {
-            free(generator->instructions[i]->params[j]);
-        }
-        free(generator->instructions[i]->params);
-    }
-    free(generator->instructions);
 }
 
 void generator_add_instruction(Generator *generator, Instruction *instruction) {
@@ -925,6 +925,8 @@ int generate(Generator *generator) {
                 break;
         }
     }
+
+    //generator_free(generator);
 
     return  0;
 }

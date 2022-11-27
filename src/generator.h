@@ -63,7 +63,7 @@ typedef enum {
 
 typedef struct Instruction {
     InstructionType instruct;
-    const char *id; // for call and defvar
+    char *id; // for call and defvar
     htab_pair_t **operands; // for call op0 will be the label
     DataType *types;
     int operands_count;

@@ -277,7 +277,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
     htab_pair_t *last_fn = NULL;
 
     while (stack_top(stack)->value != P_OPEN && stack_top(stack)->value != P_END) {
-        const TData *data = stack_pop(stack);
+        TData *data = stack_pop(stack);
         stack_push(shelf, data);
         res += data->value;
         if (data->value == P_FN) {
@@ -307,8 +307,8 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
 
     char *tmp = malloc(sizeof(char) * (TEMP_LENGTH + alloc_num));
     if (tmp == NULL) exit(BAD_INTERNAL);
-    strcpy(tmp, TEMP_VAR_PREFIX);
-    strcat(tmp, number);
+    strncpy(tmp, TEMP_VAR_PREFIX, TEMP_LENGTH);
+    strncat(tmp, number, sizeof(char) * (TEMP_LENGTH + alloc_num));
 
     TData *data = NULL;
     htab_pair_t *pair = NULL;
@@ -322,15 +322,30 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
 
     switch (res) {
         case 34: // <i>
-            while (cnt < 3) {stack_pop(shelf); cnt++;}
+            while (cnt < 3) {
+                TData *garbage = stack_pop(shelf);
+                if (garbage == NULL) {
+                    break;
+                }
+                free(garbage);
+                cnt++;
+            }
             if (cnt != 3) goto cleanup;
             stack_push(stack, stack_data(P_E, P_E));
             printf("1p ");
             return 1;
         case 54:
             if (fn) goto function;
+            exit(BAD_SYNTAX);
         case 63: // multiplication
-            while (cnt < 5) {stack_pop(shelf); cnt++;}
+            while (cnt < 5) {
+                TData *garbage = stack_pop(shelf);
+                if (garbage == NULL) {
+                    break;
+                }
+                free(garbage);
+                cnt++;
+            }
             if (cnt != 5) goto cleanup;
             op_one = stack_pop(temps);
             op_two = stack_pop(temps);
@@ -355,12 +370,22 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
             mul_ins->operands_count = 2;
             generator_add_instruction(gen, mul_ins);
 
+            free(op_one);
+            free(op_two);
+
             printf("2p ");
             stack_push(temps, data);
             stack_push(stack, stack_data(P_E, P_E));
             return 1;
         case 64: // division
-            while (cnt < 5) {stack_pop(shelf); cnt++;}
+            while (cnt < 5) {
+                TData *garbage = stack_pop(shelf);
+                if (garbage == NULL) {
+                    break;
+                }
+                free(garbage);
+                cnt++;
+            }
             if (cnt != 5) goto cleanup;
             op_one = stack_pop(temps);
             op_two = stack_pop(temps);
@@ -377,12 +402,22 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
             div_ins->operands_count = 2;
             generator_add_instruction(gen, div_ins);
 
+            free(op_one);
+            free(op_two);
+
             printf("3p ");
             stack_push(temps, data);
             stack_push(stack, stack_data(P_E, P_E));
             return 1;
         case 65: // addition
-            while (cnt < 5) {stack_pop(shelf); cnt++;}
+            while (cnt < 5) {
+                TData *garbage = stack_pop(shelf);
+                if (garbage == NULL) {
+                    break;
+                }
+                free(garbage);
+                cnt++;
+            }
             if (cnt != 5) goto cleanup;
             op_one = stack_pop(temps);
             op_two = stack_pop(temps);
@@ -407,12 +442,22 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
             add_->operands_count = 2;
             generator_add_instruction(gen, add_);
 
+            free(op_one);
+            free(op_two);
+
             printf("4p ");
             stack_push(temps, data);
             stack_push(stack, stack_data(P_E, P_E));
             return 1;
         case 66: // subtraction
-            while (cnt < 5) {stack_pop(shelf); cnt++;}
+            while (cnt < 5) {
+                TData *garbage = stack_pop(shelf);
+                if (garbage == NULL) {
+                    break;
+                }
+                free(garbage);
+                cnt++;
+            }
             if (cnt != 5) goto cleanup;
             op_one = stack_pop(temps);
             op_two = stack_pop(temps);
@@ -437,7 +482,8 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
             sub_ins->operands_count = 2;
             generator_add_instruction(gen, sub_ins);
 
-            Instruction *a = parser.in_fn;
+            free(op_one);
+            free(op_two);
 
             printf("5p ");
             stack_push(temps, data);
@@ -445,7 +491,11 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
             return 1;
         case 67: // concatenation
             while (cnt < 5) {
-                stack_pop(shelf);
+                TData *garbage = stack_pop(shelf);
+                if (garbage == NULL) {
+                    break;
+                }
+                free(garbage);
                 cnt++;
             }
             if (cnt != 5) goto cleanup;
@@ -463,6 +513,9 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
             conc_->operands_count = 2;
             generator_add_instruction(gen, conc_);
 
+            free(op_one);
+            free(op_two);
+
             pair->value_type = D_STRING;
 
             printf("6p ");
@@ -470,14 +523,28 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
             stack_push(stack, stack_data(P_E, P_E));
             return 1;
         case 59: // brackets
-            while (cnt < 5) {stack_pop(shelf); cnt++;}
+            while (cnt < 5) {
+                TData *garbage = stack_pop(shelf);
+                if (garbage == NULL) {
+                    break;
+                }
+                free(garbage);
+                cnt++;
+            }
             if (cnt != 5) goto cleanup;
             printf("7p ");
             stack_push(stack, stack_data(P_E, P_E));
             return 1;
         case 71: // relations or a function
             if (fn) goto function;
-            while (cnt < 5) {stack_pop(shelf); cnt++;}
+            while (cnt < 5) {
+                TData *garbage = stack_pop(shelf);
+                if (garbage == NULL) {
+                    break;
+                }
+                free(garbage);
+                cnt++;
+            }
             if (cnt != 5) goto cleanup;
             op_one = stack_pop(temps);
             op_two = stack_pop(temps);
@@ -528,13 +595,23 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
                     exit(BAD_SYNTAX);
             }
 
+            free(op_one);
+            free(op_two);
+
             printf("8p ");
             stack_push(temps, data);
             stack_push(stack, stack_data(P_E, P_E));
             parser.relation_operator = 0;
             return 1;
         case 72: // E===E
-            while (cnt < 5) {stack_pop(shelf); cnt++;}
+            while (cnt < 5) {
+                TData *garbage = stack_pop(shelf);
+                if (garbage == NULL) {
+                    break;
+                }
+                free(garbage);
+                cnt++;
+            }
             if (cnt != 5) goto cleanup;
             op_one = stack_pop(temps);
             op_two = stack_pop(temps);
@@ -551,13 +628,23 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
             eq_->operands_count = 2;
             generator_add_instruction(gen, eq_);
 
+            free(op_one);
+            free(op_two);
+
             printf("9p ");
             stack_push(temps, data);
             stack_push(stack, stack_data(P_E, P_E));
             parser.relation_operator = 0;
             return 1;
         case 73: // E!==E
-            while (cnt < 5) {stack_pop(shelf); cnt++;}
+            while (cnt < 5) {
+                TData *garbage = stack_pop(shelf);
+                if (garbage == NULL) {
+                    break;
+                }
+                free(garbage);
+                cnt++;
+            }
             if (cnt != 5) goto cleanup;
             op_one = stack_pop(temps);
             op_two = stack_pop(temps);
@@ -573,6 +660,9 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
             neq_->operands[0] = op_two->bucket;
             neq_->operands_count = 2;
             generator_add_instruction(gen, neq_);
+
+            free(op_one);
+            free(op_two);
 
             printf("10p ");
             stack_push(temps, data);
@@ -597,11 +687,12 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
         reversal = stack_init(reversal);
 
         while (stack_top(shelf)->value != P_CLOSE) {
-            const TData *tmp_data = stack_pop(shelf);
+            TData *tmp_data = stack_pop(shelf);
             if (tmp_data->value == P_LEFT_BRACKET) brackets--;
             else if (tmp_data->value == P_RIGHT_BRACKET) brackets++;
             else if (tmp_data->value == P_E) {
                 E++;
+                free(tmp_data);
                 tmp_data = stack_pop(temps);
                 stack_push(reversal, tmp_data);
                 if (last_fn->return_type == D_NONE) {
@@ -611,7 +702,9 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
             }
         }
         if (brackets != 0) exit(BAD_SYNTAX);
-        stack_pop(shelf); // pops last bracket
+        if (stack_top(shelf) != NULL) { // pops last bracket
+            free(stack_pop(shelf));
+        }
 
         // args number check
         if (E != last_fn->param_count && last_fn->param_count != -1 && last_fn->return_type != D_NONE)  {
@@ -634,10 +727,12 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
             fnc_->instruct = builtin;
             fnc_->id = tmp;
             fnc_->params_count = E;
-            fnc_->params = malloc(sizeof(htab_pair_t*) * E);
+            fnc_->params = E ? malloc(sizeof(htab_pair_t*) * E) : malloc(sizeof(htab_pair_t*));
             for (int j = 0; j < E; j++) {
                 if (builtin == 10) {
-                    fnc_->params[j] = stack_pop(reversal)->bucket;
+                    TData *garbage = stack_pop(reversal);
+                    fnc_->params[j] = garbage->bucket;
+                    free(garbage);
                 } else {
                     if (last_fn->params[j] == D_INT || last_fn->params[j] == D_FLOAT) {
                         if (stack_top(reversal)->bucket->value_type == D_STRING ||
@@ -655,7 +750,9 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
                     } else {
                         exit(BAD_TYPE_OR_RETURN);
                     }
-                    fnc_->params[j] = stack_pop(reversal)->bucket;
+                    TData *garbage = stack_pop(reversal);
+                    fnc_->params[j] = garbage->bucket;
+                    free(garbage);
                 }
             }
             fnc_->retval = last_fn->return_type;
@@ -698,9 +795,10 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
                 } else {
                     exit(BAD_TYPE_OR_RETURN);
                 }
-                fnc_->params[i] = stack_pop(reversal)->bucket;
+                TData *garbage = stack_pop(reversal);
+                fnc_->params[i] = garbage->bucket;
+                free(garbage);
             }
-            //fflush(stdout);
             generator_add_instruction(gen, fnc_);
         }
 
@@ -714,6 +812,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
     }
 
     cleanup:
+    free(data);
     stack_dispose(shelf);
     return 0;
 }
@@ -723,25 +822,30 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
     
     Token *lookahead = *token;
     bool end = false;
+    bool next_token = true;
     bool ID_last_token = false;
     parser.empty_expr = false;
-    unsigned int row, column;
+    unsigned int row = 0;
+    unsigned int column = 0;
     TStack *shelf = NULL;
     TStack *temps = NULL;
     shelf = stack_init(shelf);
     temps = stack_init(temps);
     while (true) {
 
-        get_next_token(&lookahead, keep_token, return_back);
-        if (lookahead->type == T_ERROR) goto bad_token;
+        if (next_token) {
+            get_next_token(&lookahead, keep_token, return_back);
+            if (lookahead->type == T_ERROR) break;
 
-        if (ID_last_token == true && lookahead->type != T_LEFT_BRACKET) {
-            exit(BAD_SYNTAX);
-        } else {
-            ID_last_token = false;
+            next_token = true;
+
+            if (ID_last_token == true && lookahead->type != T_LEFT_BRACKET) {
+                exit(BAD_SYNTAX);
+            } else {
+                ID_last_token = false;
+            }
         }
 
-        reduced:
         if (lookahead->type == T_LEFT_BRACE || lookahead->type == T_SEMICOLON) {
             end = true;
             //somehow return it back?
@@ -785,8 +889,11 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
             if (!res || !stack_isEmpty(shelf)) {
                 exit(BAD_SYNTAX);
             }
-            goto reduced;
+            next_token = false;
+            continue;
         }
+
+        next_token = true;
 
         if (!end) {
             long long number_size = (long long) ((ceil(log10(parser.tmp_counter)) + 1) * sizeof(char));
@@ -1000,7 +1107,6 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
         }
     }
 
-    bad_token:
     exit(BAD_LEXEM);
 }
 
@@ -1332,9 +1438,11 @@ int parse(Generator *gen) {
                 
                 if (!result) {
                     exit(BAD_UNDEFINED_VAR);
-                }  //TODO bad code
+                }
 
-                else if (parser.empty_expr && !parser.allow_expr_empty) exit(BAD_TERM);
+                else if (parser.empty_expr && !parser.allow_expr_empty) {
+                    exit(BAD_TERM);
+                }
                 parser.in_assign = NULL;
                 get_next_token(&token, &keep_prev_token, &return_back);
 
