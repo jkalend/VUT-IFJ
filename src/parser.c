@@ -521,7 +521,6 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
                     break;
                 default:
                     exit(BAD_SYNTAX);
-                    break;
             }
 
             printf("8p ");
@@ -757,51 +756,6 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
         }
         
         unsigned int sym = PREC_TABLE[row][column];
-//        if (end && !sym) {
-////            if (stack_top(shelf)->value == P_E) stack_push(stack, stack_pop(shelf));
-////            stack_push(stack, stack_data(P_CLOSE, P_CLOSE));
-//
-//            while (reduce(stack, shelf, temps, gen, end) == 1);
-//            if (reduce(stack, shelf, temps, gen, end) != -1) {
-//                return 0;
-//            } else {
-//                TData *top = stack_top(temps);
-//                if (parser.if_eval) {
-//                    Instruction *instr = malloc(sizeof(Instruction));
-//                    instr->instruct = if_;
-//                    instr->id = top->bucket->identifier;
-//                    generator_add_instruction(gen, instr);
-//                    parser.if_eval = false;
-//                }
-//
-//                if (parser.while_eval) {
-//                    Instruction *instr = malloc(sizeof(Instruction));
-//                    instr->instruct = while_start;
-//                    instr->id = top->bucket->identifier;
-//                    generator_add_instruction(gen, instr);
-//                    parser.while_eval = false;
-//                    //parser.in_while = instr;
-//                }
-//
-//                if (parser.expect_ret && top != NULL) parser.val_returned = top->bucket;
-//                if (parser.in_assign != NULL && top != NULL) {
-//                    parser.in_assign->value_type = top->bucket->value_type;
-//
-//                    Instruction *inst = malloc(sizeof(Instruction));
-//                    inst->instruct = assign;
-//                    inst->id = parser.in_assign->identifier;
-//                    inst->operands = malloc(sizeof(htab_pair_t *));
-//                    inst->operands[0] = top->bucket;
-//                    inst->operands_count = 1;
-//                    generator_add_instruction(gen, inst);
-//
-//                    parser.in_assign = NULL;
-//                } else if (top == NULL) {
-//                    parser.empty_expr = true;
-//                }
-//                return 1;
-//            }
-//        }
         if (!sym && !end) {
             exit(BAD_SYNTAX);
         }
