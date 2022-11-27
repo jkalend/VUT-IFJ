@@ -269,6 +269,8 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
         const TData *data = stack_pop(stack);
         res += data->value;
         stack_push(shelf, data);
+    } else if (stack_top(stack)->value == P_END && end) {
+        return -1;
     } else if (stack_top(stack)->value == P_END && !end) {
         exit(BAD_SYNTAX);
     }
@@ -664,7 +666,9 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
 
     function:
     if (fn) {
-        if (data == NULL) exit(BAD_SYNTAX);
+        if (data == NULL) {
+            exit(BAD_SYNTAX);
+        }
         data->bucket->type = H_FUNC_ID;
         //symtable is used here to check for number of args
         int brackets = 0;
@@ -1187,7 +1191,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                     parser.while_eval = false;
                 }
 
-                if (parser.expect_ret) parser.val_returned = top->bucket;
+                if (parser.expect_ret && top != NULL) parser.val_returned = top->bucket;
                 if (parser.in_assign != NULL && top != NULL) {
                     parser.in_assign->value_type = top->bucket->value_type;
 
