@@ -246,15 +246,18 @@ void prec_index(const Token *token, unsigned int *rc, int symbol) {
     }
 }
 
-int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
+int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end) {
 
     if (stack_top(stack)->value == P_E) {
         stack_push(shelf, stack_pop(stack));
-        if (stack_top(stack)->value == P_END) return -1; //empty expr
+        if (stack_top(stack)->value == P_END) {
+            stack_push(stack, stack_pop(shelf));
+            return -1; //empty expr
+        }
     }
     unsigned int res = 0;
     bool fn = false;
-    htab_pair_t *last_fn;
+    htab_pair_t *last_fn = NULL;
 
     while (stack_top(stack)->value != P_OPEN && stack_top(stack)->value != P_END) {
         const TData *data = stack_pop(stack);
@@ -266,7 +269,9 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
         const TData *data = stack_pop(stack);
         res += data->value;
         stack_push(shelf, data);
-    } else if (stack_top(stack)->value == P_END) {
+    } else if (stack_top(stack)->value == P_END && end) {
+        return -1;
+    } else if (stack_top(stack)->value == P_END && !end) {
         exit(BAD_SYNTAX);
     }
 
@@ -281,8 +286,8 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
     strcat(tmp, TEMP_VAR_PREFIX);
     strcat(tmp, number);
 
-    TData *data;
-    htab_pair_t *pair;
+    TData *data = NULL;
+    htab_pair_t *pair = NULL;
     if (res > 34 && res != 59) {
         parser.tmp_counter++;
         pair = htab_insert(parser.temporary_tab, NULL, tmp);
@@ -661,6 +666,9 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen) {
 
     function:
     if (fn) {
+        if (data == NULL) {
+            exit(BAD_SYNTAX);
+        }
         data->bucket->type = H_FUNC_ID;
         //symtable is used here to check for number of args
         int brackets = 0;
@@ -832,7 +840,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
 
         get_next_token(&lookahead, keep_token, return_back);
         if (lookahead->type == T_ERROR) goto bad_token;
-        
+
         reduced:
         if (lookahead->type == T_LEFT_BRACE || lookahead->type == T_SEMICOLON) {
             end = true;
@@ -854,44 +862,52 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
         }
         
         unsigned int sym = PREC_TABLE[row][column];
-        if (end && !sym) {
-            TData *top = stack_top(temps);
-            if (parser.if_eval) {
-                Instruction *instr = malloc(sizeof(Instruction));
-                instr->instruct = if_;
-                instr->id = top->bucket->identifier;
-                generator_add_instruction(gen, instr);
-                parser.if_eval = false;
-            }
-
-            if (parser.while_eval) {
-                Instruction *instr = malloc(sizeof(Instruction));
-                instr->instruct = while_start;
-                instr->id = top->bucket->identifier;
-                generator_add_instruction(gen, instr);
-                parser.while_eval = false;
-                //parser.in_while = instr;
-            }
-
-            if (parser.expect_ret && top != NULL) parser.val_returned = top->bucket;
-            if (parser.in_assign != NULL && top != NULL) {
-                parser.in_assign->value_type = top->bucket->value_type;
-
-                Instruction *inst = malloc(sizeof(Instruction));
-                inst->instruct = assign;
-                inst->id = parser.in_assign->identifier;
-                inst->operands = malloc(sizeof(htab_pair_t*));
-                inst->operands[0] = top->bucket;
-                inst->operands_count = 1;
-                generator_add_instruction(gen, inst);
-
-                parser.in_assign = NULL;
-            } else if (top == NULL) {
-                parser.empty_expr = true;
-            }
-            return 1;
-        }
-        if (!sym) {
+//        if (end && !sym) {
+////            if (stack_top(shelf)->value == P_E) stack_push(stack, stack_pop(shelf));
+////            stack_push(stack, stack_data(P_CLOSE, P_CLOSE));
+//
+//            while (reduce(stack, shelf, temps, gen, end) == 1);
+//            if (reduce(stack, shelf, temps, gen, end) != -1) {
+//                return 0;
+//            } else {
+//                TData *top = stack_top(temps);
+//                if (parser.if_eval) {
+//                    Instruction *instr = malloc(sizeof(Instruction));
+//                    instr->instruct = if_;
+//                    instr->id = top->bucket->identifier;
+//                    generator_add_instruction(gen, instr);
+//                    parser.if_eval = false;
+//                }
+//
+//                if (parser.while_eval) {
+//                    Instruction *instr = malloc(sizeof(Instruction));
+//                    instr->instruct = while_start;
+//                    instr->id = top->bucket->identifier;
+//                    generator_add_instruction(gen, instr);
+//                    parser.while_eval = false;
+//                    //parser.in_while = instr;
+//                }
+//
+//                if (parser.expect_ret && top != NULL) parser.val_returned = top->bucket;
+//                if (parser.in_assign != NULL && top != NULL) {
+//                    parser.in_assign->value_type = top->bucket->value_type;
+//
+//                    Instruction *inst = malloc(sizeof(Instruction));
+//                    inst->instruct = assign;
+//                    inst->id = parser.in_assign->identifier;
+//                    inst->operands = malloc(sizeof(htab_pair_t *));
+//                    inst->operands[0] = top->bucket;
+//                    inst->operands_count = 1;
+//                    generator_add_instruction(gen, inst);
+//
+//                    parser.in_assign = NULL;
+//                } else if (top == NULL) {
+//                    parser.empty_expr = true;
+//                }
+//                return 1;
+//            }
+//        }
+        if (!sym && !end) {
             exit(BAD_SYNTAX);
         }
         if (sym != P_EQUAL && !end) { // skips equal signs
@@ -902,13 +918,15 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
             }
             stack_push(stack, stack_data((int) sym, (int) sym));
         }
+
+        bool end_E = stack_top(stack)->type == P_END && end;
         while (!stack_isEmpty(shelf)) {
             stack_push(stack, stack_pop(shelf));
         }
-        if (end) stack_push(stack, stack_data(P_CLOSE, P_CLOSE));
+        if (end && !end_E) stack_push(stack, stack_data(P_CLOSE, P_CLOSE));
 
         if (sym == P_CLOSE) {
-            int res = reduce(stack, shelf, temps, gen);
+            int res = reduce(stack, shelf, temps, gen, end);
             if (!res || !stack_isEmpty(shelf)) {
                 exit(BAD_SYNTAX);
             }
@@ -931,6 +949,11 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
             char *number = malloc(100);
             snprintf(number, number_size, "%lld", parser.tmp_counter);
 
+            char *tmp = calloc(200, 200);
+            if (tmp == NULL) exit(BAD_INTERNAL);
+            strcat(tmp, TEMP_VAR_PREFIX);
+            strncat(tmp, number, 100);
+
             if (lookahead->type == T_IDENTIFIER) {
                 char *id = calloc(strlen(lookahead->value.identifier) + 3, strlen(lookahead->value.identifier) + 3);
                 if (id == NULL) exit(BAD_INTERNAL);
@@ -952,10 +975,6 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 stack_push(stack, data);
 
             } else if (lookahead->type == T_FLOAT) {
-                char *tmp = calloc(200, 200);
-                if (tmp == NULL) exit(BAD_INTERNAL);
-                strcat(tmp, TEMP_VAR_PREFIX);
-                strncat(tmp, number, 100);
 
                 htab_pair_t *pair = htab_find(parser.temporary_tab, tmp);
                 if (pair == NULL) {
@@ -996,10 +1015,6 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 stack_push(temps, data);
                 stack_push(stack, stack_data(P_I, P_I));
             } else if (lookahead->type == T_INT) {
-                char *tmp = calloc(200, 200);
-                if (tmp == NULL) exit(BAD_INTERNAL);
-                strcat(tmp, TEMP_VAR_PREFIX);
-                strncat(tmp, number, 100);
 
                 htab_pair_t *pair = htab_find(parser.temporary_tab, tmp);
                 if (pair == NULL) {
@@ -1039,10 +1054,6 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 stack_push(temps, data);
                 stack_push(stack, stack_data(P_I, P_I));
             } else if (lookahead->type == T_STRING) {
-                char *tmp = calloc(200, 200);
-                if (tmp == NULL) exit(BAD_INTERNAL);
-                strcat(tmp, TEMP_VAR_PREFIX);
-                strncat(tmp, number, 100);
                 htab_pair_t *pair = htab_find(parser.temporary_tab, tmp);
                 if (pair == NULL) {
                     parser.tmp_counter++;
@@ -1083,7 +1094,26 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
             } else if (lookahead->type == T_VAR) {
                 htab_pair_t *pair = htab_find(parser.temporary_tab, lookahead->value.identifier);
                 if (pair == NULL) {
-                    exit(BAD_UNDEFINED_VAR);
+                    parser.tmp_counter++;
+                    pair = htab_insert(parser.temporary_tab, NULL, lookahead->value.identifier);
+                    pair->value.string = lookahead->value.identifier;
+                    pair->value_type = D_NONE;
+                    pair->type = H_VAR;
+
+                    if (parser.in_while == NULL && !parser.in_function) {
+                        Instruction *instr = malloc(sizeof(Instruction));
+                        instr->instruct = defvar;
+                        instr->id = lookahead->value.identifier;
+                        generator_add_instruction(gen, instr);
+                    } else if (parser.in_function) {
+                        parser.in_fn->operands = realloc(parser.in_fn->operands, sizeof(htab_pair_t *) * (parser.in_fn->operands_count + 1));
+                        if (parser.in_fn->operands == NULL) exit(BAD_INTERNAL);
+                        parser.in_fn->operands[parser.in_fn->operands_count++ ]= pair;
+                    } else if (parser.in_while != NULL) {
+                        parser.in_while->operands = realloc(parser.in_while->operands, sizeof(htab_pair_t *) * (parser.in_while->operands_count + 1));
+                        if (parser.in_while->operands == NULL) exit(BAD_INTERNAL);
+                        parser.in_while->operands[parser.in_while->operands_count++ ]= pair;
+                    }
                 }
                 TData *data = stack_data(P_I, P_I);
                 data->bucket = pair;
@@ -1098,10 +1128,6 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                     exit(BAD_TYPE_COMPATIBILTY);
                 }
             }  else if (lookahead->value.keyword = KW_NULL && lookahead->type == T_KEYWORD) {
-                char *tmp = calloc(200, 200);
-                if (tmp == NULL) exit(BAD_INTERNAL);
-                strcat(tmp, TEMP_VAR_PREFIX);
-                strncat(tmp, number, 100);
 
                 htab_pair_t *pair = htab_find(parser.temporary_tab, tmp);
                 if (pair == NULL) {
@@ -1144,8 +1170,8 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 stack_push(stack, stack_data((int) column, (int) column));
             }
         } else {
-            while (reduce(stack, shelf, temps, gen) == 1);
-            if (reduce(stack, shelf, temps, gen) != -1) {
+            while (reduce(stack, shelf, temps, gen, end) == 1);
+            if (reduce(stack, shelf, temps, gen, end) != -1) {
                 return 0;
             } else {
                 TData *top = stack_top(temps);
@@ -1165,7 +1191,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                     parser.while_eval = false;
                 }
 
-                if (parser.expect_ret) parser.val_returned = top->bucket;
+                if (parser.expect_ret && top != NULL) parser.val_returned = top->bucket;
                 if (parser.in_assign != NULL && top != NULL) {
                     parser.in_assign->value_type = top->bucket->value_type;
 
@@ -1210,6 +1236,7 @@ int parse(Generator *gen) {
     bool return_back = false;
     get_token(token);
     if (token->type == T_ERROR) exit(BAD_LEXEM);
+    if (token->type == T_EOF) exit(BAD_SYNTAX);
     printf("# ");
 
     while(1) {
