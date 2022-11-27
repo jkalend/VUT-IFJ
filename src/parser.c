@@ -298,12 +298,16 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
     int cnt = 0;
     TData *op_one;
     TData *op_two;
-    char *number = malloc(sizeof(char) * 100);
 
-    long long number_size = (long long)((ceil(log10(parser.tmp_counter))+1)*sizeof(char));
+    long long number_size = (long long) ((ceil(log10(parser.tmp_counter)) + 1) * sizeof(char));
+    size_t alloc_num = snprintf(NULL, 0, "%d", parser.tmp_counter);
+    char *number = malloc(alloc_num);
+    if (number == NULL) exit(BAD_INTERNAL);
     snprintf(number, number_size, "%d", parser.tmp_counter);
-    char *tmp = malloc(sizeof(char) * 100);
-    strcat(tmp, TEMP_VAR_PREFIX);
+
+    char *tmp = malloc(sizeof(char) * (TEMP_LENGTH + alloc_num));
+    if (tmp == NULL) exit(BAD_INTERNAL);
+    strcpy(tmp, TEMP_VAR_PREFIX);
     strcat(tmp, number);
 
     TData *data = NULL;
@@ -330,6 +334,8 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
             if (cnt != 5) goto cleanup;
             op_one = stack_pop(temps);
             op_two = stack_pop(temps);
+
+            // type of the outcome
             if (op_one->bucket->value_type == D_FLOAT || op_two->bucket->value_type == D_FLOAT) {
                 pair->value_type = D_FLOAT;
             } else if (op_one->bucket->value_type == D_INT && op_two->bucket->value_type == D_INT) {
@@ -380,6 +386,8 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
             if (cnt != 5) goto cleanup;
             op_one = stack_pop(temps);
             op_two = stack_pop(temps);
+
+            // type of the outcome
             if (op_one->bucket->value_type == D_FLOAT || op_two->bucket->value_type == D_FLOAT) {
                 pair->value_type = D_FLOAT;
             } else if (op_one->bucket->value_type == D_INT && op_two->bucket->value_type == D_INT) {
@@ -408,6 +416,8 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
             if (cnt != 5) goto cleanup;
             op_one = stack_pop(temps);
             op_two = stack_pop(temps);
+
+            // type of the outcome
             if (op_one->bucket->value_type == D_FLOAT || op_two->bucket->value_type == D_FLOAT) {
                 pair->value_type = D_FLOAT;
             } else if (op_one->bucket->value_type == D_INT && op_two->bucket->value_type == D_INT) {
@@ -441,11 +451,6 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
             if (cnt != 5) goto cleanup;
             op_one = stack_pop(temps);
             op_two = stack_pop(temps);
-            if (op_one->bucket->value_type == D_VOID || op_two->bucket->value_type == D_VOID) {
-                // concat with null
-            } else if (op_one->bucket->value_type != D_STRING || op_two->bucket->value_type != D_STRING) {
-                //exit(BAD_TYPE_COMPATIBILTY);
-            }
 
             defvar_order(tmp, pair, gen);
 
@@ -628,6 +633,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
             Instruction *fnc_ = malloc(sizeof(Instruction));
             fnc_->instruct = builtin;
             fnc_->id = tmp;
+            fnc_->params_count = E;
             fnc_->params = malloc(sizeof(htab_pair_t*) * E);
             for (int j = 0; j < E; j++) {
                 if (builtin == 10) {
@@ -783,30 +789,21 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
         }
 
         if (!end) {
-//            long long number_size;
-//            char *number;
-//            if (parser.tmp_counter) {
-//                number_size = (long long) ((ceil(log10(parser.tmp_counter)) + 1) * sizeof(char));
-//                int a = snprintf(NULL, 0, "%d", parser.tmp_counter);
-//                number = malloc(a);
-//                snprintf(number, number_size, "%d", parser.tmp_counter);
-//            } else {
-//                number = malloc(5);
-//                strcat(number,"");
-//            }
-            long long number_size = (long long)((ceil(log10(parser.tmp_counter))+1)*sizeof(char));
-            char *number = malloc(100);
-            snprintf(number, number_size, "%lld", parser.tmp_counter);
+            long long number_size = (long long) ((ceil(log10(parser.tmp_counter)) + 1) * sizeof(char));
+            size_t alloc_num = snprintf(NULL, 0, "%d", parser.tmp_counter);
+            char *number = malloc(alloc_num);
+            if (number == NULL) exit(BAD_INTERNAL);
+            snprintf(number, number_size, "%d", parser.tmp_counter);
 
-            char *tmp = calloc(200, 200);
+            char *tmp = malloc(sizeof(char) * (TEMP_LENGTH + alloc_num));
             if (tmp == NULL) exit(BAD_INTERNAL);
-            strcat(tmp, TEMP_VAR_PREFIX);
-            strncat(tmp, number, 100);
+            strcpy(tmp, TEMP_VAR_PREFIX);
+            strcat(tmp, number);
 
             if (lookahead->type == T_IDENTIFIER) {
-                char *id = calloc(strlen(lookahead->value.identifier) + 3, strlen(lookahead->value.identifier) + 3);
+                char *id = malloc(strlen(lookahead->value.identifier) + 3);
                 if (id == NULL) exit(BAD_INTERNAL);
-                strcat(id, "69");
+                strcpy(id, "69");
                 strcat(id, lookahead->value.identifier);
 
                 htab_pair_t *pair = htab_find(parser.glob_tab, id);
@@ -1549,8 +1546,6 @@ void insert_builtins(void) {
     htab_pair_t *write = htab_insert(parser.glob_tab, NULL, identifier);
     if (write == NULL) exit(BAD_INTERNAL);
     write->type = H_FUNC_ID;
-    write->params = malloc(sizeof(DataType)*50);
-    if (write->params == NULL) exit(BAD_INTERNAL);
     write->param_count = -1;
     write->return_type = D_VOID;
 
