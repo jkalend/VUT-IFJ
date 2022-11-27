@@ -8,7 +8,11 @@ int first_read = 0;
 int get_token(Token *token) {
     if (first_read == 0){
         int c = fgetc(stream);
-        if (c != '<'){
+		if(c == EOF){
+			token->type = T_EOF;
+			token->line = line;
+			return LEX_OK;
+		}else if (c != '<'){
             token->type = T_ERROR;
             token->line = line;
             return BAD_LEXEM;
@@ -50,7 +54,7 @@ int get_token(Token *token) {
             identifier[i] = '\0';
             if (kw_check(identifier, token) != 1){
                 token->line = line;
-                free_memory(identifier, LEX_OK);
+                free(identifier);
                 return LEX_OK;
             }
             token->type = T_IDENTIFIER;
@@ -84,13 +88,19 @@ int get_token(Token *token) {
 				if((str[i-1] >= '0' && str[i-1] <= '9') && (c == '+' || c == '-')){
 					break;
 				}
+				if((c < '0' || c > '9') && (str[i-1] == '.')){
+					token->type = T_ERROR;
+					token->line = line;
+					free(str);
+					return BAD_LEXEM;
+				}
             }
             ungetc(c, stream);
             str[i] = '\0';
 			if(str[i-1] < '0' || str[i-1] > '9'){
 				token->type = T_ERROR;
 				token->line = line;
-				free_memory(str, BAD_LEXEM);
+				free(str);
 				return BAD_LEXEM;
 			}
             i = 0;
@@ -99,7 +109,7 @@ int get_token(Token *token) {
 					if(e > 0){
 						token->type = T_ERROR;
 						token->line = line;
-						free_memory(str, BAD_LEXEM);
+						free(str);
 						return BAD_LEXEM;
 					}
                     dot++;
@@ -121,7 +131,8 @@ int get_token(Token *token) {
             }else if((dot == 1 && e == 0 && plus_minus == 0) ||
 					(dot == 1 && e == 1 && plus_minus == 1) ||
 					(dot == 0 && e == 1 && plus_minus == 1) ||
-					(dot == 0 && e == 1 && plus_minus == 0)) {
+					(dot == 0 && e == 1 && plus_minus == 0) ||
+				    (dot == 1 && e == 1 && plus_minus == 0)) {
                 token->type = T_FLOAT;
                 token->value.number_float = strtod(str, NULL);
                 token->line = line;
@@ -161,12 +172,12 @@ int get_token(Token *token) {
                             line++;
                         }
                         if (c2 == EOF) {
-                            exit(1);
+                            exit(BAD_LEXEM);
                         }
                     }
                     c2 = fgetc(stream);
                     if (c2 == EOF) {
-                        exit(1);
+                        exit(BAD_LEXEM);
                     }else if (c2 == '/') {
                         break;
                     } else {
@@ -253,12 +264,12 @@ int get_token(Token *token) {
 														line++;
 													}
 													if (c2 == EOF) {
-														exit(1);
+														exit(BAD_LEXEM);
 													}
 												}
 												c2 = fgetc(stream);
 												if (c2 == EOF) {
-													exit(1);
+													exit(BAD_LEXEM);
 												} else if (c2 == '/') {
 													break;
 												} else {
@@ -316,12 +327,12 @@ int get_token(Token *token) {
 											if (strcmp(arr, "declare(strict_types=1)") == 0) {
 												token->type = T_VALID;
 												token->line = line;
-												free_memory(arr, LEX_OK);
+												free(arr);
 												return LEX_OK;
 											} else {
 												token->type = T_ERROR;
 												token->line = line;
-												free_memory(arr, BAD_LEXEM);
+												free(arr);
 												return BAD_LEXEM;
 											}
 										}
@@ -510,19 +521,16 @@ int get_token(Token *token) {
                 }
                 ungetc(c2, stream);
                 str[i] = '\0';
-				/*
-				if (kw_check(str, token) != 1){
-                    token->line = line;
-                    free_memory(str, LEX_OK);
-                    return LEX_OK;
-                }
-                */
                 token->value.identifier = str;
                 return LEX_OK;
             }
             case '?': {
                 int c2 = fgetc(stream);
                 if (c2 == '>') {
+					c2 = fgetc(stream);
+					if(c2 != EOF){
+						exit(BAD_SYNTAX);
+					}
                     token->type = T_END;
                     token->line = line;
                     return LEX_OK;
@@ -590,11 +598,23 @@ int get_token(Token *token) {
                     }
                     str[i] = (char) c2;
                     i++;
+					if(c2 == '$'){
+						token->type = T_ERROR;
+						token->line = line;
+						free(str);
+						return BAD_LEXEM;
+					}
                     if(c2 == '\\'){
                         c2 = fgetc(stream);
                         str[i] = (char) c2;
                         i++;
                     }
+					if(c2 < 32){
+						token->type = T_ERROR;
+						token->line = line;
+						free(str);
+						return BAD_LEXEM;
+					}
                     c2 = fgetc(stream);
                     if (c2 == '"') {
                         str[i] = '\0';
@@ -858,11 +878,6 @@ int convert_esc_to_int(const char* str, int len) {
         }
     }
     return (int) result;
-}
-
-int free_memory(char *s, int ret_code){
-    free(s);
-    return ret_code;
 }
 
 int kw_check(char *s, Token *token){
