@@ -504,19 +504,19 @@ void gen_call(Instruction *instruction) {
         switch (instruction->operands[0]->params[i]) {
             case D_FLOAT:
                 printf("TYPE GF@%%check0 LF@%s\n", instruction->params[i]->identifier);
-                printf("JUMPIFEQ $!!EXIT_5 GF@%%string GF@%%check0\n");
-                printf("JUMPIFEQ $!!EXIT_5 GF@%%bool GF@%%check0\n");
+                printf("JUMPIFEQ $!!EXIT_4 GF@%%string GF@%%check0\n");
+                printf("JUMPIFEQ $!!EXIT_4 GF@%%bool GF@%%check0\n");
                 break;
             case D_INT:
                 printf("TYPE GF@%%check0 LF@%s\n", instruction->params[i]->identifier);
-                printf("JUMPIFEQ $!!EXIT_5 GF@%%string GF@%%check0\n");
-                printf("JUMPIFEQ $!!EXIT_5 GF@%%bool GF@%%check0\n");
+                printf("JUMPIFEQ $!!EXIT_4 GF@%%string GF@%%check0\n");
+                printf("JUMPIFEQ $!!EXIT_4 GF@%%bool GF@%%check0\n");
                 break;
             case D_STRING:
                 printf("TYPE GF@%%check0 LF@%s\n", instruction->params[i]->identifier);
-                printf("JUMPIFEQ $!!EXIT_5 GF@%%int GF@%%check0\n");
-                printf("JUMPIFEQ $!!EXIT_5 GF@%%float GF@%%check0\n");
-                printf("JUMPIFEQ $!!EXIT_5 GF@%%bool GF@%%check0\n");
+                printf("JUMPIFEQ $!!EXIT_4 GF@%%int GF@%%check0\n");
+                printf("JUMPIFEQ $!!EXIT_4 GF@%%float GF@%%check0\n");
+                printf("JUMPIFEQ $!!EXIT_4 GF@%%bool GF@%%check0\n");
                 break;
             default:
                 break;
