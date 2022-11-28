@@ -42,8 +42,8 @@ void stack_push(TStack *stack, const TData *data);
 TData *stack_pop(TStack *stack);
 
 //returns state of stack
-bool stack_isEmpty(TStack *stack);
+bool stack_isEmpty(const TStack *stack);
 
-TData *stack_top(TStack *stack);
+TData *stack_top(const TStack *stack);
 
 #endif	// __STACK_H__
