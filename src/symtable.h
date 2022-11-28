@@ -43,8 +43,10 @@ typedef struct htab_pair {
     DataType value_type;
     int param_count;
     DataType *params;
+    bool *params_strict;
     char **param_names;
     DataType return_type;
+    bool strict_return;
 } htab_pair_t;                  // typedef podle zadání
 
 // Tabulka:

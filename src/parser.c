@@ -49,10 +49,7 @@ TData *stack_data(int value, int type) { //unsigned?
 
 void defvar_order(char *id, htab_pair_t *pair, Generator *gen) {
     if (parser.in_while == NULL && !parser.in_function) {
-        Instruction *instr = malloc(sizeof(Instruction));
-        instr->instruct = defvar;
-        instr->id = id;
-        generator_add_instruction(gen, instr);
+        generator_add_instruction(gen, gen_instruction_constructor(defvar, id, NULL, NULL, 0, NULL, 0));
     } else if (parser.in_function) {
         parser.in_fn->operands = realloc(parser.in_fn->operands, sizeof(htab_pair_t *) * (parser.in_fn->operands_count + 1));
         if (parser.in_fn->operands == NULL) exit(BAD_INTERNAL);
@@ -298,6 +295,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
     int cnt = 0;
     TData *op_one;
     TData *op_two;
+    htab_pair_t **operands = NULL;
 
     long long number_size = (long long) ((ceil(log10(parser.tmp_counter)) + 1) * sizeof(char));
     size_t alloc_num = snprintf(NULL, 0, "%d", parser.tmp_counter);
@@ -330,7 +328,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
                 free(garbage);
                 cnt++;
             }
-            if (cnt != 3) goto cleanup;
+            if (cnt != 3) goto cleanup; // FIXME break?
             stack_push(stack, stack_data(P_E, P_E));
             printf("1p ");
             return 1;
@@ -361,14 +359,10 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
 
             defvar_order(tmp, pair, gen);
 
-            Instruction *mul_ins = malloc(sizeof(Instruction));
-            mul_ins->instruct = mul;
-            mul_ins->id = tmp;
-            mul_ins->operands = malloc(sizeof(htab_pair_t*) * 2);
-            mul_ins->operands[0] = op_one->bucket; // order doesn't matter here
-            mul_ins->operands[1] = op_two->bucket;
-            mul_ins->operands_count = 2;
-            generator_add_instruction(gen, mul_ins);
+            operands = malloc(sizeof(htab_pair_t*) * 2);
+            operands[0] = op_one->bucket; // order doesn't matter here
+            operands[1] = op_two->bucket;
+            generator_add_instruction(gen, gen_instruction_constructor(mul, tmp, operands, NULL, 2, NULL, 0));
 
             free(op_one);
             free(op_two);
@@ -393,14 +387,10 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
 
             defvar_order(tmp, pair, gen);
 
-            Instruction *div_ins = malloc(sizeof(Instruction));
-            div_ins->instruct = div_;
-            div_ins->id = tmp;
-            div_ins->operands = malloc(sizeof(htab_pair_t*) * 2);
-            div_ins->operands[1] = op_one->bucket; //reversed due to stack
-            div_ins->operands[0] = op_two->bucket;
-            div_ins->operands_count = 2;
-            generator_add_instruction(gen, div_ins);
+            operands = malloc(sizeof(htab_pair_t*) * 2);
+            operands[1] = op_one->bucket; //reversed due to stack
+            operands[0] = op_two->bucket;
+            generator_add_instruction(gen, gen_instruction_constructor(div_, tmp, operands, NULL, 2, NULL, 0));
 
             free(op_one);
             free(op_two);
@@ -433,14 +423,10 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
 
             defvar_order(tmp, pair, gen);
 
-            Instruction *add_ = malloc(sizeof(Instruction));
-            add_->instruct = addition;
-            add_->id = tmp;
-            add_->operands = malloc(sizeof(htab_pair_t*) * 2);
-            add_->operands[0] = op_one->bucket; // order doesn't matter here
-            add_->operands[1] = op_two->bucket;
-            add_->operands_count = 2;
-            generator_add_instruction(gen, add_);
+            operands = malloc(sizeof(htab_pair_t*) * 2);
+            operands[1] = op_one->bucket; //reversed due to stack
+            operands[0] = op_two->bucket;
+            generator_add_instruction(gen, gen_instruction_constructor(addition, tmp, operands, NULL, 2, NULL, 0));
 
             free(op_one);
             free(op_two);
@@ -473,14 +459,10 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
 
             defvar_order(tmp, pair, gen);
 
-            Instruction *sub_ins = malloc(sizeof(Instruction));
-            sub_ins->instruct = sub;
-            sub_ins->id = tmp;
-            sub_ins->operands = malloc(sizeof(htab_pair_t*) * 2);
-            sub_ins->operands[1] = op_one->bucket; //reversed due to stack
-            sub_ins->operands[0] = op_two->bucket;
-            sub_ins->operands_count = 2;
-            generator_add_instruction(gen, sub_ins);
+            operands = malloc(sizeof(htab_pair_t*) * 2);
+            operands[1] = op_one->bucket; //reversed due to stack
+            operands[0] = op_two->bucket;
+            generator_add_instruction(gen, gen_instruction_constructor(sub, tmp, operands, NULL, 2, NULL, 0));
 
             free(op_one);
             free(op_two);
@@ -504,14 +486,10 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
 
             defvar_order(tmp, pair, gen);
 
-            Instruction *conc_ = malloc(sizeof(Instruction));
-            conc_->instruct = concat;
-            conc_->id = tmp;
-            conc_->operands = malloc(sizeof(htab_pair_t*) * 2);
-            conc_->operands[1] = op_one->bucket; //reversed due to stack
-            conc_->operands[0] = op_two->bucket;
-            conc_->operands_count = 2;
-            generator_add_instruction(gen, conc_);
+            operands = malloc(sizeof(htab_pair_t*) * 2);
+            operands[1] = op_one->bucket; //reversed due to stack
+            operands[0] = op_two->bucket;
+            generator_add_instruction(gen, gen_instruction_constructor(concat, tmp, operands, NULL, 2, NULL, 0));
 
             free(op_one);
             free(op_two);
@@ -552,48 +530,29 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
 
             defvar_order(tmp, pair, gen);
 
-            Instruction *rel = malloc(sizeof(Instruction));
+            operands = malloc(sizeof(htab_pair_t*) * 2);
+            operands[1] = op_one->bucket; //reversed due to stack
+            operands[0] = op_two->bucket;
+            Instruction *rel = gen_instruction_constructor(div_, tmp, operands, NULL, 2, NULL, 0);
 
             switch (parser.relation_operator) {
                 case T_GREATER:
                     rel->instruct = gt;
-                    rel->id = tmp;
-                    rel->operands = malloc(sizeof(htab_pair_t*) * 2);
-                    rel->operands[1] = op_one->bucket;
-                    rel->operands[0] = op_two->bucket;
-                    rel->operands_count = 2;
-                    generator_add_instruction(gen, rel);
                     break;
                 case T_LESS:
                     rel->instruct = lt;
-                    rel->id = tmp;
-                    rel->operands = malloc(sizeof(htab_pair_t*) * 2);
-                    rel->operands[1] = op_one->bucket;
-                    rel->operands[0] = op_two->bucket;
-                    rel->operands_count = 2;
-                    generator_add_instruction(gen, rel);
                     break;
                 case T_GREATER_EQUAL:
                     rel->instruct = gte;
-                    rel->id = tmp;
-                    rel->operands = malloc(sizeof(htab_pair_t*) * 2);
-                    rel->operands[1] = op_one->bucket;
-                    rel->operands[0] = op_two->bucket;
-                    rel->operands_count = 2;
-                    generator_add_instruction(gen, rel);
                     break;
                 case T_LESS_EQUAL:
                     rel->instruct = lte;
-                    rel->id = tmp;
-                    rel->operands = malloc(sizeof(htab_pair_t*) * 2);
-                    rel->operands[1] = op_one->bucket;
-                    rel->operands[0] = op_two->bucket;
-                    rel->operands_count = 2;
-                    generator_add_instruction(gen, rel);
                     break;
                 default:
                     exit(BAD_SYNTAX);
             }
+
+            generator_add_instruction(gen, rel);
 
             free(op_one);
             free(op_two);
@@ -619,14 +578,10 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
 
             defvar_order(tmp, pair, gen);
 
-            Instruction *eq_ = malloc(sizeof(Instruction));
-            eq_->instruct = eq;
-            eq_->id = tmp;
-            eq_->operands = malloc(sizeof(htab_pair_t*) * 2);
-            eq_->operands[1] = op_one->bucket; // order doesn't matter
-            eq_->operands[0] = op_two->bucket;
-            eq_->operands_count = 2;
-            generator_add_instruction(gen, eq_);
+            operands = malloc(sizeof(htab_pair_t*) * 2);
+            operands[1] = op_one->bucket; //reversed due to stack
+            operands[0] = op_two->bucket;
+            generator_add_instruction(gen, gen_instruction_constructor(eq, tmp, operands, NULL, 2, NULL, 0));
 
             free(op_one);
             free(op_two);
@@ -652,14 +607,10 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
 
             defvar_order(tmp, pair, gen);
 
-            Instruction *neq_ = malloc(sizeof(Instruction));
-            neq_->instruct = neq;
-            neq_->id = tmp;
-            neq_->operands = malloc(sizeof(htab_pair_t*) * 2);
-            neq_->operands[1] = op_one->bucket; // order doesn't matter
-            neq_->operands[0] = op_two->bucket;
-            neq_->operands_count = 2;
-            generator_add_instruction(gen, neq_);
+            operands = malloc(sizeof(htab_pair_t*) * 2);
+            operands[1] = op_one->bucket; //reversed due to stack
+            operands[0] = op_two->bucket;
+            generator_add_instruction(gen, gen_instruction_constructor(neq, tmp, operands, NULL, 2, NULL, 0));
 
             free(op_one);
             free(op_two);
@@ -683,22 +634,31 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
         //symtable is used here to check for number of args
         int brackets = 0;
         int E = 0;
+        int previous_args = 0;
         TStack *reversal = NULL;
         reversal = stack_init(reversal);
 
+        if (last_fn->return_type == D_NONE && last_fn->param_count != 0) {
+            previous_args = last_fn->param_count;
+            last_fn->param_count = 0;
+        }
+
         while (stack_top(shelf)->value != P_CLOSE) {
             TData *tmp_data = stack_pop(shelf);
+            htab_pair_t *a = tmp_data->bucket;
             if (tmp_data->value == P_LEFT_BRACKET) brackets--;
             else if (tmp_data->value == P_RIGHT_BRACKET) brackets++;
             else if (tmp_data->value == P_E) {
                 E++;
-                free(tmp_data);
+                //free(tmp_data);
                 tmp_data = stack_pop(temps);
                 stack_push(reversal, tmp_data);
                 if (last_fn->return_type == D_NONE) {
                     last_fn->params = realloc(last_fn->params, sizeof(DataType) * E);
                     last_fn->params[last_fn->param_count++] = tmp_data->bucket->value_type;
                 }
+            } else {
+                free(tmp_data);
             }
         }
         if (brackets != 0) exit(BAD_SYNTAX);
@@ -710,6 +670,9 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
         if (E != last_fn->param_count && last_fn->param_count != -1 && last_fn->return_type != D_NONE)  {
             exit(BAD_TYPE_OR_RETURN);
         }
+        if (E != previous_args && previous_args != 0) {
+            exit(BAD_TYPE_OR_RETURN);
+        }
 
         int builtin = -1;
         for (int j = 0; j < 11; j++) {
@@ -719,87 +682,33 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
             }
         }
 
+        htab_pair_t **params = NULL;
         if (builtin != -1) {
             data->bucket->type = H_VAR;
             defvar_order(tmp, pair, gen);
 
-            Instruction *fnc_ = malloc(sizeof(Instruction));
-            fnc_->instruct = builtin;
-            fnc_->id = tmp;
-            fnc_->params_count = E;
-            fnc_->params = E ? malloc(sizeof(htab_pair_t*) * E) : malloc(sizeof(htab_pair_t*));
+            params = E ? malloc(sizeof(htab_pair_t*) * E) : malloc(sizeof(htab_pair_t*));
             for (int j = 0; j < E; j++) {
-                if (builtin == 10) {
-                    TData *garbage = stack_pop(reversal);
-                    fnc_->params[j] = garbage->bucket;
-                    free(garbage);
-                } else {
-                    if (last_fn->params[j] == D_INT || last_fn->params[j] == D_FLOAT) {
-                        if (stack_top(reversal)->bucket->value_type == D_STRING ||
-                            stack_top(reversal)->bucket->value_type == D_NONE ||
-                            stack_top(reversal)->bucket->value_type == D_BOOL) {
-                            exit(BAD_TYPE_OR_RETURN);
-                        }
-                    } else if (last_fn->params[j] == D_STRING) {
-                        if (stack_top(reversal)->bucket->value_type == D_INT ||
-                            stack_top(reversal)->bucket->value_type == D_FLOAT ||
-                            stack_top(reversal)->bucket->value_type == D_BOOL ||
-                            stack_top(reversal)->bucket->value_type == D_NONE) {
-                            exit(BAD_TYPE_OR_RETURN);
-                        }
-                    } else {
-                        exit(BAD_TYPE_OR_RETURN);
-                    }
-                    TData *garbage = stack_pop(reversal);
-                    fnc_->params[j] = garbage->bucket;
-                    free(garbage);
-                }
+                TData *garbage = stack_pop(reversal);
+                params[j] = garbage->bucket;
+                free(garbage);
             }
-            fnc_->retval = last_fn->return_type;
-            fnc_->params_count = E;
-            generator_add_instruction(gen, fnc_);
+
+            generator_add_instruction(gen, gen_instruction_constructor(builtin, tmp, operands, NULL, 0, params, E));
         } else {
             // creates a temporary variable
             defvar_order(tmp, pair, gen);
 
             // prepares the call instruction
-            Instruction *fnc_ = malloc(sizeof(Instruction));
-            fnc_->instruct = call;
-            fnc_->id = tmp;
-            fnc_->operands = malloc(sizeof(htab_pair_t *));
-            fnc_->operands[0] = last_fn;
-            fnc_->operands_count = 1;
-            fnc_->retval = last_fn->return_type;
-            fnc_->params_count = last_fn->param_count + (last_fn->return_type == D_NONE) ? E : 0;
-            fnc_->params = malloc(sizeof(htab_pair_t*) * last_fn->param_count);
-            fnc_->types = last_fn->params;
-
-            for (int i = 0; i < fnc_->params_count; i++) {
-                if (last_fn->return_type == D_NONE) {
-                    // is ok
-                } else if (last_fn->params[i] == D_STRING) {
-                    if (stack_top(reversal)->bucket->value_type == D_STRING ||
-                        stack_top(reversal)->bucket->value_type == D_VOID) {
-                        // is ok
-                    } else {
-                        exit(BAD_TYPE_OR_RETURN);
-                    }
-                } else if (last_fn->params[i] == D_INT || last_fn->params[i] == D_FLOAT) {
-                    if (stack_top(reversal)->bucket->value_type == D_INT ||
-                        stack_top(reversal)->bucket->value_type == D_FLOAT ||
-                        stack_top(reversal)->bucket->value_type == D_VOID) {
-                        // is ok
-                    } else {
-                        exit(BAD_TYPE_OR_RETURN);
-                    }
-                } else {
-                    exit(BAD_TYPE_OR_RETURN);
-                }
+            operands = malloc(sizeof(htab_pair_t *));
+            operands[0] = last_fn;
+            params = malloc(sizeof(htab_pair_t*) * last_fn->param_count);
+            for (int i = 0; i < last_fn->param_count; i++) {
                 TData *garbage = stack_pop(reversal);
-                fnc_->params[i] = garbage->bucket;
+                params[i] = garbage->bucket;
                 free(garbage);
             }
-            generator_add_instruction(gen, fnc_);
+            generator_add_instruction(gen, gen_instruction_constructor(call, tmp, operands, last_fn->params, 1, params, last_fn->param_count));
         }
 
         printf("11p ");
@@ -848,7 +757,6 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
 
         if (lookahead->type == T_LEFT_BRACE || lookahead->type == T_SEMICOLON) {
             end = true;
-            //somehow return it back?
             *token = lookahead;
             *keep_token = true;
         }
@@ -893,6 +801,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
             continue;
         }
 
+        // reduction happened, new token will be required
         next_token = true;
 
         if (!end) {
@@ -906,6 +815,8 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
             if (tmp == NULL) exit(BAD_INTERNAL);
             strcpy(tmp, TEMP_VAR_PREFIX);
             strcat(tmp, number);
+
+            htab_pair_t **operands = NULL;
 
             if (lookahead->type == T_IDENTIFIER) {
                 char *id = malloc(strlen(lookahead->value.identifier) + 3);
@@ -940,13 +851,9 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
 
                     defvar_order(tmp, pair, gen);
 
-                    Instruction *inst = malloc(sizeof(Instruction));
-                    inst->instruct = assign;
-                    inst->id = tmp;
-                    inst->operands = malloc(sizeof(htab_pair_t*));
-                    inst->operands[0] = pair;
-                    inst->operands_count = 1;
-                    generator_add_instruction(gen, inst);
+                    operands = malloc(sizeof(htab_pair_t*));
+                    operands[0] = pair;
+                    generator_add_instruction(gen, gen_instruction_constructor(assign, tmp, operands, NULL, 1, NULL, 0));
 
                 }
 
@@ -967,13 +874,9 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
 
                     defvar_order(tmp, pair, gen);
 
-                    Instruction *inst = malloc(sizeof(Instruction));
-                    inst->instruct = assign;
-                    inst->id = tmp;
-                    inst->operands = malloc(sizeof(htab_pair_t*));
-                    inst->operands[0] = pair;
-                    inst->operands_count = 1;
-                    generator_add_instruction(gen, inst);
+                    operands = malloc(sizeof(htab_pair_t*));
+                    operands[0] = pair;
+                    generator_add_instruction(gen, gen_instruction_constructor(assign, tmp, operands, NULL, 1, NULL, 0));
                 }
 
                 TData *data = stack_data(P_I, P_I);
@@ -992,13 +895,9 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
 
                     defvar_order(tmp, pair, gen);
 
-                    Instruction *inst = malloc(sizeof(Instruction));
-                    inst->instruct = assign;
-                    inst->id = tmp;
-                    inst->operands = malloc(sizeof(htab_pair_t *));
-                    inst->operands[0] = pair;
-                    inst->operands_count = 1;
-                    generator_add_instruction(gen, inst);
+                    operands = malloc(sizeof(htab_pair_t*));
+                    operands[0] = pair;
+                    generator_add_instruction(gen, gen_instruction_constructor(assign, tmp, operands, NULL, 1, NULL, 0));
                 }
 
                 TData *data = stack_data(P_I, P_I);
@@ -1042,13 +941,9 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
 
                     defvar_order(tmp, pair, gen);
 
-                    Instruction *inst = malloc(sizeof(Instruction));
-                    inst->instruct = assign;
-                    inst->id = tmp;
-                    inst->operands = malloc(sizeof(htab_pair_t *));
-                    inst->operands[0] = pair;
-                    inst->operands_count = 1;
-                    generator_add_instruction(gen, inst);
+                    operands = malloc(sizeof(htab_pair_t*));
+                    operands[0] = pair;
+                    generator_add_instruction(gen, gen_instruction_constructor(assign, tmp, operands, NULL, 1, NULL, 0));
                 }
 
                 TData *data = stack_data(P_I, P_I);
@@ -1066,18 +961,12 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
             } else {
                 TData *top = stack_top(temps);
                 if (parser.if_eval) {
-                    Instruction *instr = malloc(sizeof(Instruction));
-                    instr->instruct = if_;
-                    instr->id = top->bucket->identifier;
-                    generator_add_instruction(gen, instr);
+                    generator_add_instruction(gen, gen_instruction_constructor(if_, top->bucket->identifier, NULL, NULL, 0, NULL, 0));
                     parser.if_eval = false;
                 }
                 
                 if (parser.while_eval) {
-                    Instruction *instr = malloc(sizeof(Instruction));
-                    instr->instruct = while_start;
-                    instr->id = top->bucket->identifier;
-                    generator_add_instruction(gen, instr);
+                    generator_add_instruction(gen, gen_instruction_constructor(while_start, top->bucket->identifier, NULL, NULL, 0, NULL, 0));
                     parser.while_eval = false;
                 }
 
@@ -1085,13 +974,9 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 if (parser.in_assign != NULL && top != NULL) {
                     parser.in_assign->value_type = top->bucket->value_type;
 
-                    Instruction *inst = malloc(sizeof(Instruction));
-                    inst->instruct = assign;
-                    inst->id = parser.in_assign->identifier;
-                    inst->operands = malloc(sizeof(htab_pair_t*));
-                    inst->operands[0] = top->bucket;
-                    inst->operands_count = 1;
-                    generator_add_instruction(gen, inst);
+                    htab_pair_t **operands = malloc(sizeof(htab_pair_t*));
+                    operands[0] = top->bucket;
+                    generator_add_instruction(gen, gen_instruction_constructor(assign, parser.in_assign->identifier, operands, NULL, 1, NULL, 0));
                     parser.in_assign = NULL;
                     parser.only_defvar = false;
 
@@ -1149,12 +1034,11 @@ int parse(Generator *gen) {
                     if (!stack_isEmpty(brackets)) {
                         TData *data = stack_top(brackets);
                         if (data->value == parser.bracket_counter) {
-                            stack_pop(brackets);
-                            Instruction *instr = malloc(sizeof(Instruction));
-                            
+                            TData *garbage = stack_pop(brackets);
+                            //free(garbage); FIXME free here causes segfaults in generator
+
                             if (data->type == KW_IF) {
-                                instr->instruct = else_end;
-                                generator_add_instruction(gen, instr); 
+                                generator_add_instruction(gen, gen_instruction_constructor(else_end, NULL, NULL, NULL, 0, NULL, 0));
                                 parser.while_count -= 1;
                                 if (parser.while_count == 0) {
                                     generator_add_instruction(gen, parser.in_while);
@@ -1163,8 +1047,7 @@ int parse(Generator *gen) {
                                 
                             }
                             else if (data->type == KW_WHILE) {
-                                instr->instruct = while_end;
-                                generator_add_instruction(gen, instr); 
+                                generator_add_instruction(gen, gen_instruction_constructor(while_end, NULL, NULL, NULL, 0, NULL, 0));
                                 parser.while_count -= 1;
                                 if (parser.while_count == 0) {
                                     generator_add_instruction(gen, parser.in_while);
@@ -1174,8 +1057,7 @@ int parse(Generator *gen) {
                         }
                     }
                     if (parser.bracket_counter == 0 && parser.temporary_tab != parser.glob_tab) {
-                        Instruction *instr;
-                    
+
                         /* missing closing brace */
                         if (stack_isEmpty(parser.local_tabs)) {
                             exit(BAD_SYNTAX); 
@@ -1186,7 +1068,7 @@ int parse(Generator *gen) {
                         else parser.temporary_tab = stack_top(parser.local_tabs)->htab;
 
                         parser.in_function = false;
-                        instr = malloc(sizeof(Instruction));
+                        Instruction *instr = gen_instruction_constructor(0, NULL, NULL, NULL, 0, NULL, 0);
                         if (parser.val_expected != D_VOID) {
                             instr->instruct = err_quit4;
                         }
@@ -1195,9 +1077,7 @@ int parse(Generator *gen) {
                         }
                         generator_add_instruction(gen, instr);
                         generator_add_instruction(gen, parser.in_fn);
-                       
                     }
-                    
                 }
 
                 /* definition of a function */
@@ -1303,17 +1183,12 @@ int parse(Generator *gen) {
                     parser.if_eval = true;
                     parser.while_count += 1;
 
-                    Instruction *instr;
-                    instr = malloc(sizeof(Instruction));
-                    instr->instruct = if_start;
-                    instr->params_count = parser.in_while == NULL;
-                    generator_add_instruction(gen, instr);
+
+                    generator_add_instruction(gen, gen_instruction_constructor(if_start, NULL, NULL, NULL, 0, NULL, parser.in_while == NULL));
+
 
                     if (parser.in_while == NULL) {
-                        instr = malloc(sizeof(Instruction));
-                        instr->instruct = while_defs;
-                        instr->operands_count = 0;
-                        instr->operands = NULL;
+                        Instruction *instr = gen_instruction_constructor(while_defs, NULL, NULL, NULL, 0, NULL, parser.in_while == NULL);
                         parser.in_while = instr;
                     }
 
@@ -1322,11 +1197,7 @@ int parse(Generator *gen) {
                     parser.while_eval = true;
                     parser.while_count += 1;
 
-                    Instruction *instr;
-                    instr = malloc(sizeof(Instruction));
-                    instr->instruct = while_;
-                    instr->params_count = parser.in_while == NULL;
-                    generator_add_instruction(gen, instr);
+                    generator_add_instruction(gen, gen_instruction_constructor(while_, NULL, NULL, NULL, 0, NULL, parser.in_while == NULL));
 
                     TData *data = malloc(sizeof(TData));
                     data->value = parser.bracket_counter;
@@ -1334,24 +1205,14 @@ int parse(Generator *gen) {
                     stack_push(brackets, data);
 
                     if (parser.in_while == NULL) {
-                        instr = malloc(sizeof(Instruction));
-                        instr->instruct = while_defs;
-                        instr->operands_count = 0;
-                        instr->operands = NULL;
+                        Instruction *instr = gen_instruction_constructor(while_defs, NULL, NULL, NULL, 0, NULL, 0);
                         parser.in_while = instr;
                     }
-                    
-
-                    // instr = malloc(sizeof(Instruction));
-                    // instr->instruct = while_;
-                    // instr->params_count = parser.in_while == NULL;
-                    // generator_add_instruction(gen, instr);
                 }
 
                 if (token->value.keyword == KW_ELSE) {
-                    Instruction *instr = malloc(sizeof(Instruction));
-                    instr->instruct = else_;
-                    generator_add_instruction(gen, instr);
+                    generator_add_instruction(gen, gen_instruction_constructor(else_, NULL, NULL, NULL, 0, NULL, 0));
+
 
                     TData *data = malloc(sizeof(TData));
                     data->value = parser.bracket_counter;
@@ -1376,7 +1237,8 @@ int parse(Generator *gen) {
                 if (parser.tmp_token->value.keyword == KW_FUNCTION && token->type == T_IDENTIFIER) { 
                     parser.in_function = true;
                     parser.bracket_counter = 0;
-                    char id[100] = "69";
+                    char *id = malloc(strlen(token->value.identifier) + 5);
+                    strcpy(id, "69");
                     strcat(id, token->value.identifier);
 
                     /* check if the function is not already defined */
@@ -1404,17 +1266,12 @@ int parse(Generator *gen) {
                     parser.temporary_tab = new_tab;
 
                     /* create label and pushframe */
-                    Instruction *instr = malloc(sizeof(Instruction));
-                    instr->instruct = start_fn;
-                    instr->operands_count = 1;
-                    instr->operands = malloc(sizeof(htab_pair_t *));
-                    instr->operands[0] = parser.in_func;
-                    generator_add_instruction(gen, instr);
+                    htab_pair_t **operands = malloc(sizeof(htab_pair_t *));
+                    operands[0] = parser.in_func;
+                    generator_add_instruction(gen, gen_instruction_constructor(start_fn, NULL, operands, NULL, 1, NULL, 0));
 
-                    Instruction *temp = malloc(sizeof(Instruction));
-                    temp->instruct = fn_defs;
-                    temp->operands = NULL;
-                    temp->operands_count = 0;
+
+                    Instruction *temp = gen_instruction_constructor(fn_defs, NULL, NULL, NULL, 0, NULL, 0);
                     parser.in_fn = temp;
                 }  
             }
@@ -1448,9 +1305,8 @@ int parse(Generator *gen) {
 
                 if (parser.expect_ret) {
                     if (parser.glob_tab == parser.temporary_tab) {
-                        Instruction *instr = malloc(sizeof(Instruction));
-                        instr->instruct = exit_success;
-                        generator_add_instruction(gen, instr);
+                        generator_add_instruction(gen, gen_instruction_constructor(exit_success, NULL, NULL, NULL, 0, NULL, 0));
+
                     }
                     else { 
                         // if (parser.val_returned != NULL && parser.val_returned->value_type != parser.val_expected && parser.val_returned->value_type != D_NONE) {
@@ -1459,7 +1315,7 @@ int parse(Generator *gen) {
                             
                         if (!parser.empty_expr) {
 
-                            Instruction *instr = malloc(sizeof(Instruction));
+                            Instruction *instr = gen_instruction_constructor(0, NULL, NULL, NULL, 0, NULL, 0);
                             instr->operands = malloc(sizeof(htab_pair_t *));
                             instr->operands[0] = parser.val_returned;
 
@@ -1480,9 +1336,7 @@ int parse(Generator *gen) {
                             generator_add_instruction(gen, instr);
                         } 
                         else {
-                            Instruction *instr = malloc(sizeof(Instruction));
-                            instr->instruct = end_fn_void;
-                            generator_add_instruction(gen, instr);
+                            generator_add_instruction(gen, gen_instruction_constructor(end_fn_void, NULL, NULL, NULL, 0, NULL, 0));
                         }
                     }
                     
@@ -1514,9 +1368,7 @@ int parse(Generator *gen) {
         }
     }
     printf("\n");
-    Instruction *instr = malloc(sizeof(Instruction));
-    instr->instruct = end;
-    generator_add_instruction(gen, instr);
+    generator_add_instruction(gen, gen_instruction_constructor(end, NULL, NULL, NULL, 0, NULL, 0));
     stack_dispose(stack);
     //stack_dispose(parser.local_tabs);
     //htab_free(parser.glob_tab);
@@ -1524,9 +1376,9 @@ int parse(Generator *gen) {
 }
 
 void insert_builtins(void) {
-    char *identifier = calloc(sizeof(char)*10, 10);
+    char *identifier = malloc(sizeof(char)*10);
     if (identifier == NULL) exit(BAD_INTERNAL);
-    strcat(identifier, "69reads");
+    strcpy(identifier, "69reads");
     parser.builtins[0] = identifier;
     htab_pair_t *reads = htab_insert(parser.glob_tab, NULL, identifier);
     if (reads == NULL) exit(BAD_INTERNAL);
@@ -1534,9 +1386,9 @@ void insert_builtins(void) {
     reads->param_count = 0;
     reads->return_type = D_STRING;
 
-    identifier = calloc(sizeof(char)*10, 10);
+    identifier = malloc(sizeof(char)*10);
     if (identifier == NULL) exit(BAD_INTERNAL);
-    strcat(identifier, "69readi");
+    strcpy(identifier, "69readi");
     parser.builtins[1] = identifier;
     htab_pair_t *readi = htab_insert(parser.glob_tab, NULL, identifier);
     if (readi == NULL) exit(BAD_INTERNAL);
@@ -1544,9 +1396,9 @@ void insert_builtins(void) {
     readi->param_count = 0;
     readi->return_type = D_INT;
 
-    identifier = calloc(sizeof(char)*10, 10);
+    identifier = malloc(sizeof(char)*10);
     if (identifier == NULL) exit(BAD_INTERNAL);
-    strcat(identifier, "69readf");
+    strcpy(identifier, "69readf");
     parser.builtins[2] = identifier;
     htab_pair_t *readf = htab_insert(parser.glob_tab, NULL, identifier);
     if (readf == NULL) exit(BAD_INTERNAL);
@@ -1554,9 +1406,9 @@ void insert_builtins(void) {
     readf->param_count = 0;
     readf->return_type = D_FLOAT;
 
-    identifier = calloc(sizeof(char)*20, 20);
+    identifier = malloc(sizeof(char)*10);
     if (identifier == NULL) exit(BAD_INTERNAL);
-    strcat(identifier, "69strlen");
+    strcpy(identifier, "69strlen");
     parser.builtins[3] = identifier;
     htab_pair_t *strlen_ = htab_insert(parser.glob_tab, NULL, identifier);
     if (strlen_ == NULL) exit(BAD_INTERNAL);
@@ -1567,9 +1419,9 @@ void insert_builtins(void) {
     strlen_->param_count = 1;
     strlen_->return_type = D_INT;
 
-    identifier = calloc(sizeof(char)*20, 20);
+    identifier = malloc(sizeof(char)*15);
     if (identifier == NULL) exit(BAD_INTERNAL);
-    strcat(identifier, "69substring");
+    strcpy(identifier, "69substring");
     parser.builtins[4] = identifier;
     htab_pair_t *substring = htab_insert(parser.glob_tab, NULL, identifier);
     if (substring == NULL) exit(BAD_INTERNAL);

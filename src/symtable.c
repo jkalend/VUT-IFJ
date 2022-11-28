@@ -158,14 +158,14 @@ htab_pair_t * htab_insert(htab_t * t, Token *token, char* key)
     {
         return NULL;
     }
-    new->item.identifier = malloc((strlen(key) + 1) * sizeof(char));
-    if (new->item.identifier == NULL)
-    {
-        return NULL;
-    }
+//    new->item.identifier = malloc((strlen(key) + 1) * sizeof(char));
+//    if (new->item.identifier == NULL)
+//    {
+//        return NULL;
+//    }
 
     // initialize the new node
-    strcpy((char *)new->item.identifier, key);
+    new->item.identifier = key;
     new->next = NULL;
     
     if (token == NULL) {
