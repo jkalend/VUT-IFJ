@@ -69,7 +69,7 @@ typedef struct Instruction {
     int operands_count;
     htab_pair_t **params;
     int params_count;
-    DataType retval;
+    //DataType retval;
 } Instruction;
 
 typedef struct {
@@ -95,6 +95,14 @@ int generate(Generator *);
 void generator_add_instruction(Generator *, Instruction *);
 
 void generator_free(Generator *);
+
+Instruction *gen_instruction_constructor(InstructionType instruct,
+                                         char *id,
+                                         htab_pair_t **operands,
+                                         DataType *types,
+                                         int operands_count,
+                                         htab_pair_t **params,
+                                         int params_count);
 
 Instruction *generate_instruction(InstructionType instruct,
                                   char *id,
