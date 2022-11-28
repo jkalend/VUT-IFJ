@@ -22,26 +22,11 @@ void generator_init(Generator *generator) {
 
 void generator_free(Generator *generator) {
     for (int i = 0; i < generator->instruction_count; i++) {
-        if (generator->instructions[i]->id != NULL) free(generator->instructions[i]->id);
-        generator->instructions[i]->id = NULL;
-
-        for (int j = 0; j < generator->instructions[i]->operands_count; j++) {
-            if (generator->instructions[i]->operands[j] != NULL) {
-                free(generator->instructions[i]->operands[j]);
-            }
-            generator->instructions[i]->operands[j] = NULL;
-        }
         if (generator->instructions[i]->operands != NULL) {
             free(generator->instructions[i]->operands);
         }
         generator->instructions[i]->operands = NULL;
 
-        for (int j = 0; j < generator->instructions[i]->params_count; j++) {
-            if (generator->instructions[i]->params[j] != NULL) {
-                free(generator->instructions[i]->params[j]);
-            }
-            generator->instructions[i]->params[j] = NULL;
-        }
         if (generator->instructions[i]->params != NULL) {
             free(generator->instructions[i]->params);
         }
@@ -201,8 +186,6 @@ void gen_intval(Instruction *instruction, Generator *generator) {
 	printf("TYPE GF@%%check0 LF@%s\n", instruction->params[0]->identifier);
     printf("JUMPIFEQ $!!EXIT_4 GF@%%bool GF@%%check0\n");
     printf("JUMPIFEQ $!!EXIT_4 GF@%%string GF@%%check0\n");
-    printf("JUMPIFEQ $!!EXIT_4 GF@%%string GF@%%check0\n");
-    printf("JUMPIFEQ $!!EXIT_4 GF@%%bool GF@%%check0\n");
 	printf("JUMPIFEQ !!%d GF@%%int GF@%%check0\n", generator->label_count);
 	printf("JUMPIFEQ !!%d GF@%%float GF@%%check0\n", generator->label_count + 1);
 	printf("MOVE LF@%s int@0\n", instruction->id);
@@ -518,22 +501,24 @@ void gen_call(Instruction *instruction) {
     printf("CREATEFRAME\n");
     for (int i = 0; i < instruction->params_count; i++) {
         printf("DEFVAR TF@%%%d\n", i);
-        switch (instruction->types[i]) {
+        switch (instruction->operands[0]->params[i]) {
             case D_FLOAT:
                 printf("TYPE GF@%%check0 LF@%s\n", instruction->params[i]->identifier);
-                printf("JUMPIFEQ $!!EXIT_4 GF@%%string GF@%%check0\n");
-                printf("JUMPIFEQ $!!EXIT_4 GF@%%bool GF@%%check0\n");
+                printf("JUMPIFEQ $!!EXIT_5 GF@%%string GF@%%check0\n");
+                printf("JUMPIFEQ $!!EXIT_5 GF@%%bool GF@%%check0\n");
                 break;
             case D_INT:
                 printf("TYPE GF@%%check0 LF@%s\n", instruction->params[i]->identifier);
-                printf("JUMPIFEQ $!!EXIT_4 GF@%%string GF@%%check0\n");
-                printf("JUMPIFEQ $!!EXIT_4 GF@%%bool GF@%%check0\n");
+                printf("JUMPIFEQ $!!EXIT_5 GF@%%string GF@%%check0\n");
+                printf("JUMPIFEQ $!!EXIT_5 GF@%%bool GF@%%check0\n");
                 break;
             case D_STRING:
                 printf("TYPE GF@%%check0 LF@%s\n", instruction->params[i]->identifier);
-                printf("JUMPIFEQ $!!EXIT_4 GF@%%int GF@%%check0\n");
-                printf("JUMPIFEQ $!!EXIT_4 GF@%%float GF@%%check0\n");
-                printf("JUMPIFEQ $!!EXIT_4 GF@%%bool GF@%%check0\n");
+                printf("JUMPIFEQ $!!EXIT_5 GF@%%int GF@%%check0\n");
+                printf("JUMPIFEQ $!!EXIT_5 GF@%%float GF@%%check0\n");
+                printf("JUMPIFEQ $!!EXIT_5 GF@%%bool GF@%%check0\n");
+                break;
+            default:
                 break;
         }
         printf("MOVE TF@%%%d LF@%s\n", i, instruction->params[i]->identifier);
@@ -1019,7 +1004,7 @@ int generate(Generator *generator) {
         }
     }
 
-    //generator_free(generator);
+    generator_free(generator);
 
     return  0;
 }
