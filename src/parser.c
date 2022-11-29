@@ -761,6 +761,10 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
             }
         }
 
+        if (parser.only_defvar && lookahead->type != T_SEMICOLON) {
+            parser.only_defvar = false;
+        }
+
         if (lookahead->type == T_LEFT_BRACE || lookahead->type == T_SEMICOLON) {
             end = true;
             *token = lookahead;
