@@ -318,6 +318,109 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
         data->bucket->type = H_VAR;
     }
 
+    if (fn) {
+        if (data == NULL) {
+            exit(BAD_SYNTAX);
+        }
+        data->bucket->type = H_FUNC_ID;
+        //symtable is used here to check for number of args
+        int brackets = 0;
+        int E = 0;
+        int commas = 0;
+        int previous_args = 0;
+        TStack *reversal = NULL;
+        reversal = stack_init(reversal);
+
+        if (last_fn->return_type == D_NONE && last_fn->param_count != 0) {
+            previous_args = last_fn->param_count;
+            last_fn->param_count = 0;
+        }
+
+        bool expect_comma = false;
+
+        while (stack_top(shelf)->value != P_CLOSE) {
+            TData *tmp_data = stack_pop(shelf);
+            htab_pair_t *a = tmp_data->bucket;
+            if (tmp_data->value == P_LEFT_BRACKET) brackets--;
+            else if (tmp_data->value == P_RIGHT_BRACKET) brackets++;
+            else if (tmp_data->value == P_E) {
+                E++;
+                expect_comma = true;
+                //free(tmp_data);
+                tmp_data = stack_pop(temps);
+                stack_push(reversal, tmp_data);
+                if (last_fn->return_type == D_NONE) {
+                    last_fn->params = realloc(last_fn->params, sizeof(DataType) * E);
+                    last_fn->params[last_fn->param_count++] = tmp_data->bucket->value_type;
+                }
+            } else if (tmp_data->value == P_COMMA) {
+                if(!expect_comma) exit(BAD_SYNTAX);
+                commas++;
+                expect_comma = false;
+            }
+            else {
+                free(tmp_data);
+            }
+        }
+        if (brackets != 0) exit(BAD_SYNTAX);
+        if (stack_top(shelf) != NULL) { // pops last bracket
+            free(stack_pop(shelf));
+        }
+
+        // args number check
+        if (E != last_fn->param_count && last_fn->param_count != -1 && last_fn->return_type != D_NONE)  {
+            exit(BAD_TYPE_OR_RETURN);
+        }
+        if (E != previous_args && previous_args != 0) {
+            exit(BAD_TYPE_OR_RETURN);
+        }
+
+        if (commas != E - 1) exit(BAD_SYNTAX);
+
+        int builtin = -1;
+        for (int j = 0; j < 11; j++) {
+            if(strcmp(last_fn->identifier, parser.builtins[j]) == 0) {
+                builtin = j;
+                break;
+            }
+        }
+
+        htab_pair_t **params = NULL;
+        if (builtin != -1) {
+            data->bucket->type = H_VAR;
+            defvar_order(tmp, pair, gen);
+
+            params = E ? malloc(sizeof(htab_pair_t*) * E) : malloc(sizeof(htab_pair_t*));
+            for (int j = 0; j < E; j++) {
+                TData *garbage = stack_pop(reversal);
+                params[j] = garbage->bucket;
+                free(garbage);
+            }
+
+            generator_add_instruction(gen, gen_instruction_constructor(builtin, tmp, operands, NULL, 0, params, E));
+        } else {
+            // creates a temporary variable
+            defvar_order(tmp, pair, gen);
+
+            // prepares the call instruction
+            operands = malloc(sizeof(htab_pair_t *));
+            operands[0] = last_fn;
+            params = malloc(sizeof(htab_pair_t*) * last_fn->param_count);
+            for (int i = 0; i < last_fn->param_count; i++) {
+                TData *garbage = stack_pop(reversal);
+                params[i] = garbage->bucket;
+                free(garbage);
+            }
+            generator_add_instruction(gen, gen_instruction_constructor(call, tmp, operands, last_fn->params, 1, params, last_fn->param_count));
+        }
+
+        printf("11p ");
+        stack_push(stack, stack_data(P_E, P_E));
+        data->bucket->value_type = last_fn->return_type;
+        stack_push(temps, data);
+        return 1;
+    }
+
     switch (res) {
         case 34: // <i>
             while (cnt < 3) {
@@ -328,12 +431,11 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
                 free(garbage);
                 cnt++;
             }
-            if (cnt != 3) goto cleanup; // FIXME break?
+            if (cnt != 3) break;
             stack_push(stack, stack_data(P_E, P_E));
             printf("1p ");
             return 1;
         case 54:
-            if (fn) goto function;
             exit(BAD_SYNTAX);
         case 63: // multiplication
             while (cnt < 5) {
@@ -344,7 +446,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
                 free(garbage);
                 cnt++;
             }
-            if (cnt != 5) goto cleanup;
+            if (cnt != 5) break;
             op_one = stack_pop(temps);
             op_two = stack_pop(temps);
 
@@ -380,7 +482,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
                 free(garbage);
                 cnt++;
             }
-            if (cnt != 5) goto cleanup;
+            if (cnt != 5) break;
             op_one = stack_pop(temps);
             op_two = stack_pop(temps);
             pair->value_type = D_FLOAT;
@@ -408,7 +510,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
                 free(garbage);
                 cnt++;
             }
-            if (cnt != 5) goto cleanup;
+            if (cnt != 5) break;
             op_one = stack_pop(temps);
             op_two = stack_pop(temps);
 
@@ -444,7 +546,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
                 free(garbage);
                 cnt++;
             }
-            if (cnt != 5) goto cleanup;
+            if (cnt != 5) break;
             op_one = stack_pop(temps);
             op_two = stack_pop(temps);
 
@@ -480,7 +582,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
                 free(garbage);
                 cnt++;
             }
-            if (cnt != 5) goto cleanup;
+            if (cnt != 5) break;
             op_one = stack_pop(temps);
             op_two = stack_pop(temps);
 
@@ -509,12 +611,12 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
                 free(garbage);
                 cnt++;
             }
-            if (cnt != 5) goto cleanup;
+            if (cnt != 5) break;
             printf("7p ");
             stack_push(stack, stack_data(P_E, P_E));
             return 1;
         case 71: // relations or a function
-            if (fn) goto function;
+            //if (fn) goto function;
             while (cnt < 5) {
                 TData *garbage = stack_pop(shelf);
                 if (garbage == NULL) {
@@ -523,7 +625,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
                 free(garbage);
                 cnt++;
             }
-            if (cnt != 5) goto cleanup;
+            if (cnt != 5) break;
             op_one = stack_pop(temps);
             op_two = stack_pop(temps);
             pair->value_type = D_BOOL;
@@ -571,7 +673,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
                 free(garbage);
                 cnt++;
             }
-            if (cnt != 5) goto cleanup;
+            if (cnt != 5) break;
             op_one = stack_pop(temps);
             op_two = stack_pop(temps);
             pair->value_type = D_BOOL;
@@ -600,7 +702,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
                 free(garbage);
                 cnt++;
             }
-            if (cnt != 5) goto cleanup;
+            if (cnt != 5) break;
             op_one = stack_pop(temps);
             op_two = stack_pop(temps);
             pair->value_type = D_BOOL;
@@ -621,106 +723,10 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
             parser.relation_operator = 0;
             return 1;
         default:
-            if (fn) goto function;
+            //if (fn) goto function;
             break;
     }
 
-    function:
-    if (fn) {
-        if (data == NULL) {
-            exit(BAD_SYNTAX);
-        }
-        data->bucket->type = H_FUNC_ID;
-        //symtable is used here to check for number of args
-        int brackets = 0;
-        int E = 0;
-        int previous_args = 0;
-        TStack *reversal = NULL;
-        reversal = stack_init(reversal);
-
-        if (last_fn->return_type == D_NONE && last_fn->param_count != 0) {
-            previous_args = last_fn->param_count;
-            last_fn->param_count = 0;
-        }
-
-        while (stack_top(shelf)->value != P_CLOSE) {
-            TData *tmp_data = stack_pop(shelf);
-            htab_pair_t *a = tmp_data->bucket;
-            if (tmp_data->value == P_LEFT_BRACKET) brackets--;
-            else if (tmp_data->value == P_RIGHT_BRACKET) brackets++;
-            else if (tmp_data->value == P_E) {
-                E++;
-                //free(tmp_data);
-                tmp_data = stack_pop(temps);
-                stack_push(reversal, tmp_data);
-                if (last_fn->return_type == D_NONE) {
-                    last_fn->params = realloc(last_fn->params, sizeof(DataType) * E);
-                    last_fn->params[last_fn->param_count++] = tmp_data->bucket->value_type;
-                }
-            } else {
-                free(tmp_data);
-            }
-        }
-        if (brackets != 0) exit(BAD_SYNTAX);
-        if (stack_top(shelf) != NULL) { // pops last bracket
-            free(stack_pop(shelf));
-        }
-
-        // args number check
-        if (E != last_fn->param_count && last_fn->param_count != -1 && last_fn->return_type != D_NONE)  {
-            exit(BAD_TYPE_OR_RETURN);
-        }
-        if (E != previous_args && previous_args != 0) {
-            exit(BAD_TYPE_OR_RETURN);
-        }
-
-        int builtin = -1;
-        for (int j = 0; j < 11; j++) {
-            if(strcmp(last_fn->identifier, parser.builtins[j]) == 0) {
-                builtin = j;
-                break;
-            }
-        }
-
-        htab_pair_t **params = NULL;
-        if (builtin != -1) {
-            data->bucket->type = H_VAR;
-            defvar_order(tmp, pair, gen);
-
-            params = E ? malloc(sizeof(htab_pair_t*) * E) : malloc(sizeof(htab_pair_t*));
-            for (int j = 0; j < E; j++) {
-                TData *garbage = stack_pop(reversal);
-                params[j] = garbage->bucket;
-                free(garbage);
-            }
-
-            generator_add_instruction(gen, gen_instruction_constructor(builtin, tmp, operands, NULL, 0, params, E));
-        } else {
-            // creates a temporary variable
-            defvar_order(tmp, pair, gen);
-
-            // prepares the call instruction
-            operands = malloc(sizeof(htab_pair_t *));
-            operands[0] = last_fn;
-            params = malloc(sizeof(htab_pair_t*) * last_fn->param_count);
-            for (int i = 0; i < last_fn->param_count; i++) {
-                TData *garbage = stack_pop(reversal);
-                params[i] = garbage->bucket;
-                free(garbage);
-            }
-            generator_add_instruction(gen, gen_instruction_constructor(call, tmp, operands, last_fn->params, 1, params, last_fn->param_count));
-        }
-
-        printf("11p ");
-        stack_push(stack, stack_data(P_E, P_E));
-        data->bucket->value_type = last_fn->return_type;
-        stack_push(temps, data);
-        return 1;
-    } else {
-        exit(BAD_SYNTAX);
-    }
-
-    cleanup:
     free(data);
     stack_dispose(shelf);
     return 0;
@@ -1035,7 +1041,6 @@ int parse(Generator *gen) {
                         TData *data = stack_top(brackets);
                         if (data->value == parser.bracket_counter) {
                             TData *garbage = stack_pop(brackets);
-                            //free(garbage); FIXME free here causes segfaults in generator
 
                             if (data->type == KW_IF) {
                                 generator_add_instruction(gen, gen_instruction_constructor(else_end, NULL, NULL, NULL, 0, NULL, 0));
@@ -1053,7 +1058,8 @@ int parse(Generator *gen) {
                                     generator_add_instruction(gen, parser.in_while);
                                     parser.in_while = NULL;
                                 }
-                            }               
+                            }
+                            free(garbage);
                         }
                     }
                     if (parser.bracket_counter == 0 && parser.temporary_tab != parser.glob_tab) {
@@ -1552,5 +1558,8 @@ int main(void) {
     }
 
     generate(gen);
+    // free parser struct
+    //free(parser.builtins);
+
     return 0;
 }
