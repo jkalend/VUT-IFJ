@@ -375,7 +375,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
             exit(BAD_TYPE_OR_RETURN);
         }
 
-        if (commas != E - 1) exit(BAD_SYNTAX);
+        if (commas != E - 1 && E != 0) exit(BAD_SYNTAX);
 
         int builtin = -1;
         for (int j = 0; j < 11; j++) {
