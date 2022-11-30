@@ -582,11 +582,11 @@ int get_token(Token *token, scanner_t *scanner) {
                     token->value.string = "";
                     return LEX_OK;
                 }
-                char *str = malloc(40);
+				int size = 40;
+                char *str = malloc(size);
 				if(str == NULL){
 					exit(BAD_INTERNAL);
 				}
-                int size = 40;
                 int i = 0;
                 while (true) {
                     if (i == (size / 2)) {
@@ -645,7 +645,6 @@ char* convert_string_for_ifjcode(char *str, int size) {
     char hex[2];
     char oct[3];
     while(str[i] != '\0'){
-
 		if(str[i] == '\\' && str[i+1] == 'x'){
 			hex[0] = str[i+2];
 			hex[1] = str[i+3];
@@ -854,6 +853,15 @@ char* convert_string_for_ifjcode(char *str, int size) {
 			}
 		}
 		i++;
+		if (i == (size / 2)) {
+			size *= 2;
+			char *tmp = realloc(str, size);
+			if(tmp == NULL){
+				free(str);
+				exit(BAD_INTERNAL);
+			}
+			str = tmp;
+		}
     }
     return str;
 }
