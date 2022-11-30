@@ -1,30 +1,26 @@
 #include "scanner.h"
 #define LEX_OK 0
-#define true 1
 
-int line = 1;
-int first_read = 0;
-
-int get_token(Token *token) {
+int get_token(Token *token, scanner_t *scanner) {
 	token->strict_type = true;
-    if (first_read == 0){
+    if (scanner->first_read == 0){
         int c = fgetc(stream);
 		if(c == EOF){
 			token->type = T_EOF;
-			token->line = line;
+			token->line = scanner->line;
 			return LEX_OK;
 		}else if (c != '<'){
             token->type = T_ERROR;
-            token->line = line;
+            token->line = scanner->line;
             return BAD_LEXEM;
         }
-        first_read = 1;
-        ungetc(c, stream);
+	scanner->first_read = 1;
+	ungetc(c, stream);
     }
     while(true) {
         int c = fgetc(stream);
         if(c == '\n') {
-            line++;
+            scanner->line += 1;
             continue;
         }
         if(isspace(c)){
@@ -54,13 +50,13 @@ int get_token(Token *token) {
             ungetc(c, stream);
             identifier[i] = '\0';
             if (kw_check(identifier, token) != 1){
-                token->line = line;
+                token->line = scanner->line;
                 free(identifier);
                 return LEX_OK;
             }
             token->type = T_IDENTIFIER;
             token->value.identifier = identifier;
-            token->line = line;
+            token->line = scanner->line;
             return LEX_OK;
         }
         if(c >= '0' && c <= '9'){
@@ -91,7 +87,7 @@ int get_token(Token *token) {
 				}
 				if((c < '0' || c > '9') && (str[i-1] == '.')){
 					token->type = T_ERROR;
-					token->line = line;
+					token->line = scanner->line;
 					free(str);
 					return BAD_LEXEM;
 				}
@@ -100,7 +96,7 @@ int get_token(Token *token) {
             str[i] = '\0';
 			if(str[i-1] < '0' || str[i-1] > '9'){
 				token->type = T_ERROR;
-				token->line = line;
+				token->line = scanner->line;
 				free(str);
 				return BAD_LEXEM;
 			}
@@ -109,7 +105,7 @@ int get_token(Token *token) {
                 if (str[i] == '.'){
 					if(e > 0){
 						token->type = T_ERROR;
-						token->line = line;
+						token->line = scanner->line;
 						free(str);
 						return BAD_LEXEM;
 					}
@@ -126,7 +122,7 @@ int get_token(Token *token) {
             if(dot == 0 && e == 0 && plus_minus == 0){
                 token->type = T_INT;
                 token->value.number_int = strtoll(str, NULL, 10);
-                token->line = line;
+                token->line = scanner->line;
                 free(str);
                 return LEX_OK;
             }else if((dot == 1 && e == 0 && plus_minus == 0) ||
@@ -136,12 +132,12 @@ int get_token(Token *token) {
 				    (dot == 1 && e == 1 && plus_minus == 0)) {
                 token->type = T_FLOAT;
                 token->value.number_float = strtod(str, NULL);
-                token->line = line;
+                token->line = scanner->line;
                 free(str);
                 return LEX_OK;
             }else{
                 token->type = T_ERROR;
-                token->line = line;
+                token->line = scanner->line;
                 free(str);
                 return BAD_LEXEM;
             }
@@ -158,7 +154,7 @@ int get_token(Token *token) {
                         c2 = fgetc(stream);
                         if (c2 == EOF) {
                             token->type = T_EOF;
-                            token->line = line;
+                            token->line = scanner->line;
                             return LEX_OK;
                         }
                     }
@@ -170,7 +166,7 @@ int get_token(Token *token) {
                     while (c2 != '*') {
                         c2 = fgetc(stream);
                         if(c2 == '\n') {
-                            line++;
+                            scanner->line += 1;
                         }
                         if (c2 == EOF) {
                             exit(BAD_LEXEM);
@@ -183,7 +179,7 @@ int get_token(Token *token) {
                         break;
                     } else {
                         if(c2 == '\n') {
-                            line++;
+                            scanner->line += 1;
                         }
                         goto commentary;
                     }
@@ -191,30 +187,30 @@ int get_token(Token *token) {
                     ungetc(c2, stream);
 
                     token->type = T_DIVIDE;
-                    token->line = line;
+                    token->line = scanner->line;
                     return LEX_OK;
                 }
             }
             case '+': {
                 token->type = T_PLUS;
-                token->line = line;
+                token->line = scanner->line;
                 return LEX_OK;
             }
             case '-': {
                 token->type = T_MINUS;
-                token->line = line;
+                token->line = scanner->line;
                 return LEX_OK;
             }
             case '*': {
                 token->type = T_MULTIPLY;
-                token->line = line;
+                token->line = scanner->line;
                 return LEX_OK;
             }
             case '<': {
                 int c2 = fgetc(stream);
                 if (c2 == '=') {
                     token->type = T_LESS_EQUAL;
-                    token->line = line;
+                    token->line = scanner->line;
                     return LEX_OK;
                 } else if (c2 == '?'){
                     c2 = fgetc(stream);
@@ -223,6 +219,10 @@ int get_token(Token *token) {
                         if (c2 == 'h'){
                             c2 = fgetc(stream);
                             if (c2 == 'p'){
+								if(scanner->prologue_r == 1){
+									exit(BAD_SYNTAX);
+								}
+								scanner->prologue_r = 1;
 								int ok = 0;
 								char *arr = malloc(24);
 								if(arr == NULL){
@@ -232,7 +232,7 @@ int get_token(Token *token) {
 								while (true) {
 									c2 = fgetc(stream);
 									if (c2 == '\n') {
-										line++;
+										scanner->line += 1;
 										ok = 1;
 										continue;
 									}
@@ -249,7 +249,7 @@ int get_token(Token *token) {
 													c2 = fgetc(stream);
 													if (c2 == EOF) {
 														token->type = T_ERROR;
-														token->line = line;
+														token->line = scanner->line;
 														return BAD_LEXEM;
 													}
 												}
@@ -262,7 +262,7 @@ int get_token(Token *token) {
 													c2 = fgetc(stream);
 
 													if (c2 == '\n') {
-														line++;
+														scanner->line += 1;
 													}
 													if (c2 == EOF) {
 														exit(BAD_LEXEM);
@@ -275,20 +275,20 @@ int get_token(Token *token) {
 													break;
 												} else {
 													if (c2 == '\n') {
-														line++;
+														scanner->line += 1;
 													}
 													goto loop;
 												}
 											} else {
 												token->type = T_ERROR;
-												token->line = line;
+												token->line = scanner->line;
 												return BAD_LEXEM;
 											}
 										}
 										case 'd': {
 											if(ok == 0){
 												token->type = T_ERROR;
-												token->line = line;
+												token->line = scanner->line;
 												return BAD_LEXEM;
 											}
 											ungetc(c2, stream);
@@ -296,7 +296,7 @@ int get_token(Token *token) {
 											slider = slider + 7;
 											if (strcmp(arr, "declare") != 0) {
 												token->type = T_ERROR;
-												token->line = line;
+												token->line = scanner->line;
 												return BAD_LEXEM;
 											}
 											break;
@@ -313,7 +313,7 @@ int get_token(Token *token) {
 											fgets(slider, 13, stream);
 											if (strcmp(slider, "strict_types") != 0) {
 												token->type = T_ERROR;
-												token->line = line;
+												token->line = scanner->line;
 												return BAD_LEXEM;
 											}
 											slider = slider + 12;
@@ -327,43 +327,43 @@ int get_token(Token *token) {
 										case ';': {
 											if (strcmp(arr, "declare(strict_types=1)") == 0) {
 												token->type = T_VALID;
-												token->line = line;
+												token->line = scanner->line;
 												free(arr);
 												return LEX_OK;
 											} else {
 												token->type = T_ERROR;
-												token->line = line;
+												token->line = scanner->line;
 												free(arr);
 												return BAD_LEXEM;
 											}
 										}
 										default: {
 											token->type = T_ERROR;
-											token->line = line;
+											token->line = scanner->line;
 											return BAD_LEXEM;
 										}
 									}
 								}
                             }else{
                                 token->type = T_ERROR;
-                                token->line = line;
+                                token->line = scanner->line;
                                 return BAD_LEXEM;
                             }
                         }else{
                             token->type = T_ERROR;
-                            token->line = line;
+                            token->line = scanner->line;
                             return BAD_LEXEM;
                         }
                     }else{
                         token->type = T_ERROR;
-                        token->line = line;
+                        token->line = scanner->line;
                         return BAD_LEXEM;
                     }
                 }
                 else {
                     ungetc(c2, stream);
                     token->type = T_LESS;
-                    token->line = line;
+                    token->line = scanner->line;
                     return LEX_OK;
                 }
             }
@@ -371,13 +371,13 @@ int get_token(Token *token) {
                 int c2 = fgetc(stream);
                 if (c2 == '=') {
                     token->type = T_GREATER_EQUAL;
-                    token->line = line;
+                    token->line = scanner->line;
                     return LEX_OK;
                 }
                 else {
                     ungetc(c2, stream);
                     token->type = T_GREATER;
-                    token->line = line;
+                    token->line = scanner->line;
                     return LEX_OK;
                 }
             }
@@ -387,18 +387,18 @@ int get_token(Token *token) {
                     c2 = fgetc(stream);
                     if (c2 == '=') {
                         token->type = T_EQUAL;
-                        token->line = line;
+                        token->line = scanner->line;
                         return LEX_OK;
                     }else{
 						ungetc(c2, stream);
                         token->type = T_ERROR;
-                        token->line = line;
+                        token->line = scanner->line;
                         return BAD_LEXEM;
                     }
                 } else {
                     ungetc(c2, stream);
                     token->type = T_ASSIGN;
-                    token->line = line;
+                    token->line = scanner->line;
                     return LEX_OK;
                 }
             }
@@ -408,54 +408,54 @@ int get_token(Token *token) {
                     c2 = fgetc(stream);
                     if (c2 == '=') {
                         token->type = T_NOT_EQUAL;
-                        token->line = line;
+                        token->line = scanner->line;
                         return LEX_OK;
                     }else{
 						ungetc(c2, stream);
                         token->type = T_ERROR;
-                        token->line = line;
+                        token->line = scanner->line;
                         return BAD_LEXEM;
                     }
                 } else {
 					ungetc(c2, stream);
                     token->type = T_ERROR;
-                    token->line = line;
+                    token->line = scanner->line;
                     return BAD_LEXEM;
                 }
             }
             case '(': {
                 token->type = T_LEFT_BRACKET;
-                token->line = line;
+                token->line = scanner->line;
                 return LEX_OK;
             }
             case ')': {
                 token->type = T_RIGHT_BRACKET;
-                token->line = line;
+                token->line = scanner->line;
                 return LEX_OK;
             }
             case ',': {
                 token->type = T_COMMA;
-                token->line = line;
+                token->line = scanner->line;
                 return LEX_OK;
             }
             case ';': {
                 token->type = T_SEMICOLON;
-                token->line = line;
+                token->line = scanner->line;
                 return LEX_OK;
             }
             case '{': {
                 token->type = T_LEFT_BRACE;
-                token->line = line;
+                token->line = scanner->line;
                 return LEX_OK;
             }
             case '}': {
                 token->type = T_RIGHT_BRACE;
-                token->line = line;
+                token->line = scanner->line;
                 return LEX_OK;
             }
             case '.': {
                 token->type = T_CONCATENATE;
-                token->line = line;
+                token->line = scanner->line;
                 return LEX_OK;
             }
             /*
@@ -463,12 +463,12 @@ int get_token(Token *token) {
                 int c2 = fgetc(stream);
                 if (c2 == '&') {
                     token->type = T_AND;
-                    token->line = line;
+                    token->line = scanner->line;
                     return LEX_OK;
                 } else {
                     ungetc(c2, stream);
                     token->type = T_ERROR;
-                    token->line = line;
+                    token->line = scanner->line;
                     return BAD_LEXEM;
                 }
             }
@@ -476,28 +476,28 @@ int get_token(Token *token) {
                 int c2 = fgetc(stream);
                 if (c2 == '|') {
                     token->type = T_OR;
-                    token->line = line;
+                    token->line = scanner->line;
                     return LEX_OK;
                 } else {
                     ungetc(c2, stream);
                     token->type = T_ERROR;
-                    token->line = line;
+                    token->line = scanner->line;
                     return BAD_LEXEM;
                 }
             }
             */
             case ':':{
                 token->type = T_DOUBLE_DOT;
-                token->line = line;
+                token->line = scanner->line;
                 return LEX_OK;
             }
             case '$':{
                 token->type = T_VAR;
-                token->line = line;
+                token->line = scanner->line;
                 int c2 = fgetc(stream);
                 if(c2 != '_' && (c2 <'A' || (c2 > 'Z' && c2 < 'a') || c2 > 'z')){
                     token->type = T_ERROR;
-                    token->line = line;
+                    token->line = scanner->line;
                     return BAD_LEXEM;
                 }
                 int size = 40;
@@ -533,7 +533,7 @@ int get_token(Token *token) {
 						exit(BAD_SYNTAX);
 					}
                     token->type = T_END;
-                    token->line = line;
+                    token->line = scanner->line;
                     return LEX_OK;
                 } else if (c2 >= 'a' && c2 <= 'z') {
                     char *str = malloc(40);
@@ -560,23 +560,23 @@ int get_token(Token *token) {
                     str[i] = '\0';
                     if (kw_check(str, token) != 2) {
                         token->type = T_ERROR;
-                        token->line = line;
+                        token->line = scanner->line;
                         free(str);
                         return BAD_LEXEM;
                     }
-                    token->line = line;
+                    token->line = scanner->line;
 					token->strict_type = false;
                     return LEX_OK;
 
                 } else {
                     token->type = T_ERROR;
-                    token->line = line;
+                    token->line = scanner->line;
                     return BAD_LEXEM;
                 }
             }
             case '"': {
                 token->type = T_STRING;
-                token->line = line;
+                token->line = scanner->line;
                 int c2 = fgetc(stream);
                 if(c2 == '"'){
                     token->value.string = "";
@@ -602,7 +602,7 @@ int get_token(Token *token) {
                     i++;
 					if(c2 == '$'){
 						token->type = T_ERROR;
-						token->line = line;
+						token->line = scanner->line;
 						free(str);
 						return BAD_LEXEM;
 					}
@@ -613,7 +613,7 @@ int get_token(Token *token) {
                     }
 					if(c2 < 32){
 						token->type = T_ERROR;
-						token->line = line;
+						token->line = scanner->line;
 						free(str);
 						return BAD_LEXEM;
 					}
@@ -623,7 +623,7 @@ int get_token(Token *token) {
                         break;
                     }else if(c2 == EOF){
                         token->type = T_ERROR;
-                        token->line = line;
+                        token->line = scanner->line;
                         free(str);
                         return BAD_LEXEM;
                     }
@@ -633,7 +633,7 @@ int get_token(Token *token) {
             }
             default: {
                 token->type = T_ERROR;
-                token->line = line;
+                token->line = scanner->line;
                 return BAD_LEXEM;
             }
         }

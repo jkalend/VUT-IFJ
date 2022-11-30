@@ -61,7 +61,7 @@ void defvar_order(char *id, htab_pair_t *pair, Generator *gen) {
     }
 }
 
-void get_next_token(Token **token, bool *keep_token, bool *return_back) {
+void get_next_token(Token **token, bool *keep_token, bool *return_back, scanner_t *scanner) {
     if (*keep_token && *return_back) {
         Token *tmp = *token;
         *token = parser.tmp_token;
@@ -80,7 +80,7 @@ void get_next_token(Token **token, bool *keep_token, bool *return_back) {
         parser.tmp_token->type = (*token)->type;
 
         /* get new token from scanner */
-        get_token(*token);
+        get_token(*token, scanner);
         if ((*token)->type == T_ERROR) exit(BAD_LEXEM);
     }
     *keep_token = false;
@@ -732,7 +732,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
     return 0;
 }
 
-int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back, Generator *gen) {
+int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back, Generator *gen, scanner_t *scanner) {
     stack_push(stack, stack_data(P_END, P_END));
     
     Token *lookahead = *token;
@@ -749,7 +749,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
     while (true) {
 
         if (next_token) {
-            get_next_token(&lookahead, keep_token, return_back);
+            get_next_token(&lookahead, keep_token, return_back, scanner);
             if (lookahead->type == T_ERROR) break;
 
             next_token = true;
@@ -1005,7 +1005,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
     exit(BAD_LEXEM);
 }
 
-int parse(Generator *gen) {
+int parse(Generator *gen, scanner_t *scanner) {
     TStack *stack = NULL;
     stack = stack_init(stack);
     TStack *prec = NULL;
@@ -1025,7 +1025,7 @@ int parse(Generator *gen) {
 
     bool keep_prev_token = false;
     bool return_back = false;
-    get_token(token);
+    get_token(token, scanner);
     if (token->type == T_ERROR) exit(BAD_LEXEM);
     if (token->type == T_EOF) exit(BAD_SYNTAX);
     printf("# ");
@@ -1178,7 +1178,7 @@ int parse(Generator *gen) {
                     }
                 }
                 
-                get_next_token(&token, &keep_prev_token, &return_back);
+                get_next_token(&token, &keep_prev_token, &return_back, scanner);
 
                 if (token->type == T_ASSIGN && parser.tmp_token->type == T_VAR) {
                     parser.in_assign = htab_find(parser.temporary_tab, parser.tmp_token->value.identifier);
@@ -1248,7 +1248,7 @@ int parse(Generator *gen) {
                     }
                 }
 
-                get_next_token(&token, &keep_prev_token, &return_back);
+                get_next_token(&token, &keep_prev_token, &return_back, scanner);
 
                 /* function definition - create new item in tab */
                 if (parser.tmp_token->value.keyword == KW_FUNCTION && token->type == T_IDENTIFIER) { 
@@ -1307,7 +1307,7 @@ int parse(Generator *gen) {
                 /* CALL PRECEDENTIAL */
                 keep_prev_token = true;
                 
-                int result = precedence(prec, &token, &keep_prev_token, &return_back, gen);
+                int result = precedence(prec, &token, &keep_prev_token, &return_back, gen, scanner);
                 stack_dispose(prec);
                 
                 if (!result) {
@@ -1318,7 +1318,7 @@ int parse(Generator *gen) {
                     exit(BAD_TERM);
                 }
                 parser.in_assign = NULL;
-                get_next_token(&token, &keep_prev_token, &return_back);
+                get_next_token(&token, &keep_prev_token, &return_back, scanner);
 
                 if (parser.expect_ret) {
                     if (parser.glob_tab == parser.temporary_tab) {
@@ -1531,6 +1531,11 @@ int main(void) {
     Generator *gen = malloc(sizeof(Generator));
     generator_init(gen);
 
+	scanner_t scanner;
+	scanner.line = 1;
+	scanner.first_read = 0;
+	scanner.prologue_r = 0;
+
     /* initialize the parser struct */
     parser.builtins = malloc(sizeof(char *) * 11);
     parser.tmp_token = NULL;
@@ -1558,7 +1563,7 @@ int main(void) {
 
     insert_builtins();
 
-    int result = parse(gen);
+    int result = parse(gen, &scanner);
     if (result) {
         return result;
     }

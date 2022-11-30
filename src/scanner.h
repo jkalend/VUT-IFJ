@@ -14,9 +14,6 @@
 
 FILE *stream;
 
-extern int line;
-extern int first_read;
-
 typedef enum {
     KW_ELSE,
     KW_FLOAT,
@@ -102,7 +99,13 @@ typedef struct {
 	bool strict_type;
 }Token;
 
-int get_token(Token*);
+typedef struct {
+	int line;
+	int first_read;
+	int prologue_r;
+}scanner_t;
+
+int get_token(Token*, scanner_t*);
 char* convert_string_for_ifjcode(char*, int);
 int convert_esc_to_int(const char*, int);
 int kw_check(char*, Token*);
