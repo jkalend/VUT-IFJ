@@ -1530,7 +1530,7 @@ void htab_check(htab_pair_t * pair) {
 
 int main(void) {
     stream = stdin;
-    ///stream = fopen("test.php", "r");
+    stream = fopen("test.php", "r");
     if (stream == NULL) exit(BAD_INTERNAL);
 
     Generator *gen = malloc(sizeof(Generator));
