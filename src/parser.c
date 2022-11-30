@@ -28,12 +28,12 @@ const unsigned int PREC_TABLE[14][14] = {
 
 const unsigned int LL_TABLE[8][33] = {{1},
                                       {0, 2, 2, 2, 2, 2, 2, 2, 0, 2, 0, 0, 3, 4, [15] =  2, 2, 2, 2},
-                                      {0, 7, 11, 12, 10, 5, 6, 9, 0, 8, [15] =  7, 7, 7, 7},
+                                      {0, 7, 11, 12, 10, 5, 6, 9, 0, 0, [15] =  7, 7, 7, 7},
                                       {[9] = 15, 14, [19] = 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15},
                                       {[8] = 16, [14] = 22},
                                       {[7] = 17},
                                       {[11] = 19, [14] = 18},
-                                      {0, 20, 20, 20, 20, 0, 20, 20, 0, 0, 0, 0, 0, 0, 21} };
+                                      {0, 20, 20, 20, 20, 0, 20, 20, 0, 20, 0, 0, 0, 0, 21, [15] =  20, 20, 20, 20} };
 
 
 TData *stack_data(int value, int type) { //unsigned?
@@ -1012,6 +1012,8 @@ int parse(Generator *gen) {
     prec = stack_init(prec);
     TStack *brackets = NULL;
     brackets = stack_init(brackets);
+
+    /* push initial nonterms to stack */
     stack_push(stack, stack_data(T_EOF, T_TERM));
     stack_push(stack, stack_data(N_PROG, T_NONTERM));
     int E = 0;
@@ -1044,7 +1046,7 @@ int parse(Generator *gen) {
                     if (!stack_isEmpty(brackets)) {
                         TData *data = stack_top(brackets);
                         if (data->value == parser.bracket_counter) {
-                            TData *garbage = stack_pop(brackets);
+                            stack_pop(brackets);
 
                             if (data->type == KW_IF) {
                                 generator_add_instruction(gen, gen_instruction_constructor(else_end, NULL, NULL, NULL, 0, NULL, 0));
@@ -1063,7 +1065,7 @@ int parse(Generator *gen) {
                                     parser.in_while = NULL;
                                 }
                             }
-                            free(garbage);
+                            free(data);
                         }
                     }
                     if (parser.bracket_counter == 0 && parser.temporary_tab != parser.glob_tab) {
@@ -1079,14 +1081,15 @@ int parse(Generator *gen) {
 
                         parser.in_function = false;
                         Instruction *instr = gen_instruction_constructor(0, NULL, NULL, NULL, 0, NULL, 0);
-                        if (parser.val_expected != D_VOID) {
-                            instr->instruct = err_quit4;
+                        if (!parser.in_func->strict_return || parser.in_func->return_type == D_VOID) {
+                            instr->instruct = end_fn_void;                            
                         }
                         else {
-                            instr->instruct = end_fn_void;
+                            instr->instruct = err_quit4;
                         }
                         generator_add_instruction(gen, instr);
                         generator_add_instruction(gen, parser.in_fn);
+                        parser.in_func = NULL;
                     }
                 }
 
@@ -1114,9 +1117,9 @@ int parse(Generator *gen) {
                                 exit(BAD_SYNTAX); // unknown data type
                         }
                         E = 0;
-                        parser.val_expected = parser.in_func->return_type;
+                       // parser.val_expected = parser.in_func->return_type;
                         parser.val_returned = NULL;
-                        parser.in_func = NULL;
+                        parser.in_func->strict_return = token->strict_type;
                     }
                     else if (parser.in_param_def && token->type == T_TYPE) {
                         DataType type;
@@ -1140,10 +1143,17 @@ int parse(Generator *gen) {
                             if (parser.in_func->params == NULL) exit(BAD_INTERNAL); // realloc failed
 
                             parser.in_func->params[parser.in_func->param_count - 1] = type;
+
+                            parser.in_func->params_strict = realloc(parser.in_func->params_strict, sizeof(bool) * parser.in_func->param_count);
+                            if (parser.in_func->params_strict == NULL) exit(BAD_INTERNAL); // realloc failed
+                            parser.in_func->params_strict[parser.in_func->param_count - 1] = token->strict_type;
                         }
                         else {
-                            if (E >= parser.in_func->param_count) exit(BAD_TYPE_OR_RETURN);
-                            if (parser.in_func->params[E++] != type) exit (BAD_TYPE_OR_RETURN);
+                            if (E >= parser.in_func->param_count || 
+                                parser.in_func->params[E] != type ||
+                                parser.in_func->params[E] == D_NONE && token->strict_type) 
+                                    exit(BAD_TYPE_OR_RETURN);
+                            //if (parser.in_func->params[E++] != type) exit (BAD_TYPE_OR_RETURN);
                         }
                         
                     }
@@ -1230,15 +1240,12 @@ int parse(Generator *gen) {
                     stack_push(brackets, data);
                 }
 
-//                if ((token->value.keyword == KW_IF || token->value.keyword == KW_WHILE) && !parser.in_function) {
-//                    parser.main_found = true;
-//                }
-                if (token->value.keyword == KW_RETURN && parser.val_expected == D_VOID) {
-                    parser.expect_ret = true;
-                    parser.allow_expr_empty = true;
-                } else if (token->value.keyword == KW_RETURN) {
+                if (token->value.keyword == KW_RETURN){
                     parser.expect_ret = true;
                     parser.allow_expr_empty = false;
+                    if (parser.temporary_tab == parser.glob_tab || (parser.in_func->return_type == D_VOID)) {
+                        parser.allow_expr_empty = true;
+                    }
                 }
 
                 get_next_token(&token, &keep_prev_token, &return_back);
@@ -1316,20 +1323,15 @@ int parse(Generator *gen) {
                 if (parser.expect_ret) {
                     if (parser.glob_tab == parser.temporary_tab) {
                         generator_add_instruction(gen, gen_instruction_constructor(exit_success, NULL, NULL, NULL, 0, NULL, 0));
-
                     }
-                    else { 
-                        // if (parser.val_returned != NULL && parser.val_returned->value_type != parser.val_expected && parser.val_returned->value_type != D_NONE) {
-                        //     exit(BAD_TYPE_OR_RETURN); //could be 6
-                        // }
-                            
+                    else {                             
                         if (!parser.empty_expr) {
 
                             Instruction *instr = gen_instruction_constructor(0, NULL, NULL, NULL, 0, NULL, 0);
                             instr->operands = malloc(sizeof(htab_pair_t *));
                             instr->operands[0] = parser.val_returned;
 
-                            switch (parser.val_expected) {
+                            switch (parser.in_func->return_type) {
                                 case D_INT:
                                     instr->instruct = end_fn_int;
                                     break;
@@ -1523,7 +1525,7 @@ void insert_builtins(void) {
 
 int main(void) {
     stream = stdin;
-    stream = fopen("test.php", "r");
+    //stream = fopen("test.php", "r");
     if (stream == NULL) exit(BAD_INTERNAL);
 
     Generator *gen = malloc(sizeof(Generator));
@@ -1545,7 +1547,7 @@ int main(void) {
     parser.expect_ret = false;
     parser.bracket_counter = 0;
     parser.val_returned = NULL;
-    parser.val_expected = D_VOID;
+    //parser.val_expected = D_VOID;
     parser.if_eval = false;
     parser.while_eval = false;
     parser.in_function = false;
