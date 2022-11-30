@@ -33,7 +33,7 @@ const unsigned int LL_TABLE[8][33] = {{1},
                                       {[8] = 16, [14] = 22},
                                       {[7] = 17},
                                       {[11] = 19, [14] = 18},
-                                      {0, 20, 20, 20, 20, 0, 20, 20, 0, 20, 0, 0, 0, 0, 21, [15] =  20, 20, 20, 20} };
+                                      {0, 20, 20, 20, 20, 0, 20, 20, 0, 0, 0, 0, 0, 0, 21, [15] =  20, 20, 20, 20} };
 
 
 TData *stack_data(int value, int type) { //unsigned?
@@ -1012,8 +1012,6 @@ int parse(Generator *gen, scanner_t *scanner) {
     prec = stack_init(prec);
     TStack *brackets = NULL;
     brackets = stack_init(brackets);
-
-    /* push initial nonterms to stack */
     stack_push(stack, stack_data(T_EOF, T_TERM));
     stack_push(stack, stack_data(N_PROG, T_NONTERM));
     int E = 0;
@@ -1046,7 +1044,7 @@ int parse(Generator *gen, scanner_t *scanner) {
                     if (!stack_isEmpty(brackets)) {
                         TData *data = stack_top(brackets);
                         if (data->value == parser.bracket_counter) {
-                            stack_pop(brackets);
+                            TData *garbage = stack_pop(brackets);
 
                             if (data->type == KW_IF) {
                                 generator_add_instruction(gen, gen_instruction_constructor(else_end, NULL, NULL, NULL, 0, NULL, 0));
@@ -1065,7 +1063,7 @@ int parse(Generator *gen, scanner_t *scanner) {
                                     parser.in_while = NULL;
                                 }
                             }
-                            free(data);
+                            free(garbage);
                         }
                     }
                     if (parser.bracket_counter == 0 && parser.temporary_tab != parser.glob_tab) {
@@ -1081,11 +1079,11 @@ int parse(Generator *gen, scanner_t *scanner) {
 
                         parser.in_function = false;
                         Instruction *instr = gen_instruction_constructor(0, NULL, NULL, NULL, 0, NULL, 0);
-                        if (!parser.in_func->strict_return || parser.in_func->return_type == D_VOID) {
-                            instr->instruct = end_fn_void;                            
+                        if (parser.in_func->return_type != D_VOID) {
+                            instr->instruct = err_quit4;
                         }
                         else {
-                            instr->instruct = err_quit4;
+                            instr->instruct = end_fn_void;
                         }
                         generator_add_instruction(gen, instr);
                         generator_add_instruction(gen, parser.in_fn);
@@ -1117,9 +1115,10 @@ int parse(Generator *gen, scanner_t *scanner) {
                                 exit(BAD_SYNTAX); // unknown data type
                         }
                         E = 0;
-                       // parser.val_expected = parser.in_func->return_type;
+                        //parser.val_expected = parser.in_func->return_type;
                         parser.val_returned = NULL;
                         parser.in_func->strict_return = token->strict_type;
+                        //parser.in_func = NULL;
                     }
                     else if (parser.in_param_def && token->type == T_TYPE) {
                         DataType type;
@@ -1142,18 +1141,15 @@ int parse(Generator *gen, scanner_t *scanner) {
                             parser.in_func->params = realloc(parser.in_func->params, sizeof(Value) * parser.in_func->param_count);
                             if (parser.in_func->params == NULL) exit(BAD_INTERNAL); // realloc failed
 
-                            parser.in_func->params[parser.in_func->param_count - 1] = type;
-
                             parser.in_func->params_strict = realloc(parser.in_func->params_strict, sizeof(bool) * parser.in_func->param_count);
                             if (parser.in_func->params_strict == NULL) exit(BAD_INTERNAL); // realloc failed
+
+                            parser.in_func->params[parser.in_func->param_count - 1] = type;
                             parser.in_func->params_strict[parser.in_func->param_count - 1] = token->strict_type;
                         }
                         else {
-                            if (E >= parser.in_func->param_count || 
-                                parser.in_func->params[E] != type ||
-                                parser.in_func->params[E] == D_NONE && token->strict_type) 
-                                    exit(BAD_TYPE_OR_RETURN);
-                            //if (parser.in_func->params[E++] != type) exit (BAD_TYPE_OR_RETURN);
+                            if (E >= parser.in_func->param_count) exit(BAD_TYPE_OR_RETURN);
+                            if (parser.in_func->params[E++] != type) exit (BAD_TYPE_OR_RETURN);
                         }
                         
                     }
@@ -1172,7 +1168,9 @@ int parse(Generator *gen, scanner_t *scanner) {
                             frame_item->value_type = parser.in_func->params[idx];
 
                             parser.in_func->param_names = realloc(parser.in_func->param_names, sizeof(char *) * (idx + 1));
+                            if (parser.in_func->param_names == NULL) exit(BAD_INTERNAL);
                             parser.in_func->param_names[idx] = malloc(sizeof(char) * strlen(token->value.identifier));
+                            if (parser.in_func->param_names[idx] == NULL) exit(BAD_INTERNAL);
                             strcpy(parser.in_func->param_names[idx], token->value.identifier);
                         }
                     }
@@ -1240,12 +1238,11 @@ int parse(Generator *gen, scanner_t *scanner) {
                     stack_push(brackets, data);
                 }
 
-                if (token->value.keyword == KW_RETURN){
+                if (token->value.keyword == KW_RETURN) {
                     parser.expect_ret = true;
                     parser.allow_expr_empty = false;
-                    if (parser.temporary_tab == parser.glob_tab || (parser.in_func->return_type == D_VOID)) {
+                    if (parser.glob_tab == parser.temporary_tab || parser.in_func->return_type == D_VOID) 
                         parser.allow_expr_empty = true;
-                    }
                 }
 
                 get_next_token(&token, &keep_prev_token, &return_back, scanner);
@@ -1272,6 +1269,8 @@ int parse(Generator *gen, scanner_t *scanner) {
                     parser.in_func->params = NULL;
                     parser.in_func->return_type = D_UNDEF;
                     parser.in_func->param_names = NULL;
+                    parser.in_func->params_strict = NULL;
+                    parser.in_func->strict_return = true;
                     parser.in_param_def = true;
 
                     /* create new frame for current function call */
@@ -1323,8 +1322,9 @@ int parse(Generator *gen, scanner_t *scanner) {
                 if (parser.expect_ret) {
                     if (parser.glob_tab == parser.temporary_tab) {
                         generator_add_instruction(gen, gen_instruction_constructor(exit_success, NULL, NULL, NULL, 0, NULL, 0));
+
                     }
-                    else {                             
+                    else { 
                         if (!parser.empty_expr) {
 
                             Instruction *instr = gen_instruction_constructor(0, NULL, NULL, NULL, 0, NULL, 0);
@@ -1523,9 +1523,14 @@ void insert_builtins(void) {
 
 }
 
+void htab_check(htab_pair_t * pair) {
+    if ((pair->type == H_FUNC_ID && pair->return_type == D_NONE) || 
+        (pair->type == H_VAR && pair->value_type == D_NONE))  exit(BAD_UNDEFINED_VAR);
+}
+
 int main(void) {
     stream = stdin;
-    //stream = fopen("test.php", "r");
+    ///stream = fopen("test.php", "r");
     if (stream == NULL) exit(BAD_INTERNAL);
 
     Generator *gen = malloc(sizeof(Generator));
@@ -1552,7 +1557,7 @@ int main(void) {
     parser.expect_ret = false;
     parser.bracket_counter = 0;
     parser.val_returned = NULL;
-    //parser.val_expected = D_VOID;
+    parser.val_expected = D_VOID;
     parser.if_eval = false;
     parser.while_eval = false;
     parser.in_function = false;
@@ -1566,7 +1571,9 @@ int main(void) {
     int result = parse(gen, &scanner);
     if (result) {
         return result;
-    }
+    }   
+
+    //htab_for_each(parser.glob_tab, htab_check);
 
     generate(gen);
     // free parser struct
