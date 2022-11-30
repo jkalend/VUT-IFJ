@@ -104,13 +104,5 @@ Instruction *gen_instruction_constructor(InstructionType instruct,
                                          htab_pair_t **params,
                                          int params_count);
 
-Instruction *generate_instruction(InstructionType instruct,
-                                  char *id,
-                                  char **operands,
-                                  int *types,
-                                  int operands_count,
-                                  char **params,
-                                  int params_count,
-                                  DataType retval);
 
 #endif //IFJ_GENERATOR_H
