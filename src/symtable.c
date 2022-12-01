@@ -128,6 +128,7 @@ htab_t *htab_init(size_t n)
     tab->arr_ptr = malloc(n * sizeof(htab_item_t *));
     if (tab->arr_ptr == NULL)
     {
+        free(tab);
         return NULL;
     }
     tab->arr_size = n;

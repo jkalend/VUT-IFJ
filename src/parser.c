@@ -197,9 +197,11 @@ int apply_rule(TStack *stack, unsigned int val) {
 }
 
 void prec_index(const Token *token, unsigned int *rc, int symbol) {
-    if (symbol > -1 && symbol < 15) {
+    if (symbol > -1 && symbol < 15 && token == NULL) {
         *rc = symbol;
         return;
+    } else if (token == NULL) {
+        exit(BAD_INTERNAL);
     }
     switch (token->type) {
 
