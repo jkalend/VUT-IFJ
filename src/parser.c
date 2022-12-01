@@ -426,6 +426,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
         printf("11p ");
         stack_push(stack, stack_data(P_E, P_E));
         data->bucket->value_type = last_fn->return_type;
+        data->bucket->return_type = last_fn->return_type;
         stack_push(temps, data);
         return 1;
     }
@@ -1543,7 +1544,9 @@ void insert_builtins(void) {
 
 void htab_check(htab_pair_t * pair) {
     if ((pair->type == H_FUNC_ID && pair->return_type == D_NONE) || 
-        (pair->type == H_VAR && pair->value_type == D_NONE))  exit(BAD_UNDEFINED_VAR);
+        (pair->type == H_VAR && pair->value_type == D_NONE)) {
+        exit(BAD_UNDEFINED_VAR);
+    }
 }
 
 int main(void) {
@@ -1589,7 +1592,7 @@ int main(void) {
         return result;
     }   
 
-    //htab_for_each(parser.glob_tab, htab_check);
+    htab_for_each(parser.glob_tab, htab_check);
 
     generate(gen);
     // free parser struct
