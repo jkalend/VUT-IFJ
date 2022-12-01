@@ -73,13 +73,11 @@ typedef struct {
     bool while_eval;
     bool only_defvar;
     int while_count;
-    bool in_function;
     char relation_operator;
     char **builtins;
     int tmp_counter;
     int bracket_counter;
     htab_pair_t *val_returned;
-    DataType val_expected;
     struct Instruction *in_while;
     struct Instruction *in_fn;
 } parser_t;

@@ -48,9 +48,9 @@ TData *stack_data(int value, int type) { //unsigned?
 }
 
 void defvar_order(char *id, htab_pair_t *pair, Generator *gen) {
-    if (parser.in_while == NULL && !parser.in_function) {
+    if (parser.in_while == NULL && parser.in_func == NULL) {
         generator_add_instruction(gen, gen_instruction_constructor(defvar, id, NULL, NULL, 0, NULL, 0));
-    } else if (parser.in_function) {
+    } else if (parser.in_func != NULL) {
         parser.in_fn->operands = realloc(parser.in_fn->operands, sizeof(htab_pair_t *) * (parser.in_fn->operands_count + 1));
         if (parser.in_fn->operands == NULL) exit(BAD_INTERNAL);
         parser.in_fn->operands[parser.in_fn->operands_count++ ] = pair;
@@ -340,7 +340,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
 
         while (stack_top(shelf)->value != P_CLOSE) {
             TData *tmp_data = stack_pop(shelf);
-            htab_pair_t *a = tmp_data->bucket;
+            //htab_pair_t *a = tmp_data->bucket;
             if (tmp_data->value == P_LEFT_BRACKET) brackets--;
             else if (tmp_data->value == P_RIGHT_BRACKET) brackets++;
             else if (tmp_data->value == P_E) {
@@ -351,7 +351,14 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
                 stack_push(reversal, tmp_data);
                 if (last_fn->return_type == D_NONE) {
                     last_fn->params = realloc(last_fn->params, sizeof(DataType) * E);
-                    last_fn->params[last_fn->param_count++] = tmp_data->bucket->value_type;
+                    last_fn->params[last_fn->param_count] = tmp_data->bucket->value_type;
+
+                    last_fn->params_strict = realloc(last_fn->params_strict, sizeof(DataType) * E);
+                    last_fn->params_strict[last_fn->param_count] = true;
+                    if (tmp_data->bucket->value_type == D_VOID) {
+                        last_fn->params_strict[last_fn->param_count] = false;
+                    }
+                    last_fn->param_count++;
                 }
             } else if (tmp_data->value == P_COMMA) {
                 if(!expect_comma) exit(BAD_SYNTAX);
@@ -844,6 +851,8 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                     pair->params = NULL;
                     pair->return_type = D_NONE;
                     pair->param_names = NULL;
+                    pair->params_strict = NULL;
+                    pair->strict_return = true;
                 }
                 data->bucket = pair;
                 stack_push(stack, data);
@@ -939,7 +948,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 } else {
                     exit(BAD_TYPE_COMPATIBILTY);
                 }
-            }  else if (lookahead->value.keyword = KW_NULL && lookahead->type == T_KEYWORD) {
+            }  else if (lookahead->value.keyword == KW_NULL && lookahead->type == T_KEYWORD) {
 
                 htab_pair_t *pair = htab_find(parser.temporary_tab, tmp);
                 if (pair == NULL) {
@@ -980,7 +989,11 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                     parser.while_eval = false;
                 }
 
-                if (parser.expect_ret && top != NULL) parser.val_returned = top->bucket;
+                if (parser.expect_ret && top != NULL) {
+                    parser.val_returned = top->bucket;
+                    if (parser.in_func != NULL) parser.val_returned->strict_return = parser.in_func->strict_return;
+                    else parser.val_returned->strict_return = false;
+                }
                 if (parser.in_assign != NULL && top != NULL) {
                     parser.in_assign->value_type = top->bucket->value_type;
 
@@ -1043,7 +1056,7 @@ int parse(Generator *gen, scanner_t *scanner) {
                     parser.bracket_counter--;
                     if (!stack_isEmpty(brackets)) {
                         TData *data = stack_top(brackets);
-                        if (data->value == parser.bracket_counter) {
+                        if ((int)data->value == parser.bracket_counter) {
                             TData *garbage = stack_pop(brackets);
 
                             if (data->type == KW_IF) {
@@ -1077,13 +1090,12 @@ int parse(Generator *gen, scanner_t *scanner) {
                         if (stack_isEmpty(parser.local_tabs)) parser.temporary_tab = parser.glob_tab;
                         else parser.temporary_tab = stack_top(parser.local_tabs)->htab;
 
-                        parser.in_function = false;
                         Instruction *instr = gen_instruction_constructor(0, NULL, NULL, NULL, 0, NULL, 0);
-                        if (parser.in_func->return_type != D_VOID) {
-                            instr->instruct = err_quit4;
-                        }
-                        else {
+                        if (parser.in_func->return_type == D_VOID || !parser.in_func->strict_return) {
                             instr->instruct = end_fn_void;
+                        }
+                        else {                           
+                            instr->instruct = err_quit4;
                         }
                         generator_add_instruction(gen, instr);
                         generator_add_instruction(gen, parser.in_fn);
@@ -1149,7 +1161,9 @@ int parse(Generator *gen, scanner_t *scanner) {
                         }
                         else {
                             if (E >= parser.in_func->param_count) exit(BAD_TYPE_OR_RETURN);
-                            if (parser.in_func->params[E++] != type) exit (BAD_TYPE_OR_RETURN);
+                            if (parser.in_func->params[E] != type && (parser.in_func->params_strict[E] || parser.in_func->params[E] != D_VOID)) 
+                                exit (BAD_TYPE_OR_RETURN);
+                            E++;
                         }
                         
                     }
@@ -1249,7 +1263,7 @@ int parse(Generator *gen, scanner_t *scanner) {
 
                 /* function definition - create new item in tab */
                 if (parser.tmp_token->value.keyword == KW_FUNCTION && token->type == T_IDENTIFIER) { 
-                    parser.in_function = true;
+                    //parser.in_function = true;
                     parser.bracket_counter = 0;
                     char *id = malloc(strlen(token->value.identifier) + 5);
                     strcpy(id, "69");
@@ -1344,6 +1358,8 @@ int parse(Generator *gen, scanner_t *scanner) {
                                 case D_VOID:
                                     instr->instruct = end_fn_void;
                                     break;
+                                default:
+                                    exit(BAD_TYPE_OR_RETURN);
                             }
                             generator_add_instruction(gen, instr);
                         } 
@@ -1557,10 +1573,8 @@ int main(void) {
     parser.expect_ret = false;
     parser.bracket_counter = 0;
     parser.val_returned = NULL;
-    parser.val_expected = D_VOID;
     parser.if_eval = false;
     parser.while_eval = false;
-    parser.in_function = false;
     parser.in_while = NULL;
     parser.in_fn = NULL;
     parser.while_count = 0;

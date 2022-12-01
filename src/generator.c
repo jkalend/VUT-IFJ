@@ -522,7 +522,11 @@ void gen_call(Instruction *instruction) {
                 break;
             default:
                 break;
+            
         }
+        if (instruction->operands[0]->params_strict[i]) 
+            printf("JUMPIFEQ $!!EXIT_4 GF@%%nil GF@%%check0\n");
+
         printf("MOVE TF@%%%d LF@%s\n", i, instruction->params[i]->identifier);
     }
     printf("CALL $%s\n", instruction->operands[0]->identifier);
@@ -641,7 +645,12 @@ void gen_fn_defs(Instruction *instruction, Generator *generator) {
 
 void gen_end_fn_float(Instruction *instruction) {
     printf("TYPE GF@%%check0 LF@%s\n", instruction->operands[0]->identifier);
-    printf("JUMPIFNEQ $!!EXIT_4 GF@%%check0 string@float\n");
+    printf("JUMPIFEQ $!!EXIT_4 GF@%%check0 string@string\n");
+    printf("JUMPIFEQ $!!EXIT_4 GF@%%check0 string@int\n");
+    printf("JUMPIFEQ $!!EXIT_4 GF@%%check0 string@bool\n");
+    if (instruction->operands[0]->strict_return) {
+        printf("JUMPIFEQ $!!EXIT_4 GF@%%check0 string@nil\n");
+    }
     printf("MOVE LF@$$retval LF@%s\n", instruction->operands[0]->identifier);
     printf("POPFRAME\n");
     printf("RETURN\n");
@@ -649,7 +658,12 @@ void gen_end_fn_float(Instruction *instruction) {
 
 void gen_end_fn_string(Instruction *instruction) {
     printf("TYPE GF@%%check0 LF@%s\n", instruction->operands[0]->identifier);
-    printf("JUMPIFNEQ $!!EXIT_4 GF@%%check0 string@string\n");
+    printf("JUMPIFEQ $!!EXIT_4 GF@%%check0 string@int\n");
+    printf("JUMPIFEQ $!!EXIT_4 GF@%%check0 string@float\n");
+    printf("JUMPIFEQ $!!EXIT_4 GF@%%check0 string@bool\n");
+    if (instruction->operands[0]->strict_return) {
+        printf("JUMPIFEQ $!!EXIT_4 GF@%%check0 string@nil\n");
+    }
     printf("MOVE LF@$$retval LF@%s\n", instruction->operands[0]->identifier);
     printf("POPFRAME\n");
     printf("RETURN\n");
@@ -657,7 +671,12 @@ void gen_end_fn_string(Instruction *instruction) {
 
 void gen_end_fn_int(Instruction *instruction) {
     printf("TYPE GF@%%check0 LF@%s\n", instruction->operands[0]->identifier);
-    printf("JUMPIFNEQ $!!EXIT_4 GF@%%check0 string@int\n");
+    printf("JUMPIFEQ $!!EXIT_4 GF@%%check0 string@string\n");
+    printf("JUMPIFEQ $!!EXIT_4 GF@%%check0 string@float\n");
+    printf("JUMPIFEQ $!!EXIT_4 GF@%%check0 string@bool\n");
+    if (instruction->operands[0]->strict_return) {
+        printf("JUMPIFEQ $!!EXIT_4 GF@%%check0 string@nil\n");
+    }
     printf("MOVE LF@$$retval LF@%s\n", instruction->operands[0]->identifier);
     printf("POPFRAME\n");
     printf("RETURN\n");
