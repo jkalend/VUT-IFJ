@@ -177,4 +177,5 @@ workflows:
       - scanner_test_granular_cmake
       - all_scanner_tests_cmake
   Overall:
+    jobs:
       - ifj-22tester
