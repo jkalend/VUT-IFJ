@@ -171,11 +171,11 @@ workflows:
   Static Analysis:
     jobs:
       - cppcheck
-  Tests:
-    jobs:
-      - stack_test_cmake
-      - scanner_test_granular_cmake
-      - all_scanner_tests_cmake
+#   Tests:
+#     jobs:
+#       - stack_test_cmake
+#       - scanner_test_granular_cmake
+#       - all_scanner_tests_cmake
   Overall:
     jobs:
       - ifj-22tester
