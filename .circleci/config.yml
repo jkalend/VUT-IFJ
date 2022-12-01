@@ -135,7 +135,7 @@ jobs:
       - coverage:
           flags: << parameters.flags >>
 
-ifj-22tester:
+  ifj-22tester:
     docker:
       - image: cimg/base:stable
     environment:
