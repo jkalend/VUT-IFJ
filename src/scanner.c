@@ -699,21 +699,17 @@ char* convert_string_for_ifjcode(char *str, int size) {
 				continue;
 			}
 			int result = convert_esc_to_int(oct, 3);
+			char esc[4];
+			sprintf(esc, "%d", result);
 			if(result > 99) {
-				char esc[4];
-				sprintf(esc, "%d", (int)result);
 				str[i + 1] = esc[0];
 				str[i + 2] = esc[1];
 				str[i + 3] = esc[2];
 			}else if(result > 9){
-				char esc[4];
-				sprintf(esc, "%d", (int)result);
 				str[i + 3] = esc[1];
 				str[i + 2] = esc[0];
 				str[i + 1] = '0';
 			}else{
-				char esc[4];
-				sprintf(esc, "%d", (int)result);
 				str[i + 3] = esc[0];
 				str[i + 2] = '0';
 				str[i + 1] = '0';
@@ -867,14 +863,12 @@ char* convert_string_for_ifjcode(char *str, int size) {
 }
 
 int convert_esc_to_int(const char* str, int len) {
-    long result = 0;
-	char esc[3];
+    int result = 0;
     if (len == 3) {
-        result = strtol(str, NULL, 8);
+        result = (int) strtol(str, NULL, 8);
         if(result > 255 || result == 36 || result < 1){
             return -1;
         }
-		sprintf(esc, "%d", (int) result);
     }else if(len == 2) {
         if(str[0] < '0' || (str[0] > '9' && str[0] < 'A') || (str[0] > 'F' && str[0] < 'a') || str[0] > 'f'){
             return -1;
@@ -882,12 +876,12 @@ int convert_esc_to_int(const char* str, int len) {
         if(str[1] < '0' || (str[1] > '9' && str[1] < 'A') || (str[1] > 'F' && str[1] < 'a') || str[1] > 'f' ){
             return -1;
         }
-        result = strtol(str, NULL, 16);
+        result = (int) strtol(str, NULL, 16);
         if(result == 36 || result < 1){
             return -1;
         }
     }
-    return (int) result;
+    return result;
 }
 
 int kw_check(char *s, Token *token){
