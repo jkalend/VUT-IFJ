@@ -588,10 +588,12 @@ void gen_gt(Instruction *instruction, Generator *generator, char op[], bool inve
 
 
     printf("MOVE LF@%s bool@true\n", instruction->id);
+    if (invert) printf("NOT LF@%s LF@%s\n", instruction->id, instruction->id);
     printf("JUMP !!%d\n", generator->label_count + 1);
 
     printf("LABEL !!%d\n", generator->label_count++);
     printf("MOVE LF@%s bool@false\n", instruction->id);
+    if (invert) printf("NOT LF@%s LF@%s\n", instruction->id, instruction->id);
     printf("LABEL !!%d\n", generator->label_count++);
 }
 
