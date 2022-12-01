@@ -550,17 +550,17 @@ void gen_gt(Instruction *instruction, Generator *generator, char op[], bool inve
     printf("JUMPIFEQ $!!EXIT_7 GF@%%bool GF@%%check3\n");
 
     printf("JUMPIFNEQ !!%d GF@%%check0 GF@%%check3\n", generator->label_count + 1);
-    printf("JUMPIFEQ !!%d LF@%s nil@nil\n", generator->label_count + 4, instruction->operands[0]->identifier); /* jump to end of false */
+    printf("JUMPIFEQ !!%d LF@%s nil@nil\n", generator->label_count + 6, instruction->operands[0]->identifier); /* jump to end of false */
 
     printf("LABEL !!%d\n", generator->label_count++);
 
     /* operands are not null and have the same type -we can compare */
     printf("%s LF@%s GF@%%check1 GF@%%check2\n", op, instruction->id);
     if (invert) printf("NOT LF@%s LF@%s\n", instruction->id, instruction->id);
-    printf("JUMP !!%d\n", generator->label_count + 4);
+    printf("JUMP !!%d\n", generator->label_count + 6);
 
     printf("LABEL !!%d\n", generator->label_count++);
-    printf("JUMPIFEQ !!%d LF@%s nil@nil\n", generator->label_count + 2, instruction->operands[0]->identifier);
+    printf("JUMPIFEQ !!%d LF@%s nil@nil\n", generator->label_count + 4, instruction->operands[0]->identifier);
 
     printf("JUMPIFEQ !!%d LF@%s nil@nil\n", generator->label_count + 1, instruction->operands[1]->identifier);
 
@@ -576,7 +576,17 @@ void gen_gt(Instruction *instruction, Generator *generator, char op[], bool inve
     printf("JUMP !!%d\n", generator->label_count - 3);  
 
     printf("LABEL !!%d\n", generator->label_count++);
-    printf("JUMPIFEQ !!%d LF@%s int@0\n", generator->label_count, instruction->operands[0]->identifier);
+    printf("JUMPIFEQ !!%d GF@%%check0 string@float\n", generator->label_count);
+    printf("JUMPIFEQ !!%d GF@%%check0 string@string\n", generator->label_count + 1);
+    printf("JUMPIFEQ !!%d GF@%%check1 int@0\n", generator->label_count + 2);
+
+    printf("LABEL !!%d\n", generator->label_count++);
+    printf("JUMPIFEQ !!%d GF@%%check1 float@%a\n", generator->label_count + 1, 0.0);
+
+    printf("LABEL !!%d\n", generator->label_count++);
+    printf("JUMPIFEQ !!%d GF@%%check1 string@\n", generator->label_count);
+
+
     printf("MOVE LF@%s bool@true\n", instruction->id);
     printf("JUMP !!%d\n", generator->label_count + 1);
 
