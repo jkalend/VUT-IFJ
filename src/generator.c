@@ -253,9 +253,11 @@ void gen_chr(Instruction *instruction, Generator *generator) {
 
 	printf("LABEL !!%d\n", generator->label_count + 1);
 	printf("FLOAT2INT LF@%s LF@%s\n", instruction->id, instruction->params[0]->identifier);
+	printf("INT2CHAR LF@%s LF@%s\n", instruction->id, instruction->id);
+	printf("JUMP !!%d\n", generator->label_count + 2);
 
 	printf("LABEL !!%d\n", generator->label_count);
-	printf("INT2CHAR LF@%s LF@%s\n", instruction->id, instruction->id);
+	printf("INT2CHAR LF@%s LF@%s\n", instruction->id, instruction->params[0]->identifier);
 
 	printf("LABEL !!%d\n", generator->label_count + 2);
 	generator->label_count += 3;
