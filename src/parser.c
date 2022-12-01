@@ -463,7 +463,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
             // type of the outcome
             if (op_one->bucket->value_type == D_FLOAT || op_two->bucket->value_type == D_FLOAT) {
                 pair->value_type = D_FLOAT;
-            } else if (op_one->bucket->value_type == D_INT && op_two->bucket->value_type == D_INT) {
+            } else if (op_one->bucket->value_type == D_INT || op_two->bucket->value_type == D_INT) {
                 pair->value_type = D_INT;
             } else if (op_one->bucket->value_type == D_VOID && op_two->bucket->value_type == D_VOID) {
                 pair->value_type = D_INT;
@@ -527,7 +527,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
             // type of the outcome
             if (op_one->bucket->value_type == D_FLOAT || op_two->bucket->value_type == D_FLOAT) {
                 pair->value_type = D_FLOAT;
-            } else if (op_one->bucket->value_type == D_INT && op_two->bucket->value_type == D_INT) {
+            } else if (op_one->bucket->value_type == D_INT || op_two->bucket->value_type == D_INT) {
                 pair->value_type = D_INT;
             } else if (op_one->bucket->value_type == D_VOID && op_two->bucket->value_type == D_VOID) {
                 pair->value_type = D_INT;
@@ -563,7 +563,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
             // type of the outcome
             if (op_one->bucket->value_type == D_FLOAT || op_two->bucket->value_type == D_FLOAT) {
                 pair->value_type = D_FLOAT;
-            } else if (op_one->bucket->value_type == D_INT && op_two->bucket->value_type == D_INT) {
+            } else if (op_one->bucket->value_type == D_INT || op_two->bucket->value_type == D_INT) {
                 pair->value_type = D_INT;
             } else if (op_one->bucket->value_type == D_VOID && op_two->bucket->value_type == D_VOID) {
                 pair->value_type = D_INT;
@@ -733,7 +733,6 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
             parser.relation_operator = 0;
             return 1;
         default:
-            //if (fn) goto function;
             break;
     }
 
