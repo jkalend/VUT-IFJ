@@ -197,9 +197,11 @@ int apply_rule(TStack *stack, unsigned int val) {
 }
 
 void prec_index(const Token *token, unsigned int *rc, int symbol) {
-    if (symbol > -1 && symbol < 15) {
+    if (symbol > -1 && symbol < 15 && token == NULL) {
         *rc = symbol;
         return;
+    } else if (token == NULL) {
+        exit(BAD_INTERNAL);
     }
     switch (token->type) {
 
@@ -1546,8 +1548,8 @@ void htab_check(htab_pair_t * pair) {
 
 int main(void) {
     stream = stdin;
-    stream = fopen("test.php", "r");
-    if (stream == NULL) exit(BAD_INTERNAL);
+    //stream = fopen("test.php", "r");
+    //if (stream == NULL) exit(BAD_INTERNAL);
 
     Generator *gen = malloc(sizeof(Generator));
     generator_init(gen);

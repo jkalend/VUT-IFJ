@@ -135,12 +135,47 @@ jobs:
       - coverage:
           flags: << parameters.flags >>
 
+  ifj-22tester:
+    docker:
+      - image: cimg/base:stable
+    environment:
+      CODECOV_TOKEN: << pipeline.parameters.codecov_token >>
+    parameters:
+      flags:
+        type: string
+        default: "total"
+    steps:
+      - checkout
+      - prepare_env
+      - run:
+          name: "Compile"
+          command: "cmake -B build -S . && cmake --build build"
+      - run:
+          name: "Get tests"
+          command: "git clone https://github.com/galloj/IFJ22_Tester.git"
+      - run:
+          name: "Run tests"
+          command: "cd IFJ22_Tester && python3 test.py ../build/IFJ ../ic22int"
+          # command: "cd build && ctest -C Debug -T test -R IFJ"
+      - run:
+          name: "Get Coverage"
+          command: |
+            lcov --directory . --capture --output-file coverage.info
+            lcov --remove coverage.info '/usr/*' "${HOME}"'/.cache/*' --output-file coverage.info
+            lcov --list coverage.info
+      - coverage:
+          flags: << parameters.flags >>
+
+
 workflows:
   Static Analysis:
     jobs:
       - cppcheck
-  Tests:
+#   Tests:
+#     jobs:
+#       - stack_test_cmake
+#       - scanner_test_granular_cmake
+#       - all_scanner_tests_cmake
+  Overall:
     jobs:
-      - stack_test_cmake
-      - scanner_test_granular_cmake
-      - all_scanner_tests_cmake
+      - ifj-22tester
