@@ -72,8 +72,8 @@ size_t htab_size(const htab_t * t);             // počet záznamů v tabulce
 size_t htab_bucket_count(const htab_t * t);     // velikost pole
                                                 // (umožňuje rezervaci místa)
 
-htab_pair_t * htab_find(htab_t * t, htab_key_t key);  // hledání
-htab_pair_t * htab_insert(htab_t * t, Token *token, char *key);
+htab_pair_t * htab_find(const htab_t * restrict t, htab_key_t key);  // hledání
+htab_pair_t * htab_insert(htab_t * t, const Token *token, char *key);
 
 bool htab_erase(htab_t * t, htab_key_t key);    // ruší zadaný záznam
 

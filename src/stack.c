@@ -17,16 +17,17 @@ void stack_free(TStack *stack) {
 	free(stack);
 }
 
-void stack_dispose(TStack *stack) {
-	TElement temp;
+void stack_dispose(register TStack *stack) {
+	register TElement temp = {.data = NULL, .nextPtr = NULL};
 	while (!stack_isEmpty(stack)) {
 		temp.nextPtr = stack->topPtr->nextPtr;
 		free(stack->topPtr);
 		stack->topPtr = temp.nextPtr;
 	}
+    stack_free(stack);
 }
 
-void stack_push(TStack *stack, const TData *data) {
+void stack_push(register TStack *stack, const TData *data) {
 	TElement *newElement = malloc(sizeof(TElement));
 	if (newElement == NULL) {
 		stack_dispose(stack);
@@ -37,7 +38,7 @@ void stack_push(TStack *stack, const TData *data) {
 	stack->topPtr = newElement;
 }
 
-TData *stack_pop(TStack *stack) {
+TData *stack_pop(register TStack *stack) {
 	if (!stack_isEmpty(stack)) {
 		TData *data = stack->topPtr->data;
 		TElement *temp = stack->topPtr;
