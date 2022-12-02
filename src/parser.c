@@ -1336,12 +1336,12 @@ int parse(Generator * restrict gen, scanner_t * restrict scanner) {
                 stack_dispose(prec);
 
                 if (!result) {
-                    exit(BAD_TERM);
+                    exit(BAD_OTHER_SEMANTIC);
                 }
 
-                else if (parser.empty_expr && !parser.allow_expr_empty) {
-                    exit(BAD_UNDEFINED_VAR);
-                }
+//                else if (parser.empty_expr && !parser.allow_expr_empty) {
+//                    exit(BAD_TERM);
+//                }
                 parser.in_assign = NULL;
                 get_next_token(token, &keep_prev_token, &return_back, scanner);
 
