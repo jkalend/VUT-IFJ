@@ -602,7 +602,7 @@ void gen_gt(register Instruction * restrict instruction, register Generator * re
     printf("LABEL !!%d\n", generator->label_count++);
 }
 
-void gen_check(const register Instruction * restrict instruction, bool operand_not_param) {
+void gen_check(register const Instruction * restrict instruction, bool operand_not_param) {
     if (operand_not_param) {
         for (int i = 0; i < instruction->operands_count; i++) {
             printf("TYPE GF@%%check0 LF@%s\n", instruction->operands[i]->identifier);
@@ -618,7 +618,7 @@ void gen_check(const register Instruction * restrict instruction, bool operand_n
     }
 }
 
-void gen_start_fn(const register Instruction * restrict instruction, Generator * restrict generator) {
+void gen_start_fn(register const Instruction * restrict instruction, Generator * restrict generator) {
     TData * restrict data = malloc(sizeof(TData));
     data->value = generator->label_count++;
     data->type = generator->label_count++;
@@ -643,7 +643,7 @@ void gen_start_fn(const register Instruction * restrict instruction, Generator *
 
 }
 
-void gen_fn_defs(const register Instruction * restrict instruction, Generator * restrict generator, parser_t * restrict parser) {
+void gen_fn_defs(register const Instruction * restrict instruction, Generator * restrict generator, parser_t * restrict parser) {
     const TData *data = stack_pop(generator->label_stack);
     printf("JUMP !!%d\n", generator->label_count);
     printf("LABEL !!%d\n", data->value);
@@ -656,7 +656,7 @@ void gen_fn_defs(const register Instruction * restrict instruction, Generator * 
     stack_push(parser->garbage_bin, data);
 }
 
-void gen_end_fn_float(const register Instruction * restrict instruction) {
+void gen_end_fn_float(register const Instruction * restrict instruction) {
     printf("TYPE GF@%%check0 LF@%s\n", instruction->operands[0]->identifier);
     printf("JUMPIFEQ $!!EXIT_4 GF@%%check0 string@string\n");
     printf("JUMPIFEQ $!!EXIT_4 GF@%%check0 string@int\n");
@@ -669,7 +669,7 @@ void gen_end_fn_float(const register Instruction * restrict instruction) {
     printf("RETURN\n");
 }
 
-void gen_end_fn_string(const register Instruction * restrict instruction) {
+void gen_end_fn_string(register const Instruction * restrict instruction) {
     printf("TYPE GF@%%check0 LF@%s\n", instruction->operands[0]->identifier);
     printf("JUMPIFEQ $!!EXIT_4 GF@%%check0 string@int\n");
     printf("JUMPIFEQ $!!EXIT_4 GF@%%check0 string@float\n");
@@ -682,7 +682,7 @@ void gen_end_fn_string(const register Instruction * restrict instruction) {
     printf("RETURN\n");
 }
 
-void gen_end_fn_int(const register Instruction * restrict instruction) {
+void gen_end_fn_int(register const Instruction * restrict instruction) {
     printf("TYPE GF@%%check0 LF@%s\n", instruction->operands[0]->identifier);
     printf("JUMPIFEQ $!!EXIT_4 GF@%%check0 string@string\n");
     printf("JUMPIFEQ $!!EXIT_4 GF@%%check0 string@float\n");
@@ -695,7 +695,7 @@ void gen_end_fn_int(const register Instruction * restrict instruction) {
     printf("RETURN\n");
 }
 
-void gen_end_fn_void(const register Instruction * restrict instruction) {
+void gen_end_fn_void(register const Instruction * restrict instruction) {
     if (instruction->operands != NULL) {
         printf("TYPE GF@%%check0 LF@%s\n", instruction->operands[0]->identifier);
         printf("JUMPIFNEQ $!!EXIT_6 GF@%%check0 string@nil\n");
@@ -722,7 +722,7 @@ void gen_while_(const Instruction * restrict instruction, Generator * restrict g
     printf("LABEL !!%d\n", stack_top(generator->label_stack)->type);
 }
 
-void gen_while_defs(const register Instruction * restrict instruction, Generator * restrict generator, parser_t * restrict parser) {
+void gen_while_defs(register const Instruction * restrict instruction, Generator * restrict generator, parser_t * restrict parser) {
     const TData *data = stack_pop(generator->label_stack);
     printf("JUMP !!%d\n", generator->label_count);
     printf("LABEL !!%d\n", data->value);
@@ -790,7 +790,7 @@ void gen_if_start(const Instruction * restrict instruction, Generator * restrict
     stack_push(generator->label_stack, data);
 }
 
-void gen_if_(const register Instruction * restrict instruction, register Generator * restrict generator) {
+void gen_if_(register const Instruction * restrict instruction, register Generator * restrict generator) {
     printf("TYPE GF@%%check0 LF@%s\n", instruction->id);
     printf("JUMPIFEQ !!%d GF@%%check0 GF@%%string\n", generator->label_count);
     printf("JUMPIFEQ !!%d GF@%%check0 GF@%%int\n", generator->label_count + 1);
