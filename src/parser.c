@@ -61,27 +61,27 @@ void defvar_order(char *id, htab_pair_t *pair, Generator * restrict gen) {
     }
 }
 
-void get_next_token(Token *token, bool * restrict keep_token, bool * restrict return_back, scanner_t * restrict scanner) {
+void get_next_token(Token **token, bool * restrict keep_token, bool * restrict return_back, scanner_t * restrict scanner) {
     if (*keep_token && *return_back) {
-        Token *tmp = token;
-        token = parser.tmp_token;
+        Token *tmp = *token;
+        (*token) = parser.tmp_token;
         parser.tmp_token = tmp;
     }
     else if (!(*keep_token) && *return_back) {
-        Token *tmp = token;
-        token = parser.tmp_token;
+        Token *tmp = *token;
+        (*token) = parser.tmp_token;
         parser.tmp_token = tmp;
         *return_back = false;
     }
     else if (!(*keep_token)){
         /* copy previous token to temporary token */
-        parser.tmp_token->line = token->line;
-        parser.tmp_token->value = token->value;
-        parser.tmp_token->type = token->type;
+        parser.tmp_token->line = (*token)->line;
+        parser.tmp_token->value = (*token)->value;
+        parser.tmp_token->type = (*token)->type;
 
         /* get new token from scanner */
-        get_token(token, scanner);
-        if (token->type == T_ERROR) exit(BAD_LEXEM);
+        get_token((*token), scanner);
+        if ((*token)->type == T_ERROR) exit(BAD_LEXEM);
     }
     *keep_token = false;
 }
@@ -740,7 +740,8 @@ int reduce(register TStack * restrict stack, register TStack * restrict shelf, T
 
 int precedence(register TStack *stack, register Token * token, bool *keep_token, bool *return_back, Generator * restrict gen, scanner_t * restrict scanner) {
     stack_push(stack, stack_data(P_END, P_END));
-
+    
+    Token *lookahead = token;
     bool end = false;
     bool next_token = true;
     bool ID_last_token = false;
@@ -754,25 +755,25 @@ int precedence(register TStack *stack, register Token * token, bool *keep_token,
     while (true) {
 
         if (next_token) {
-            get_next_token(token, keep_token, return_back, scanner);
-            if (token->type == T_ERROR) break;
+            get_next_token(&lookahead, keep_token, return_back, scanner);
+            if (lookahead->type == T_ERROR) break;
 
             next_token = true;
 
-            if (ID_last_token == true && token->type != T_LEFT_BRACKET) {
+            if (ID_last_token == true && lookahead->type != T_LEFT_BRACKET) {
                 exit(BAD_SYNTAX);
             } else {
                 ID_last_token = false;
             }
         }
 
-        if (parser.only_defvar && token->type != T_SEMICOLON) {
+        if (parser.only_defvar && lookahead->type != T_SEMICOLON) {
             parser.only_defvar = false;
         }
 
-        if (token->type == T_LEFT_BRACE || token->type == T_SEMICOLON) {
+        if (lookahead->type == T_LEFT_BRACE || lookahead->type == T_SEMICOLON) {
             end = true;
-            token = token;
+            lookahead = token;
             *keep_token = true;
         }
 
@@ -783,7 +784,7 @@ int precedence(register TStack *stack, register Token * token, bool *keep_token,
         // gets indexes for the table
         prec_index(NULL, &row,  (int)stack_top(stack)->value);
         if (!end) {
-            prec_index(token, &column, -1);
+            prec_index(lookahead, &column, -1);
         } else {
             prec_index(NULL, &column, P_END);
         }
@@ -843,12 +844,12 @@ int precedence(register TStack *stack, register Token * token, bool *keep_token,
             htab_pair_t **operands = NULL;
             register htab_pair_t *pair = NULL;
 
-            if (token->type == T_IDENTIFIER) {
+            if (lookahead->type == T_IDENTIFIER) {
                 /* function ID */
-                char *id = malloc(strlen(token->value.identifier) + 3);
+                char *id = malloc(strlen(lookahead->value.identifier) + 3);
                 if (id == NULL) exit(BAD_INTERNAL);
                 strcpy(id, "69");
-                strcat(id, token->value.identifier);
+                strcat(id, lookahead->value.identifier);
 
                 pair = htab_find(parser.glob_tab, id);
                 TData *data = stack_data(P_FN, P_FN);
@@ -866,13 +867,13 @@ int precedence(register TStack *stack, register Token * token, bool *keep_token,
                 data->bucket = pair;
                 stack_push(stack, data);
                 ID_last_token = true;
-            } else if (token->type == T_FLOAT) {
+            } else if (lookahead->type == T_FLOAT) {
                 /* float constant */
                 pair = htab_find(parser.temporary_tab, tmp);
                 if (pair == NULL) {
                     parser.tmp_counter++;
                     pair = htab_insert(parser.temporary_tab, NULL, tmp);
-                    pair->value.number_float = token->value.number_float;
+                    pair->value.number_float = lookahead->value.number_float;
                     pair->value_type = D_FLOAT;
                     pair->type = H_CONSTANT;
 
@@ -889,13 +890,13 @@ int precedence(register TStack *stack, register Token * token, bool *keep_token,
 
                 stack_push(temps, data);
                 stack_push(stack, stack_data(P_I, P_I));
-            } else if (token->type == T_INT) {
+            } else if (lookahead->type == T_INT) {
                 /* int constant */
                 pair = htab_find(parser.temporary_tab, tmp);
                 if (pair == NULL) {
                     parser.tmp_counter++;
                     pair = htab_insert(parser.temporary_tab, NULL, tmp);
-                    pair->value.number_int = token->value.number_int;
+                    pair->value.number_int = lookahead->value.number_int;
                     pair->value_type = D_INT;
                     pair->type = H_CONSTANT;
 
@@ -911,13 +912,13 @@ int precedence(register TStack *stack, register Token * token, bool *keep_token,
 
                 stack_push(temps, data);
                 stack_push(stack, stack_data(P_I, P_I));
-            } else if (token->type == T_STRING) {
+            } else if (lookahead->type == T_STRING) {
                 /* string constant */
                 pair = htab_find(parser.temporary_tab, tmp);
                 if (pair == NULL) {
                     parser.tmp_counter++;
                     pair = htab_insert(parser.temporary_tab, NULL, tmp);
-                    pair->value.string = token->value.string;
+                    pair->value.string = lookahead->value.string;
                     pair->value_type = D_STRING;
                     pair->type = H_CONSTANT;
 
@@ -933,14 +934,14 @@ int precedence(register TStack *stack, register Token * token, bool *keep_token,
 
                 stack_push(temps, data);
                 stack_push(stack, stack_data(P_I, P_I));
-            } else if (token->type == T_VAR) {
+            } else if (lookahead->type == T_VAR) {
                 /* variable */
-                pair = htab_find(parser.temporary_tab, token->value.identifier);
+                pair = htab_find(parser.temporary_tab, lookahead->value.identifier);
                 if (pair == NULL) {
                     parser.only_defvar = true;
                     parser.tmp_counter++;
-                    pair = htab_insert(parser.temporary_tab, NULL, token->value.identifier);
-                    pair->value.string = token->value.identifier;
+                    pair = htab_insert(parser.temporary_tab, NULL, lookahead->value.identifier);
+                    pair->value.string = lookahead->value.identifier;
                     pair->value_type = D_NONE;
                     pair->type = H_VAR;
 
@@ -951,21 +952,21 @@ int precedence(register TStack *stack, register Token * token, bool *keep_token,
 
                 stack_push(temps, data);
                 stack_push(stack, stack_data(P_I, P_I));
-            } else if (token->type >= T_LESS && token->type <= T_GREATER_EQUAL) {
+            } else if (lookahead->type >= T_LESS && lookahead->type <= T_GREATER_EQUAL) {
                 /* relational operator */
                 stack_push(stack, stack_data(P_R, P_R));
                 if (parser.relation_operator == 0) {
-                    parser.relation_operator = (char)token->type;
+                    parser.relation_operator = (char)lookahead->type;
                 } else {
                     exit(BAD_TYPE_COMPATIBILTY);
                 }
-            }  else if (token->value.keyword == KW_NULL && token->type == T_KEYWORD) {
+            }  else if (lookahead->value.keyword == KW_NULL && lookahead->type == T_KEYWORD) {
                 /* null constant */
                 pair = htab_find(parser.temporary_tab, tmp);
                 if (pair == NULL) {
                     parser.tmp_counter++;
                     pair = htab_insert(parser.temporary_tab, NULL, tmp);
-                    pair->value.keyword = token->value.keyword;
+                    pair->value.keyword = lookahead->value.keyword;
                     pair->value_type = D_VOID;
                     pair->type = H_CONSTANT;
 
@@ -1202,7 +1203,8 @@ int parse(Generator * restrict gen, scanner_t * restrict scanner) {
                     }
                 }
 
-                get_next_token(token, &keep_prev_token, &return_back, scanner);
+                Token *next_token = token;
+                get_next_token(&next_token, &keep_prev_token, &return_back, scanner);
 
                 if (token->type == T_ASSIGN && parser.tmp_token->type == T_VAR) {
                     parser.in_assign = htab_find(parser.temporary_tab, parser.tmp_token->value.identifier);
@@ -1271,7 +1273,8 @@ int parse(Generator * restrict gen, scanner_t * restrict scanner) {
                         parser.allow_expr_empty = true;
                 }
 
-                get_next_token(token, &keep_prev_token, &return_back, scanner);
+                Token *next_token = token;
+                get_next_token(&next_token, &keep_prev_token, &return_back, scanner);
 
                 /* function definition - create new item in tab */
                 if (parser.tmp_token->value.keyword == KW_FUNCTION && token->type == T_IDENTIFIER) {
@@ -1339,9 +1342,9 @@ int parse(Generator * restrict gen, scanner_t * restrict scanner) {
                     exit(BAD_OTHER_SEMANTIC);
                 }
 
-//                else if (parser.empty_expr && !parser.allow_expr_empty) {
-//                    exit(BAD_TERM);
-//                }
+                else if (parser.empty_expr && !parser.allow_expr_empty) {
+                    exit(BAD_TERM);
+                }
                 parser.in_assign = NULL;
                 get_next_token(token, &keep_prev_token, &return_back, scanner);
 
@@ -1560,7 +1563,7 @@ void htab_check(const htab_pair_t * restrict pair) {
 
 int main(void) {
     stream = stdin;
-    //stream = fopen("test.php", "r");
+    stream = fopen("test.php", "r");
     //if (stream == NULL) exit(BAD_INTERNAL);
 
     register Generator * restrict gen = malloc(sizeof(Generator));
