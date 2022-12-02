@@ -67,12 +67,12 @@ typedef struct parser_t {
     int while_count;
     int tmp_counter;
     int bracket_counter;
-    char ** restrict builtins;
+    char **builtins;
     Token *tmp_token;
-    htab_t * restrict glob_tab;
+    htab_t *glob_tab;
     htab_t *temporary_tab;
     TStack *local_tabs;
-    TStack * restrict garbage_bin;
+    TStack *garbage_bin;
     htab_pair_t *in_func;
     htab_pair_t *in_assign;
     htab_pair_t *val_returned;

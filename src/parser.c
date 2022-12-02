@@ -299,7 +299,7 @@ int reduce(register TStack * restrict stack, register TStack * restrict shelf, T
     TData *op_two;
     htab_pair_t **operands = NULL;
 
-    long long number_size = (long long) ((ceil(log10(parser.tmp_counter)) + 1) * sizeof(char));
+    //long long number_size = (long long) ((ceil(log10(parser.tmp_counter)) + 1) * sizeof(char));
     size_t alloc_num = snprintf(NULL, 0, "%d", parser.tmp_counter) + 1;
     char *number = malloc(alloc_num);
     if (number == NULL) exit(BAD_INTERNAL);
@@ -1336,11 +1336,11 @@ int parse(Generator * restrict gen, scanner_t * restrict scanner) {
                 stack_dispose(prec);
 
                 if (!result) {
-                    exit(BAD_UNDEFINED_VAR);
+                    exit(BAD_TERM);
                 }
 
                 else if (parser.empty_expr && !parser.allow_expr_empty) {
-                    exit(BAD_TERM);
+                    exit(BAD_UNDEFINED_VAR);
                 }
                 parser.in_assign = NULL;
                 get_next_token(token, &keep_prev_token, &return_back, scanner);
@@ -1560,7 +1560,7 @@ void htab_check(const htab_pair_t * restrict pair) {
 
 int main(void) {
     stream = stdin;
-    //stream = fopen("test.php", "r");
+    stream = fopen("test.php", "r");
     //if (stream == NULL) exit(BAD_INTERNAL);
 
     register Generator * restrict gen = malloc(sizeof(Generator));
@@ -1605,6 +1605,8 @@ int main(void) {
     htab_for_each(parser.glob_tab, htab_check);
 
     generate(gen, &parser);
+    stack_dispose(parser.garbage_bin);
+    stack_free(parser.garbage_bin);
     // free parser struct
     //free(parser.builtins);
 
