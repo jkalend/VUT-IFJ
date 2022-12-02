@@ -33,7 +33,7 @@ void stack_push(register TStack *stack, const TData *data) {
 		stack_dispose(stack);
 		exit(1);
 	}
-	newElement->data = data;
+	newElement->data = (TData *)data;
 	newElement->nextPtr = stack->topPtr;
 	stack->topPtr = newElement;
 }
