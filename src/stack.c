@@ -24,7 +24,7 @@ void stack_dispose(register TStack *stack) {
 		free(stack->topPtr);
 		stack->topPtr = temp.nextPtr;
 	}
-    stack_free(stack);
+    //stack_free(stack);
 }
 
 void stack_push(register TStack *stack, const TData *data) {
