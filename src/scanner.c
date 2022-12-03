@@ -645,13 +645,14 @@ int get_token(Token * restrict token, scanner_t * restrict scanner) {
  */
 char* convert_string_for_ifjcode(register char *str, int size) {
     register int i = 0;
-    char hex[2];
-    char oct[3];
+    char hex[3];
+    char oct[4];
     while(str[i] != '\0'){
 		if(str[i] == '\\' && str[i+1] == 'x'){
 			//if the escape is hexadecimal
 			hex[0] = str[i+2];
 			hex[1] = str[i+3];
+			hex[2] = '\0';
 			if(convert_esc_to_int(hex, 2) == -1){
 				int j = size - 1;
 				while (j > i + 1) { //if the format doesn't match any allowed sequence,
@@ -689,6 +690,7 @@ char* convert_string_for_ifjcode(register char *str, int size) {
 			oct[0] = str[i+1];
 			oct[1] = str[i+2];
 			oct[2] = str[i+3];
+			oct[3] = '\0';
 			if(convert_esc_to_int(oct, 3) == -1){
 				int j = size - 1;
 				while (j > i + 1) { //if the format doesn't match any allowed sequence,
@@ -723,7 +725,7 @@ char* convert_string_for_ifjcode(register char *str, int size) {
 			}
 		}else if(str[i] ==' '){ //space and # have to be written as esc. sequence for the IFJcode22
 			int j = size - 1;
-			while (j > i + 1) {
+			while (j > i + 2) {
 				str[j] = str[j - 3];
 				j--;
 			}
@@ -733,7 +735,7 @@ char* convert_string_for_ifjcode(register char *str, int size) {
 			str[i+3] = '2';
 		}else if(str[i] =='#'){
 			int j = size - 1;
-			while (j > i + 1) {
+			while (j > i + 2) {
 				str[j] = str[j - 3];
 				j--;
 			}
