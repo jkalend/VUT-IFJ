@@ -47,7 +47,7 @@ typedef struct htab_pair {
     char **param_names;
     DataType return_type;
     bool strict_return;
-} htab_pair_t;                  // typedef podle zadání
+} htab_pair_t;
 
 // Tabulka:
 typedef struct htab_item {

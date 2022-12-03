@@ -1,3 +1,4 @@
+/// @file
 #include "parser.h"
 #include "scanner.h"
 #include "stack.h"
@@ -35,8 +36,11 @@ const unsigned int LL_TABLE[8][33] = {{1},
                                       {[11] = 19, [14] = 18},
                                       {0, 20, 20, 20, 20, 0, 20, 20, 0, 0, 0, 0, 0, 0, 21, [15] =  20, 20, 20, 20} };
 
-
-TData *stack_data(int value, int type) { //unsigned?
+/// \brief Allocates memory for data for stack and initializes it
+/// \param value unsigned int value
+/// \param type unsigned int type
+/// \return Pointer to allocated memory
+TData *stack_data(int value, int type) {
     TData *ptr = malloc(sizeof(TData));
     if (ptr != NULL) {
         ptr->value = value;
@@ -47,6 +51,10 @@ TData *stack_data(int value, int type) { //unsigned?
     return ptr;
 }
 
+/// \brief If outside of main body, definition of a variable is stored for later use
+/// \param id identifier
+/// \param pair pointer to a hashtable pair of the variable
+/// \param gen Generator structure
 void defvar_order(char *id, htab_pair_t *pair, Generator * restrict gen) {
     if (parser.in_while == NULL && parser.in_func == NULL) {
         generator_add_instruction(gen, gen_instruction_constructor(defvar, id, NULL, NULL, 0, NULL, 0));
@@ -61,6 +69,11 @@ void defvar_order(char *id, htab_pair_t *pair, Generator * restrict gen) {
     }
 }
 
+///
+/// \param token Token structure
+/// \param keep_token indicates whether the token should be kept or not
+/// \param return_back indicates whether the token should be returned back to the input
+/// \param scanner Scanner structure
 void get_next_token(Token **token, bool * restrict keep_token, bool * restrict return_back, scanner_t * restrict scanner) {
     if (*keep_token && *return_back) {
         Token *tmp = *token;
@@ -80,13 +93,28 @@ void get_next_token(Token **token, bool * restrict keep_token, bool * restrict r
         parser.tmp_token->type = (*token)->type;
 
         /* get new token from scanner */
+        (*token)->value.identifier = NULL;
         get_token((*token), scanner);
         if ((*token)->type == T_ERROR) exit(BAD_LEXEM);
     }
     *keep_token = false;
 }
 
-int apply_rule(register TStack * restrict stack, register unsigned int val) {
+//void free_token(Token *token) {
+//    if (token != NULL) {
+//        if (token->type == T_IDENTIFIER || token->type == T_STRING) {
+//            free(token->value);
+//        }
+//        free(token->value);
+//        free(token);
+//    }
+//}
+
+/// \brief Selects the next LL rule
+/// \param stack Rule stack
+/// \param val Unique index of the rule
+/// \return 1 if the rule is selected, exits with BAD_SYNTAX otherwise
+int apply_rule(register TStack * restrict stack, unsigned int val) {
     switch (val) {
         case 0: exit(BAD_SYNTAX);
         case 1:
@@ -196,6 +224,10 @@ int apply_rule(register TStack * restrict stack, register unsigned int val) {
     return 1;
 }
 
+/// \brief Gets row and column indexes for the precedence table
+/// \param token Last token read
+/// \param rc Row or column index
+/// \param symbol Specified symbol from the table
 void prec_index(const Token * restrict token, unsigned int * restrict rc, int symbol) {
     if (symbol > -1 && symbol < 15 && token == NULL) {
         *rc = symbol;
@@ -205,7 +237,7 @@ void prec_index(const Token * restrict token, unsigned int * restrict rc, int sy
     }
     switch (token->type) {
 
-        case T_IDENTIFIER: //func
+        case T_IDENTIFIER:
             *rc = 12;
             break;
         case T_STRING: case T_INT: case T_FLOAT: case T_VAR:
@@ -262,6 +294,13 @@ void prec_index(const Token * restrict token, unsigned int * restrict rc, int sy
     }
 }
 
+/// \brief Expression parser function for reduction rules
+/// \param stack Precedence stack
+/// \param shelf Supportive stack
+/// \param temps Stack storing results of expressions
+/// \param gen Generator structure
+/// \param end indicates whether the end of the expression has been reached
+/// \return -1 on empty expression, 0 on error, 1 on success
 int reduce(register TStack * restrict stack, register TStack * restrict shelf, TStack * restrict temps, register Generator * restrict gen, bool end) {
 
     if (stack_top(stack)->value == P_E) {
@@ -310,6 +349,8 @@ int reduce(register TStack * restrict stack, register TStack * restrict shelf, T
     strncpy(tmp, TEMP_VAR_PREFIX, TEMP_LENGTH);
     strncat(tmp, number, sizeof(char) * (TEMP_LENGTH + alloc_num));
 
+    free(number);
+
     TData *data = NULL;
     htab_pair_t *pair = NULL;
     if (res > 34 && res != 59) {
@@ -318,6 +359,8 @@ int reduce(register TStack * restrict stack, register TStack * restrict shelf, T
         data = stack_data(P_E, P_E);
         data->bucket = pair;
         data->bucket->type = H_VAR;
+    } else {
+        free(tmp);
     }
 
     if (fn) {
@@ -426,6 +469,7 @@ int reduce(register TStack * restrict stack, register TStack * restrict shelf, T
         data->bucket->value_type = last_fn->return_type;
         data->bucket->return_type = last_fn->return_type;
         stack_push(temps, data);
+        stack_free(reversal);
         return 1;
     }
 
@@ -616,7 +660,7 @@ int reduce(register TStack * restrict stack, register TStack * restrict shelf, T
                 if (garbage == NULL) {
                     break;
                 }
-                free(garbage);
+                stack_push(parser.garbage_bin, garbage);
                 cnt++;
             }
             if (cnt != 5) break;
@@ -738,7 +782,16 @@ int reduce(register TStack * restrict stack, register TStack * restrict shelf, T
     return 0;
 }
 
+/// @brief Expression parser function for shift rules
+/// \param stack Precedence stack
+/// \param token Actual token
+/// \param keep_token Indicator whether to keep the stored token
+/// \param return_back Indicator whether to return the stored token back to the input
+/// \param gen Generator structure
+/// \param scanner Scanner structure
+/// \return 1 on success, 0 on failure
 int precedence(register TStack *stack, register Token * token, bool *keep_token, bool *return_back, Generator * restrict gen, scanner_t * restrict scanner) {
+    /* pushes end terminal */
     stack_push(stack, stack_data(P_END, P_END));
     
     Token *lookahead = token;
@@ -841,6 +894,8 @@ int precedence(register TStack *stack, register Token * token, bool *keep_token,
             strcpy(tmp, TEMP_VAR_PREFIX);
             strcat(tmp, number);
 
+            free(number);
+
             htab_pair_t **operands = NULL;
             register htab_pair_t *pair = NULL;
 
@@ -850,6 +905,8 @@ int precedence(register TStack *stack, register Token * token, bool *keep_token,
                 if (id == NULL) exit(BAD_INTERNAL);
                 strcpy(id, "69");
                 strcat(id, lookahead->value.identifier);
+
+                free(lookahead->value.identifier);
 
                 pair = htab_find(parser.glob_tab, id);
                 TData *data = stack_data(P_FN, P_FN);
@@ -863,7 +920,10 @@ int precedence(register TStack *stack, register Token * token, bool *keep_token,
                     pair->param_names = NULL;
                     pair->params_strict = NULL;
                     pair->strict_return = true;
+                } else {
+                    free(id);
                 }
+                free(tmp);
                 data->bucket = pair;
                 stack_push(stack, data);
                 ID_last_token = true;
@@ -883,6 +943,8 @@ int precedence(register TStack *stack, register Token * token, bool *keep_token,
                     operands[0] = pair;
                     generator_add_instruction(gen, gen_instruction_constructor(assign, tmp, operands, NULL, 1, NULL, 0));
 
+                } else {
+                    free(tmp);
                 }
 
                 TData *data = stack_data(P_I, P_I);
@@ -905,6 +967,8 @@ int precedence(register TStack *stack, register Token * token, bool *keep_token,
                     operands = malloc(sizeof(htab_pair_t*));
                     operands[0] = pair;
                     generator_add_instruction(gen, gen_instruction_constructor(assign, tmp, operands, NULL, 1, NULL, 0));
+                } else {
+                    free(tmp);
                 }
 
                 TData *data = stack_data(P_I, P_I);
@@ -927,6 +991,8 @@ int precedence(register TStack *stack, register Token * token, bool *keep_token,
                     operands = malloc(sizeof(htab_pair_t*));
                     operands[0] = pair;
                     generator_add_instruction(gen, gen_instruction_constructor(assign, tmp, operands, NULL, 1, NULL, 0));
+                } else {
+                    free(tmp);
                 }
 
                 TData *data = stack_data(P_I, P_I);
@@ -946,9 +1012,13 @@ int precedence(register TStack *stack, register Token * token, bool *keep_token,
                     pair->type = H_VAR;
 
                     defvar_order(tmp, pair, gen);
+                } else {
+                    free(lookahead->value.identifier);
                 }
                 TData *data = stack_data(P_I, P_I);
                 data->bucket = pair;
+
+                free(tmp);
 
                 stack_push(temps, data);
                 stack_push(stack, stack_data(P_I, P_I));
@@ -960,6 +1030,7 @@ int precedence(register TStack *stack, register Token * token, bool *keep_token,
                 } else {
                     exit(BAD_TYPE_COMPATIBILTY);
                 }
+                free(tmp);
             }  else if (lookahead->value.keyword == KW_NULL && lookahead->type == T_KEYWORD) {
                 /* null constant */
                 pair = htab_find(parser.temporary_tab, tmp);
@@ -975,6 +1046,8 @@ int precedence(register TStack *stack, register Token * token, bool *keep_token,
                     operands = malloc(sizeof(htab_pair_t*));
                     operands[0] = pair;
                     generator_add_instruction(gen, gen_instruction_constructor(assign, tmp, operands, NULL, 1, NULL, 0));
+                } else {
+                    free(tmp);
                 }
 
                 TData *data = stack_data(P_I, P_I);
@@ -983,12 +1056,15 @@ int precedence(register TStack *stack, register Token * token, bool *keep_token,
                 stack_push(temps, data);
                 stack_push(stack, stack_data(P_I, P_I));
             } else {
+                free(tmp);
                 stack_push(stack, stack_data((int) column, (int) column));
             }
         } else {
             /* end of expression */
             while (reduce(stack, shelf, temps, gen, end) == 1);
             if (reduce(stack, shelf, temps, gen, end) != -1) {
+                stack_free(temps);
+                stack_free(shelf);
                 return 0;
             } else {
                 TData *top = stack_top(temps);
@@ -1022,6 +1098,8 @@ int precedence(register TStack *stack, register Token * token, bool *keep_token,
                 if (parser.only_defvar == true) {
                     exit(BAD_UNDEFINED_VAR);
                 }
+                stack_free(temps);
+                stack_free(shelf);
 
                 return 1;
             }
@@ -1031,6 +1109,10 @@ int precedence(register TStack *stack, register Token * token, bool *keep_token,
     exit(BAD_LEXEM);
 }
 
+/// Predictive parser
+/// \param gen Generator structure
+/// \param scanner Scanner structure
+/// \return 0 on success, exits otherwise
 int parse(Generator * restrict gen, scanner_t * restrict scanner) {
     register TStack * restrict stack = NULL;
     stack = stack_init(stack);
@@ -1044,8 +1126,10 @@ int parse(Generator * restrict gen, scanner_t * restrict scanner) {
 
     register Token *token = malloc(sizeof(Token));
     if (token == NULL)  exit(BAD_INTERNAL);
+    token->value.identifier = NULL;
     parser.tmp_token = malloc(sizeof(Token));
     if (parser.tmp_token == NULL) exit(BAD_INTERNAL);
+    parser.tmp_token->value.identifier = NULL;
 
     bool keep_prev_token = false;
     bool return_back = false;
@@ -1059,7 +1143,8 @@ int parse(Generator * restrict gen, scanner_t * restrict scanner) {
             break;
         }
 
-        TData *top = stack_pop(stack);
+        const TData *top = stack_pop(stack);
+        stack_push(parser.garbage_bin, top);
         if (top->type == T_TERM) {
             if (top->value == token->type) {
                 if (token->type == T_LEFT_BRACE) {
@@ -1068,9 +1153,8 @@ int parse(Generator * restrict gen, scanner_t * restrict scanner) {
                 else if (token->type == T_RIGHT_BRACE) {
                     parser.bracket_counter--;
                     if (!stack_isEmpty(brackets)) {
-                        TData *data = stack_top(brackets);
+                        const TData *data = stack_top(brackets);
                         if ((int)data->value == parser.bracket_counter) {
-                            TData *garbage = stack_pop(brackets);
 
                             if (data->type == KW_IF) {
                                 generator_add_instruction(gen, gen_instruction_constructor(else_end, NULL, NULL, NULL, 0, NULL, 0));
@@ -1089,7 +1173,7 @@ int parse(Generator * restrict gen, scanner_t * restrict scanner) {
                                     parser.in_while = NULL;
                                 }
                             }
-                            free(garbage);
+                            stack_push(parser.garbage_bin, stack_pop(brackets));
                         }
                     }
                     if (parser.bracket_counter == 0 && parser.temporary_tab != parser.glob_tab) {
@@ -1099,7 +1183,7 @@ int parse(Generator * restrict gen, scanner_t * restrict scanner) {
                             exit(BAD_SYNTAX);
                         }
                         /* return from a function */
-                        stack_pop(parser.local_tabs);
+                        stack_push(parser.garbage_bin, stack_pop(parser.local_tabs));
                         if (stack_isEmpty(parser.local_tabs)) parser.temporary_tab = parser.glob_tab;
                         else parser.temporary_tab = stack_top(parser.local_tabs)->htab;
 
@@ -1215,6 +1299,8 @@ int parse(Generator * restrict gen, scanner_t * restrict scanner) {
 
                         defvar_order(parser.tmp_token->value.identifier, parser.in_assign, gen);
                         parser.only_defvar = true;
+                    } else {
+                        free(parser.tmp_token->value.identifier);
                     }
                 }
             }
@@ -1283,6 +1369,8 @@ int parse(Generator * restrict gen, scanner_t * restrict scanner) {
                     char *id = malloc(strlen(token->value.identifier) + 5);
                     strcpy(id, "69");
                     strcat(id, token->value.identifier);
+
+                    free(token->value.identifier);
 
                     /* check if the function is not already defined */
                     parser.in_func = htab_find(parser.temporary_tab, id);
@@ -1412,12 +1500,15 @@ int parse(Generator * restrict gen, scanner_t * restrict scanner) {
     }
     printf("\n");
     generator_add_instruction(gen, gen_instruction_constructor(end, NULL, NULL, NULL, 0, NULL, 0));
-    stack_dispose(stack);
-    //stack_dispose(parser.local_tabs);
-    //htab_free(parser.glob_tab);
+    stack_free(stack);
+    stack_free(prec);
+    stack_free(brackets);
+    free(parser.tmp_token);
+    free(token);
     return 0;
 }
 
+/// \brief Function inserting inbuilt functions to global table
 void insert_builtins(void) {
     char *identifier = malloc(sizeof(char)*10);
     if (identifier == NULL) exit(BAD_INTERNAL);
@@ -1554,16 +1645,20 @@ void insert_builtins(void) {
 
 }
 
+/// @brief Function for checking undefined functions and variables
+/// \param pair Hash table pair
 void htab_check(const htab_pair_t * restrict pair) {
-    if ((pair->type == H_FUNC_ID && pair->return_type == D_NONE) || 
-        (pair->type == H_VAR && pair->value_type == D_NONE)) {
+    if (pair->type == H_FUNC_ID && pair->return_type == D_NONE) {
+        exit(BAD_DEFINITION);
+    }
+    if (pair->type == H_VAR && pair->value_type == D_NONE) {
         exit(BAD_UNDEFINED_VAR);
     }
 }
 
 int main(void) {
     stream = stdin;
-    //stream = fopen("test.php", "r");
+    stream = fopen("test.php", "r");
     //if (stream == NULL) exit(BAD_INTERNAL);
 
     register Generator * restrict gen = malloc(sizeof(Generator));
@@ -1600,18 +1695,15 @@ int main(void) {
 
     insert_builtins();
 
-    int result = parse(gen, &scanner);
-    if (result) {
-        return result;
-    }   
+    parse(gen, &scanner);
 
-    htab_for_each(parser.glob_tab, htab_check);
+    htab_for_each(parser.glob_tab, (void (*)(htab_pair_t *)) htab_check);
 
     generate(gen, &parser);
-    stack_dispose(parser.garbage_bin);
     stack_free(parser.garbage_bin);
-    // free parser struct
-    //free(parser.builtins);
+    stack_free(parser.local_tabs);
+    htab_free(parser.glob_tab);
+    free(parser.builtins);
 
     return 0;
 }

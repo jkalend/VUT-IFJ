@@ -78,7 +78,7 @@ typedef struct Generator {
 
 void generator_init(Generator *);
 
-int generate(Generator *, struct parser_t *);
+void generate(Generator *, struct parser_t *);
 
 void generator_add_instruction(Generator *, Instruction *);
 

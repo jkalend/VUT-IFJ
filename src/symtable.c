@@ -1,7 +1,6 @@
 #include "symtable.h"
 
-size_t htab_hash_function(htab_key_t str) 
-{
+size_t htab_hash_function(htab_key_t str) {
     unsigned int h = 0;     // musí mít 32 bitů
     const unsigned char *p;
 
@@ -12,13 +11,11 @@ size_t htab_hash_function(htab_key_t str)
 }
 
 
-size_t htab_bucket_count(const htab_t * t)
-{
-    return t->arr_size;
-}
+//size_t htab_bucket_count(const htab_t * t) {
+//    return t->arr_size;
+//}
 
-void htab_clear(htab_t * restrict t)
-{
+void htab_clear(htab_t * restrict t) {
     // iterate over all table elements and remove them
     for (size_t i = 0; i < t->arr_size; i++)
     {
@@ -26,16 +23,28 @@ void htab_clear(htab_t * restrict t)
         while (head != NULL)
         {
             t->arr_ptr[i] = head->next;
-            free((void *)head->item.identifier);
-            free(head);
+            head->item.identifier[0] = '\0';
+            if (head->item.type == H_CONSTANT && head->item.value_type == D_STRING) {
+                free(head->item.identifier);
+                free(head->item.value.string);
+                free(head->item.params);
+                free(head->item.params_strict);
+                free(head->item.param_names);
+                free(head);
+            } else {
+                free(head->item.identifier);
+                free(head->item.params);
+                free(head->item.params_strict);
+                free(head->item.param_names);
+                free(head);
+            }
             head = t->arr_ptr[i];
         }
     }
     t->size = 0;
 }
 
-bool htab_erase(htab_t * restrict t, htab_key_t identifier)
-{
+bool htab_erase(htab_t * restrict t, htab_key_t identifier) {
     size_t hash = htab_hash_function(identifier) % t->arr_size;
 
     htab_item_t *head = t->arr_ptr[hash];
@@ -72,8 +81,7 @@ bool htab_erase(htab_t * restrict t, htab_key_t identifier)
     return false;
 }
 
-htab_pair_t * htab_find(const htab_t * restrict t, htab_key_t identifier)
-{
+htab_pair_t * htab_find(const htab_t * restrict t, htab_key_t identifier) {
     size_t hash = htab_hash_function(identifier) % t->arr_size;
 
     // iterate over all table elements
@@ -91,8 +99,7 @@ htab_pair_t * htab_find(const htab_t * restrict t, htab_key_t identifier)
     return NULL;
 }
 
-void htab_for_each(const htab_t * t, void (*f)(htab_pair_t *data))
-{
+void htab_for_each(const htab_t * t, void (*f)(htab_pair_t *data)) {
     // iterate over all table items
     for (size_t i = 0; i < t->arr_size; i++)
     {
@@ -107,16 +114,14 @@ void htab_for_each(const htab_t * t, void (*f)(htab_pair_t *data))
 }
 
 
-void htab_free(htab_t * t)
-{
+void htab_free(htab_t * restrict t) {
     // remove all items and free all dynamic memory
     htab_clear(t);
     free(t->arr_ptr);
     free(t);
 }
 
-htab_t *htab_init(size_t n)
-{
+htab_t *htab_init(size_t n) {
     // dynamically allocate the hash table
     htab_t *tab = malloc(sizeof(htab_t));
     if (tab == NULL)
@@ -143,8 +148,7 @@ htab_t *htab_init(size_t n)
 }
 
 
-htab_pair_t * htab_insert(htab_t * restrict t, const Token * restrict token, char* key)
-{
+htab_pair_t * htab_insert(htab_t * restrict t, const Token * restrict token, char* key) {
     // check if the identifier exists in the table
     if (token != NULL && (token->type == T_VAR || token->type == T_IDENTIFIER)) {
         htab_pair_t *tmp = htab_find(t, key);
@@ -159,14 +163,12 @@ htab_pair_t * htab_insert(htab_t * restrict t, const Token * restrict token, cha
     {
         return NULL;
     }
-//    new->item.identifier = malloc((strlen(key) + 1) * sizeof(char));
-//    if (new->item.identifier == NULL)
-//    {
-//        return NULL;
-//    }
 
     // initialize the new node
     new->item.identifier = key;
+    new->item.params = NULL;
+    new->item.params_strict = NULL;
+    new->item.param_names = NULL;
     new->next = NULL;
     
     if (token == NULL) {
@@ -199,6 +201,6 @@ htab_pair_t * htab_insert(htab_t * restrict t, const Token * restrict token, cha
 }
 
 
-size_t htab_size(const htab_t * restrict t) {
-    return t->size;
-}
+//size_t htab_size(const htab_t * restrict t) {
+//    return t->size;
+//}
