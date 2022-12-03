@@ -23,22 +23,25 @@ void htab_clear(htab_t * restrict t) {
         while (head != NULL)
         {
             t->arr_ptr[i] = head->next;
-            head->item.identifier[0] = '\0';
-            if (head->item.type == H_CONSTANT && head->item.value_type == D_STRING) {
+            //head->item.identifier[0] = '\0';
+            if (head->item.type == H_CONSTANT && head->item.value_type == D_STRING && head->item.value.string[0] != '\0') {
                 free(head->item.identifier);
                 free(head->item.value.string);
                 free(head->item.params);
                 free(head->item.params_strict);
                 free(head->item.param_names);
                 free(head);
+                head = t->arr_ptr[i];
+                continue;
             } else {
                 free(head->item.identifier);
                 free(head->item.params);
                 free(head->item.params_strict);
                 free(head->item.param_names);
                 free(head);
+                head = t->arr_ptr[i];
+                continue;
             }
-            head = t->arr_ptr[i];
         }
     }
     t->size = 0;
