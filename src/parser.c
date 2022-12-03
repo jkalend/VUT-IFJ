@@ -1658,7 +1658,7 @@ void htab_check(const htab_pair_t * restrict pair) {
 
 int main(void) {
     stream = stdin;
-    stream = fopen("test.php", "r");
+    //stream = fopen("test.php", "r");
     //if (stream == NULL) exit(BAD_INTERNAL);
 
     register Generator * restrict gen = malloc(sizeof(Generator));

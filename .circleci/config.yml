@@ -169,9 +169,11 @@ jobs:
 
 workflows:
   Static Analysis:
+    when: always
     jobs:
       - cppcheck
   Tests:
+    when: always
     jobs:
       - ifj-22tester
 #   Tests:
