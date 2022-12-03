@@ -7,7 +7,7 @@
 #include "generator.h"
 
 /* global struct for parser flags and variables */
-parser_t parser;
+static parser_t parser;
 
 const unsigned int PREC_TABLE[14][14] = {
         {P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_OPEN, P_OPEN, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_CLOSE, P_OPEN, P_CLOSE},
@@ -47,7 +47,7 @@ TData *stack_data(int value, int type) { //unsigned?
     return ptr;
 }
 
-void defvar_order(char *id, htab_pair_t *pair, Generator *gen) {
+void defvar_order(char *id, htab_pair_t *pair, Generator * restrict gen) {
     if (parser.in_while == NULL && parser.in_func == NULL) {
         generator_add_instruction(gen, gen_instruction_constructor(defvar, id, NULL, NULL, 0, NULL, 0));
     } else if (parser.in_func != NULL) {
@@ -61,15 +61,15 @@ void defvar_order(char *id, htab_pair_t *pair, Generator *gen) {
     }
 }
 
-void get_next_token(Token **token, bool *keep_token, bool *return_back, scanner_t *scanner) {
+void get_next_token(Token **token, bool * restrict keep_token, bool * restrict return_back, scanner_t * restrict scanner) {
     if (*keep_token && *return_back) {
         Token *tmp = *token;
-        *token = parser.tmp_token;
+        (*token) = parser.tmp_token;
         parser.tmp_token = tmp;
     }
     else if (!(*keep_token) && *return_back) {
         Token *tmp = *token;
-        *token = parser.tmp_token;
+        (*token) = parser.tmp_token;
         parser.tmp_token = tmp;
         *return_back = false;
     }
@@ -80,15 +80,15 @@ void get_next_token(Token **token, bool *keep_token, bool *return_back, scanner_
         parser.tmp_token->type = (*token)->type;
 
         /* get new token from scanner */
-        get_token(*token, scanner);
+        get_token((*token), scanner);
         if ((*token)->type == T_ERROR) exit(BAD_LEXEM);
     }
     *keep_token = false;
 }
 
-int apply_rule(TStack *stack, unsigned int val) {
+int apply_rule(register TStack * restrict stack, register unsigned int val) {
     switch (val) {
-        case 0: exit(BAD_SYNTAX); /* syntax error */
+        case 0: exit(BAD_SYNTAX);
         case 1:
             stack_push(stack, stack_data(N_ST_LIST, T_NONTERM));
             stack_push(stack, stack_data(T_VALID, T_TERM));
@@ -185,10 +185,10 @@ int apply_rule(TStack *stack, unsigned int val) {
             stack_push(stack, stack_data(N_BODY, T_NONTERM));
             stack_push(stack, stack_data(N_ST, T_NONTERM));
             break;
-        
+
         case 21:
         case 22:
-            /* eps */
+            /* epsilon */
             break;
         default: /* no rule found */
             exit(BAD_SYNTAX);
@@ -196,7 +196,7 @@ int apply_rule(TStack *stack, unsigned int val) {
     return 1;
 }
 
-void prec_index(const Token *token, unsigned int *rc, int symbol) {
+void prec_index(const Token * restrict token, unsigned int * restrict rc, int symbol) {
     if (symbol > -1 && symbol < 15 && token == NULL) {
         *rc = symbol;
         return;
@@ -262,7 +262,7 @@ void prec_index(const Token *token, unsigned int *rc, int symbol) {
     }
 }
 
-int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end) {
+int reduce(register TStack * restrict stack, register TStack * restrict shelf, TStack * restrict temps, register Generator * restrict gen, bool end) {
 
     if (stack_top(stack)->value == P_E) {
         stack_push(shelf, stack_pop(stack));
@@ -273,7 +273,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
     }
     unsigned int res = 0;
     bool fn = false;
-    htab_pair_t *last_fn = NULL;
+    register htab_pair_t *last_fn = NULL;
 
     while (stack_top(stack)->value != P_OPEN && stack_top(stack)->value != P_END) {
         TData *data = stack_pop(stack);
@@ -299,7 +299,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
     TData *op_two;
     htab_pair_t **operands = NULL;
 
-    long long number_size = (long long) ((ceil(log10(parser.tmp_counter)) + 1) * sizeof(char));
+    //long long number_size = (long long) ((ceil(log10(parser.tmp_counter)) + 1) * sizeof(char));
     size_t alloc_num = snprintf(NULL, 0, "%d", parser.tmp_counter) + 1;
     char *number = malloc(alloc_num);
     if (number == NULL) exit(BAD_INTERNAL);
@@ -342,13 +342,14 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
 
         while (stack_top(shelf)->value != P_CLOSE) {
             TData *tmp_data = stack_pop(shelf);
+            stack_push(parser.garbage_bin, tmp_data);
             //htab_pair_t *a = tmp_data->bucket;
             if (tmp_data->value == P_LEFT_BRACKET) brackets--;
             else if (tmp_data->value == P_RIGHT_BRACKET) brackets++;
             else if (tmp_data->value == P_E) {
                 E++;
                 expect_comma = true;
-                //free(tmp_data);
+
                 tmp_data = stack_pop(temps);
                 stack_push(reversal, tmp_data);
                 if (last_fn->return_type == D_NONE) {
@@ -367,13 +368,10 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
                 commas++;
                 expect_comma = false;
             }
-            else {
-                free(tmp_data);
-            }
         }
         if (brackets != 0) exit(BAD_SYNTAX);
         if (stack_top(shelf) != NULL) { // pops last bracket
-            free(stack_pop(shelf));
+            stack_push(parser.garbage_bin, stack_pop(shelf));
         }
 
         // args number check
@@ -403,7 +401,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
             for (int j = 0; j < E; j++) {
                 TData *garbage = stack_pop(reversal);
                 params[j] = garbage->bucket;
-                free(garbage);
+                stack_push(parser.garbage_bin, garbage);
             }
 
             generator_add_instruction(gen, gen_instruction_constructor(builtin, tmp, operands, NULL, 0, params, E));
@@ -418,7 +416,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
             for (int i = 0; i < last_fn->param_count; i++) {
                 TData *garbage = stack_pop(reversal);
                 params[i] = garbage->bucket;
-                free(garbage);
+                stack_push(parser.garbage_bin, garbage);
             }
             generator_add_instruction(gen, gen_instruction_constructor(call, tmp, operands, last_fn->params, 1, params, last_fn->param_count));
         }
@@ -438,7 +436,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
                 if (garbage == NULL) {
                     break;
                 }
-                free(garbage);
+                stack_push(parser.garbage_bin, garbage);
                 cnt++;
             }
             if (cnt != 3) break;
@@ -453,7 +451,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
                 if (garbage == NULL) {
                     break;
                 }
-                free(garbage);
+                stack_push(parser.garbage_bin, garbage);
                 cnt++;
             }
             if (cnt != 5) break;
@@ -476,8 +474,8 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
             operands[1] = op_two->bucket;
             generator_add_instruction(gen, gen_instruction_constructor(mul, tmp, operands, NULL, 2, NULL, 0));
 
-            free(op_one);
-            free(op_two);
+            stack_push(parser.garbage_bin, op_one);
+            stack_push(parser.garbage_bin, op_two);
 
             printf("2p ");
             stack_push(temps, data);
@@ -489,7 +487,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
                 if (garbage == NULL) {
                     break;
                 }
-                free(garbage);
+                stack_push(parser.garbage_bin, garbage);
                 cnt++;
             }
             if (cnt != 5) break;
@@ -504,8 +502,8 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
             operands[0] = op_two->bucket;
             generator_add_instruction(gen, gen_instruction_constructor(div_, tmp, operands, NULL, 2, NULL, 0));
 
-            free(op_one);
-            free(op_two);
+            stack_push(parser.garbage_bin, op_one);
+            stack_push(parser.garbage_bin, op_two);
 
             printf("3p ");
             stack_push(temps, data);
@@ -517,7 +515,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
                 if (garbage == NULL) {
                     break;
                 }
-                free(garbage);
+                stack_push(parser.garbage_bin, garbage);
                 cnt++;
             }
             if (cnt != 5) break;
@@ -540,8 +538,8 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
             operands[0] = op_two->bucket;
             generator_add_instruction(gen, gen_instruction_constructor(addition, tmp, operands, NULL, 2, NULL, 0));
 
-            free(op_one);
-            free(op_two);
+            stack_push(parser.garbage_bin, op_one);
+            stack_push(parser.garbage_bin, op_two);
 
             printf("4p ");
             stack_push(temps, data);
@@ -553,7 +551,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
                 if (garbage == NULL) {
                     break;
                 }
-                free(garbage);
+                stack_push(parser.garbage_bin, garbage);
                 cnt++;
             }
             if (cnt != 5) break;
@@ -576,8 +574,8 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
             operands[0] = op_two->bucket;
             generator_add_instruction(gen, gen_instruction_constructor(sub, tmp, operands, NULL, 2, NULL, 0));
 
-            free(op_one);
-            free(op_two);
+            stack_push(parser.garbage_bin, op_one);
+            stack_push(parser.garbage_bin, op_two);
 
             printf("5p ");
             stack_push(temps, data);
@@ -589,7 +587,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
                 if (garbage == NULL) {
                     break;
                 }
-                free(garbage);
+                stack_push(parser.garbage_bin, garbage);
                 cnt++;
             }
             if (cnt != 5) break;
@@ -603,8 +601,8 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
             operands[0] = op_two->bucket;
             generator_add_instruction(gen, gen_instruction_constructor(concat, tmp, operands, NULL, 2, NULL, 0));
 
-            free(op_one);
-            free(op_two);
+            stack_push(parser.garbage_bin, op_one);
+            stack_push(parser.garbage_bin, op_two);
 
             pair->value_type = D_STRING;
 
@@ -626,13 +624,12 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
             stack_push(stack, stack_data(P_E, P_E));
             return 1;
         case 71: // relations or a function
-            //if (fn) goto function;
             while (cnt < 5) {
                 TData *garbage = stack_pop(shelf);
                 if (garbage == NULL) {
                     break;
                 }
-                free(garbage);
+                stack_push(parser.garbage_bin, garbage);
                 cnt++;
             }
             if (cnt != 5) break;
@@ -666,8 +663,8 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
 
             generator_add_instruction(gen, rel);
 
-            free(op_one);
-            free(op_two);
+            stack_push(parser.garbage_bin, op_one);
+            stack_push(parser.garbage_bin, op_two);
 
             printf("8p ");
             stack_push(temps, data);
@@ -680,7 +677,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
                 if (garbage == NULL) {
                     break;
                 }
-                free(garbage);
+                stack_push(parser.garbage_bin, garbage);
                 cnt++;
             }
             if (cnt != 5) break;
@@ -695,8 +692,8 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
             operands[0] = op_two->bucket;
             generator_add_instruction(gen, gen_instruction_constructor(eq, tmp, operands, NULL, 2, NULL, 0));
 
-            free(op_one);
-            free(op_two);
+            stack_push(parser.garbage_bin, op_one);
+            stack_push(parser.garbage_bin, op_two);
 
             printf("9p ");
             stack_push(temps, data);
@@ -709,7 +706,7 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
                 if (garbage == NULL) {
                     break;
                 }
-                free(garbage);
+                stack_push(parser.garbage_bin, garbage);
                 cnt++;
             }
             if (cnt != 5) break;
@@ -724,8 +721,8 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
             operands[0] = op_two->bucket;
             generator_add_instruction(gen, gen_instruction_constructor(neq, tmp, operands, NULL, 2, NULL, 0));
 
-            free(op_one);
-            free(op_two);
+            stack_push(parser.garbage_bin, op_one);
+            stack_push(parser.garbage_bin, op_two);
 
             printf("10p ");
             stack_push(temps, data);
@@ -741,18 +738,18 @@ int reduce(TStack *stack, TStack *shelf, TStack *temps, Generator *gen, bool end
     return 0;
 }
 
-int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back, Generator *gen, scanner_t *scanner) {
+int precedence(register TStack *stack, register Token * token, bool *keep_token, bool *return_back, Generator * restrict gen, scanner_t * restrict scanner) {
     stack_push(stack, stack_data(P_END, P_END));
     
-    Token *lookahead = *token;
+    Token *lookahead = token;
     bool end = false;
     bool next_token = true;
     bool ID_last_token = false;
     parser.empty_expr = false;
     unsigned int row = 0;
     unsigned int column = 0;
-    TStack *shelf = NULL;
-    TStack *temps = NULL;
+    register TStack * restrict shelf = NULL;
+    TStack * restrict temps = NULL;
     shelf = stack_init(shelf);
     temps = stack_init(temps);
     while (true) {
@@ -776,39 +773,47 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
 
         if (lookahead->type == T_LEFT_BRACE || lookahead->type == T_SEMICOLON) {
             end = true;
-            *token = lookahead;
+            lookahead = token;
             *keep_token = true;
         }
-        
-        
-        //only 1 skip needed?
+
+
+        // finds the first terminal in the stack
         if (stack_top(stack)->value == P_E) stack_push(shelf, stack_pop(stack));
 
-        //gets indexes for the table
+        // gets indexes for the table
         prec_index(NULL, &row,  (int)stack_top(stack)->value);
         if (!end) {
             prec_index(lookahead, &column, -1);
         } else {
             prec_index(NULL, &column, P_END);
         }
-        
+
+        // gets the value from the table
         unsigned int sym = PREC_TABLE[row][column];
         if (!sym && !end) {
             exit(BAD_SYNTAX);
         }
-        if (sym != P_EQUAL && !end) { // skips equal signs
+
+        // skips equal signs
+        if (sym != P_EQUAL && !end) {
             if (sym == P_CLOSE) {
                 while (!stack_isEmpty(shelf)) {
                     stack_push(stack, stack_pop(shelf));
                 }
             }
+            // shift rule
             stack_push(stack, stack_data((int) sym, (int) sym));
         }
 
+        // indicates that the last item on stack is a terminal
         bool end_E = stack_top(stack)->type == P_END && end;
+
+        // pops all reductions from the shelf
         while (!stack_isEmpty(shelf)) {
             stack_push(stack, stack_pop(shelf));
         }
+        // insert closing sign if the end of expression is reached
         if (end && !end_E) stack_push(stack, stack_data(P_CLOSE, P_CLOSE));
 
         if (sym == P_CLOSE) {
@@ -816,11 +821,12 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
             if (!res || !stack_isEmpty(shelf)) {
                 exit(BAD_SYNTAX);
             }
+            // using the same token due to reduction
             next_token = false;
             continue;
         }
 
-        // reduction happened, new token will be required
+        // reduction happened, new token will be required after the current one is pushed
         next_token = true;
 
         if (!end) {
@@ -836,17 +842,19 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
             strcat(tmp, number);
 
             htab_pair_t **operands = NULL;
+            register htab_pair_t *pair = NULL;
 
             if (lookahead->type == T_IDENTIFIER) {
+                /* function ID */
                 char *id = malloc(strlen(lookahead->value.identifier) + 3);
                 if (id == NULL) exit(BAD_INTERNAL);
                 strcpy(id, "69");
                 strcat(id, lookahead->value.identifier);
 
-                htab_pair_t *pair = htab_find(parser.glob_tab, id);
+                pair = htab_find(parser.glob_tab, id);
                 TData *data = stack_data(P_FN, P_FN);
-                
-                if (pair == NULL) {      
+
+                if (pair == NULL) {
                     pair = htab_insert(parser.glob_tab, NULL, id);
                     pair->param_count = 0;
                     pair->type = H_FUNC_ID;
@@ -859,10 +867,9 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 data->bucket = pair;
                 stack_push(stack, data);
                 ID_last_token = true;
-
             } else if (lookahead->type == T_FLOAT) {
-
-                htab_pair_t *pair = htab_find(parser.temporary_tab, tmp);
+                /* float constant */
+                pair = htab_find(parser.temporary_tab, tmp);
                 if (pair == NULL) {
                     parser.tmp_counter++;
                     pair = htab_insert(parser.temporary_tab, NULL, tmp);
@@ -884,8 +891,8 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 stack_push(temps, data);
                 stack_push(stack, stack_data(P_I, P_I));
             } else if (lookahead->type == T_INT) {
-
-                htab_pair_t *pair = htab_find(parser.temporary_tab, tmp);
+                /* int constant */
+                pair = htab_find(parser.temporary_tab, tmp);
                 if (pair == NULL) {
                     parser.tmp_counter++;
                     pair = htab_insert(parser.temporary_tab, NULL, tmp);
@@ -906,7 +913,8 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 stack_push(temps, data);
                 stack_push(stack, stack_data(P_I, P_I));
             } else if (lookahead->type == T_STRING) {
-                htab_pair_t *pair = htab_find(parser.temporary_tab, tmp);
+                /* string constant */
+                pair = htab_find(parser.temporary_tab, tmp);
                 if (pair == NULL) {
                     parser.tmp_counter++;
                     pair = htab_insert(parser.temporary_tab, NULL, tmp);
@@ -927,7 +935,8 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 stack_push(temps, data);
                 stack_push(stack, stack_data(P_I, P_I));
             } else if (lookahead->type == T_VAR) {
-                htab_pair_t *pair = htab_find(parser.temporary_tab, lookahead->value.identifier);
+                /* variable */
+                pair = htab_find(parser.temporary_tab, lookahead->value.identifier);
                 if (pair == NULL) {
                     parser.only_defvar = true;
                     parser.tmp_counter++;
@@ -944,15 +953,16 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 stack_push(temps, data);
                 stack_push(stack, stack_data(P_I, P_I));
             } else if (lookahead->type >= T_LESS && lookahead->type <= T_GREATER_EQUAL) {
+                /* relational operator */
                 stack_push(stack, stack_data(P_R, P_R));
                 if (parser.relation_operator == 0) {
-                    parser.relation_operator = lookahead->type;
+                    parser.relation_operator = (char)lookahead->type;
                 } else {
                     exit(BAD_TYPE_COMPATIBILTY);
                 }
             }  else if (lookahead->value.keyword == KW_NULL && lookahead->type == T_KEYWORD) {
-
-                htab_pair_t *pair = htab_find(parser.temporary_tab, tmp);
+                /* null constant */
+                pair = htab_find(parser.temporary_tab, tmp);
                 if (pair == NULL) {
                     parser.tmp_counter++;
                     pair = htab_insert(parser.temporary_tab, NULL, tmp);
@@ -976,6 +986,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                 stack_push(stack, stack_data((int) column, (int) column));
             }
         } else {
+            /* end of expression */
             while (reduce(stack, shelf, temps, gen, end) == 1);
             if (reduce(stack, shelf, temps, gen, end) != -1) {
                 return 0;
@@ -985,7 +996,7 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
                     generator_add_instruction(gen, gen_instruction_constructor(if_, top->bucket->identifier, NULL, NULL, 0, NULL, 0));
                     parser.if_eval = false;
                 }
-                
+
                 if (parser.while_eval) {
                     generator_add_instruction(gen, gen_instruction_constructor(while_start, top->bucket->identifier, NULL, NULL, 0, NULL, 0));
                     parser.while_eval = false;
@@ -1020,10 +1031,10 @@ int precedence(TStack *stack, Token **token, bool *keep_token, bool *return_back
     exit(BAD_LEXEM);
 }
 
-int parse(Generator *gen, scanner_t *scanner) {
-    TStack *stack = NULL;
+int parse(Generator * restrict gen, scanner_t * restrict scanner) {
+    register TStack * restrict stack = NULL;
     stack = stack_init(stack);
-    TStack *prec = NULL;
+    register TStack * restrict prec = NULL;
     prec = stack_init(prec);
     TStack *brackets = NULL;
     brackets = stack_init(brackets);
@@ -1031,7 +1042,7 @@ int parse(Generator *gen, scanner_t *scanner) {
     stack_push(stack, stack_data(N_PROG, T_NONTERM));
     int E = 0;
 
-    Token *token = malloc(sizeof(Token));
+    register Token *token = malloc(sizeof(Token));
     if (token == NULL)  exit(BAD_INTERNAL);
     parser.tmp_token = malloc(sizeof(Token));
     if (parser.tmp_token == NULL) exit(BAD_INTERNAL);
@@ -1047,10 +1058,10 @@ int parse(Generator *gen, scanner_t *scanner) {
         if (stack_isEmpty(stack)) {
             break;
         }
-        
+
         TData *top = stack_pop(stack);
         if (top->type == T_TERM) {
-            if (top->value == token->type) { 
+            if (top->value == token->type) {
                 if (token->type == T_LEFT_BRACE) {
                     parser.bracket_counter++;
                 }
@@ -1068,7 +1079,7 @@ int parse(Generator *gen, scanner_t *scanner) {
                                     generator_add_instruction(gen, parser.in_while);
                                     parser.in_while = NULL;
                                 }
-                                
+
                             }
                             else if (data->type == KW_WHILE) {
                                 generator_add_instruction(gen, gen_instruction_constructor(while_end, NULL, NULL, NULL, 0, NULL, 0));
@@ -1085,7 +1096,7 @@ int parse(Generator *gen, scanner_t *scanner) {
 
                         /* missing closing brace */
                         if (stack_isEmpty(parser.local_tabs)) {
-                            exit(BAD_SYNTAX); 
+                            exit(BAD_SYNTAX);
                         }
                         /* return from a function */
                         stack_pop(parser.local_tabs);
@@ -1096,7 +1107,7 @@ int parse(Generator *gen, scanner_t *scanner) {
                         if (parser.in_func->return_type == D_VOID || !parser.in_func->strict_return) {
                             instr->instruct = end_fn_void;
                         }
-                        else {                           
+                        else {
                             instr->instruct = err_quit4;
                         }
                         generator_add_instruction(gen, instr);
@@ -1151,7 +1162,7 @@ int parse(Generator *gen, scanner_t *scanner) {
                         }
                         if (parser.in_func->return_type != D_NONE) {
                             parser.in_func->param_count += 1;
-                        
+
                             parser.in_func->params = realloc(parser.in_func->params, sizeof(Value) * parser.in_func->param_count);
                             if (parser.in_func->params == NULL) exit(BAD_INTERNAL); // realloc failed
 
@@ -1163,11 +1174,11 @@ int parse(Generator *gen, scanner_t *scanner) {
                         }
                         else {
                             if (E >= parser.in_func->param_count) exit(BAD_TYPE_OR_RETURN);
-                            if (parser.in_func->params[E] != type && (parser.in_func->params_strict[E] || parser.in_func->params[E] != D_VOID)) 
+                            if (parser.in_func->params[E] != type && (parser.in_func->params_strict[E] || parser.in_func->params[E] != D_VOID))
                                 exit (BAD_TYPE_OR_RETURN);
                             E++;
                         }
-                        
+
                     }
                     else if (parser.in_param_def && token->type == T_VAR) {
                         htab_pair_t *frame_item = htab_find(parser.temporary_tab, token->value.identifier);
@@ -1191,8 +1202,9 @@ int parse(Generator *gen, scanner_t *scanner) {
                         }
                     }
                 }
-                
-                get_next_token(&token, &keep_prev_token, &return_back, scanner);
+
+                Token *next_token = token;
+                get_next_token(&next_token, &keep_prev_token, &return_back, scanner);
 
                 if (token->type == T_ASSIGN && parser.tmp_token->type == T_VAR) {
                     parser.in_assign = htab_find(parser.temporary_tab, parser.tmp_token->value.identifier);
@@ -1257,14 +1269,15 @@ int parse(Generator *gen, scanner_t *scanner) {
                 if (token->value.keyword == KW_RETURN) {
                     parser.expect_ret = true;
                     parser.allow_expr_empty = false;
-                    if (parser.glob_tab == parser.temporary_tab || parser.in_func->return_type == D_VOID) 
+                    if (parser.glob_tab == parser.temporary_tab || parser.in_func->return_type == D_VOID)
                         parser.allow_expr_empty = true;
                 }
 
-                get_next_token(&token, &keep_prev_token, &return_back, scanner);
+                Token *next_token = token;
+                get_next_token(&next_token, &keep_prev_token, &return_back, scanner);
 
                 /* function definition - create new item in tab */
-                if (parser.tmp_token->value.keyword == KW_FUNCTION && token->type == T_IDENTIFIER) { 
+                if (parser.tmp_token->value.keyword == KW_FUNCTION && token->type == T_IDENTIFIER) {
                     //parser.in_function = true;
                     parser.bracket_counter = 0;
                     char *id = malloc(strlen(token->value.identifier) + 5);
@@ -1277,7 +1290,7 @@ int parse(Generator *gen, scanner_t *scanner) {
                     if (parser.in_func != NULL && parser.in_func->return_type != D_NONE) {
                         exit(BAD_DEFINITION);
                     }
-                    else if (parser.in_func == NULL){  
+                    else if (parser.in_func == NULL){
                         /* else insert to tab */
                         parser.in_func = htab_insert(parser.temporary_tab, token, id);
                     }
@@ -1305,7 +1318,7 @@ int parse(Generator *gen, scanner_t *scanner) {
 
                     Instruction *temp = gen_instruction_constructor(fn_defs, NULL, NULL, NULL, 0, NULL, 0);
                     parser.in_fn = temp;
-                }  
+                }
             }
             else {
                 /* terms not matching */
@@ -1321,26 +1334,26 @@ int parse(Generator *gen, scanner_t *scanner) {
 
                 /* CALL PRECEDENTIAL */
                 keep_prev_token = true;
-                
-                int result = precedence(prec, &token, &keep_prev_token, &return_back, gen, scanner);
+
+                int result = precedence(prec, token, &keep_prev_token, &return_back, gen, scanner);
                 stack_dispose(prec);
-                
+
                 if (!result) {
-                    exit(BAD_UNDEFINED_VAR);
+                    exit(BAD_OTHER_SEMANTIC);
                 }
 
                 else if (parser.empty_expr && !parser.allow_expr_empty) {
                     exit(BAD_TERM);
                 }
                 parser.in_assign = NULL;
-                get_next_token(&token, &keep_prev_token, &return_back, scanner);
+                get_next_token(token, &keep_prev_token, &return_back, scanner);
 
                 if (parser.expect_ret) {
                     if (parser.glob_tab == parser.temporary_tab) {
                         generator_add_instruction(gen, gen_instruction_constructor(exit_success, NULL, NULL, NULL, 0, NULL, 0));
 
                     }
-                    else { 
+                    else {
                         if (!parser.empty_expr) {
 
                             Instruction *instr = gen_instruction_constructor(0, NULL, NULL, NULL, 0, NULL, 0);
@@ -1364,14 +1377,14 @@ int parse(Generator *gen, scanner_t *scanner) {
                                     exit(BAD_TYPE_OR_RETURN);
                             }
                             generator_add_instruction(gen, instr);
-                        } 
+                        }
                         else {
                             generator_add_instruction(gen, gen_instruction_constructor(end_fn_void, NULL, NULL, NULL, 0, NULL, 0));
                         }
                     }
-                    
+
                 }
-                
+
                 parser.expect_ret = false;
                 parser.allow_expr_empty = false;
                 continue;
@@ -1541,7 +1554,7 @@ void insert_builtins(void) {
 
 }
 
-void htab_check(htab_pair_t * pair) {
+void htab_check(const htab_pair_t * restrict pair) {
     if ((pair->type == H_FUNC_ID && pair->return_type == D_NONE) || 
         (pair->type == H_VAR && pair->value_type == D_NONE)) {
         exit(BAD_UNDEFINED_VAR);
@@ -1553,10 +1566,10 @@ int main(void) {
     //stream = fopen("test.php", "r");
     //if (stream == NULL) exit(BAD_INTERNAL);
 
-    Generator *gen = malloc(sizeof(Generator));
+    register Generator * restrict gen = malloc(sizeof(Generator));
     generator_init(gen);
 
-	scanner_t scanner;
+	static scanner_t scanner;
 	scanner.line = 1;
 	scanner.first_read = 0;
 	scanner.prologue_r = 0;
@@ -1567,6 +1580,7 @@ int main(void) {
     parser.glob_tab = htab_init(GLOBTAB_SIZE);
     parser.temporary_tab = parser.glob_tab;
     parser.local_tabs = stack_init(parser.local_tabs);
+    parser.garbage_bin = stack_init(parser.garbage_bin);
     parser.in_func = NULL;
     parser.in_assign = NULL;
     parser.in_param_def = false;
@@ -1593,7 +1607,9 @@ int main(void) {
 
     htab_for_each(parser.glob_tab, htab_check);
 
-    generate(gen);
+    generate(gen, &parser);
+    stack_dispose(parser.garbage_bin);
+    stack_free(parser.garbage_bin);
     // free parser struct
     //free(parser.builtins);
 

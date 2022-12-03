@@ -33,13 +33,13 @@ TStack *stack_init(TStack *stack);
 void stack_free(TStack *stack);
 
 //frees all allocated elements
-void stack_dispose(TStack *stack);
+void stack_dispose(register TStack *stack);
 
 //adds new element to stack
-void stack_push(TStack *stack, const TData *data);
+void stack_push(register TStack *stack, const TData *data);
 
 //remove element from stack and returns its value
-TData *stack_pop(TStack *stack);
+TData *stack_pop(register TStack *stack);
 
 //returns state of stack
 bool stack_isEmpty(const TStack *stack);

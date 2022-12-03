@@ -7,7 +7,7 @@
  * @param scanner scanner structure to hold flags
  * @return returns 0 if everything is ok, otherwise returns 1
  */
-int get_token(Token *token, scanner_t *scanner) {
+int get_token(Token * restrict token, scanner_t * restrict scanner) {
 	token->strict_type = true;
     if (scanner->first_read == 0){ //checking if there are no characters before prologue
         int c = fgetc(stream);
@@ -24,7 +24,7 @@ int get_token(Token *token, scanner_t *scanner) {
 	ungetc(c, stream);
     }
     while(true) {
-        int c = fgetc(stream);
+		register int c = fgetc(stream);
         if(c == '\n') { //line increment
             scanner->line += 1;
             continue;
@@ -72,7 +72,7 @@ int get_token(Token *token, scanner_t *scanner) {
 			if(str == NULL){
 				exit(BAD_INTERNAL);
 			}
-            int i = 0;
+            register int i = 0;
             int e = 0;
             int plus_minus = 0;
             int dot = 0;
@@ -161,7 +161,7 @@ int get_token(Token *token, scanner_t *scanner) {
                 return LEX_OK;
             }
             case '/': { //either token is divide or comment starts
-                int c2 = fgetc(stream);
+                register int c2 = fgetc(stream);
                 if (c2 == '/') {
                     while (c2 != '\n') {
                         c2 = fgetc(stream);
@@ -219,7 +219,7 @@ int get_token(Token *token, scanner_t *scanner) {
                 return LEX_OK;
             }
             case '<': { //token is less, less equal or valid
-                int c2 = fgetc(stream);
+                register int c2 = fgetc(stream);
                 if (c2 == '=') { //less equal
                     token->type = T_LESS_EQUAL;
                     token->line = scanner->line;
@@ -482,7 +482,7 @@ int get_token(Token *token, scanner_t *scanner) {
             case '$':{ //token is variable
                 token->type = T_VAR;
                 token->line = scanner->line;
-                int c2 = fgetc(stream);
+                register int c2 = fgetc(stream);
                 if(c2 != '_' && (c2 <'A' || (c2 > 'Z' && c2 < 'a') || c2 > 'z')){
                     token->type = T_ERROR;
                     token->line = scanner->line;
@@ -514,7 +514,7 @@ int get_token(Token *token, scanner_t *scanner) {
                 return LEX_OK;
             }
             case '?': { //token can be type or ending sequence
-                int c2 = fgetc(stream);
+                register int c2 = fgetc(stream);
                 if (c2 == '>') { //ending sequence
 					c2 = fgetc(stream);
 					if(c2 != EOF){
@@ -643,8 +643,8 @@ int get_token(Token *token, scanner_t *scanner) {
  * @param size current allocated size for the string in bytes
  * @return returns converted string
  */
-char* convert_string_for_ifjcode(char *str, int size) {
-    int i = 0;
+char* convert_string_for_ifjcode(register char *str, int size) {
+    register int i = 0;
     char hex[2];
     char oct[3];
     while(str[i] != '\0'){
@@ -743,7 +743,7 @@ char* convert_string_for_ifjcode(char *str, int size) {
 			str[i+3] = '5';
 		}
 		else if(str[i] == '\\'){ //conversion of escaped characters to numerical escape sequences
-			int j = size - 1;
+			register int j = size - 1;
 			switch (str[i+1]) {
 				case 'n':
 					while (j > i + 1) { //making space in the string
@@ -904,7 +904,7 @@ int convert_esc_to_int(const char* str, int len) {
  * @param token current token
  * @return returns 0 if no keyword is found, 2 for types except void, 1 for other keywords
  */
-int kw_check(char *s, Token *token){
+int kw_check(const char * restrict s, Token * restrict token){
     if (strcmp(s, "else") == 0) {
         token->type = T_KEYWORD;
         token->value.keyword = KW_ELSE;

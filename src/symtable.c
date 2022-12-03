@@ -17,7 +17,7 @@ size_t htab_bucket_count(const htab_t * t)
     return t->arr_size;
 }
 
-void htab_clear(htab_t * t)
+void htab_clear(htab_t * restrict t)
 {
     // iterate over all table elements and remove them
     for (size_t i = 0; i < t->arr_size; i++)
@@ -34,7 +34,7 @@ void htab_clear(htab_t * t)
     t->size = 0;
 }
 
-bool htab_erase(htab_t * t, htab_key_t identifier)
+bool htab_erase(htab_t * restrict t, htab_key_t identifier)
 {
     size_t hash = htab_hash_function(identifier) % t->arr_size;
 
@@ -72,7 +72,7 @@ bool htab_erase(htab_t * t, htab_key_t identifier)
     return false;
 }
 
-htab_pair_t * htab_find(htab_t * t, htab_key_t identifier)
+htab_pair_t * htab_find(const htab_t * restrict t, htab_key_t identifier)
 {
     size_t hash = htab_hash_function(identifier) % t->arr_size;
 
@@ -143,7 +143,7 @@ htab_t *htab_init(size_t n)
 }
 
 
-htab_pair_t * htab_insert(htab_t * t, Token *token, char* key)
+htab_pair_t * htab_insert(htab_t * restrict t, const Token * restrict token, char* key)
 {
     // check if the identifier exists in the table
     if (token != NULL && (token->type == T_VAR || token->type == T_IDENTIFIER)) {
@@ -199,7 +199,6 @@ htab_pair_t * htab_insert(htab_t * t, Token *token, char* key)
 }
 
 
-size_t htab_size(const htab_t * t)
-{
+size_t htab_size(const htab_t * restrict t) {
     return t->size;
 }

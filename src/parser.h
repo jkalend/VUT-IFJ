@@ -9,7 +9,6 @@
 extern const unsigned int LL_TABLE[8][33];
 
 extern const unsigned int PREC_TABLE[14][14];
-//extern Token *tmp_token;
 
 #define TEMP_VAR_PREFIX "$!!$tmp"
 #define TEMP_LENGTH 8
@@ -33,21 +32,20 @@ typedef enum {
     T_TERM,
     T_NONTERM,
     T_KW,
-    T_TOKEN
 } TermType;
 
 typedef enum {
-    P_MUL,
-    P_DIV,
-    P_ADD,
-    P_SUB,
-    P_CONC,
+    P_MUL __attribute__((unused)),
+    P_DIV __attribute__((unused)),
+    P_ADD __attribute__((unused)),
+    P_SUB __attribute__((unused)),
+    P_CONC __attribute__((unused)),
     P_I,
     P_LEFT_BRACKET,
     P_RIGHT_BRACKET,
     P_R,
-    P_TYPE_EQ,
-    P_TYPE_NEQ,
+    P_TYPE_EQ __attribute__((unused)),
+    P_TYPE_NEQ __attribute__((unused)),
     P_END,
     P_FN,
     P_COMMA,
@@ -57,35 +55,29 @@ typedef enum {
     P_E
 }PrecSyms;
 
-typedef struct {
-    Token *tmp_token;
-    htab_t *glob_tab;
-    htab_t *temporary_tab;
-    TStack *local_tabs;
-    htab_pair_t *in_func;
-    htab_pair_t *in_assign;
+typedef struct parser_t {
     bool in_param_def;
     bool empty_expr;
     bool allow_expr_empty;
     bool expect_ret;
-    bool main_found;
     bool if_eval;
     bool while_eval;
     bool only_defvar;
-    int while_count;
     char relation_operator;
-    char **builtins;
+    int while_count;
     int tmp_counter;
     int bracket_counter;
+    char **builtins;
+    Token *tmp_token;
+    htab_t *glob_tab;
+    htab_t *temporary_tab;
+    TStack *local_tabs;
+    TStack *garbage_bin;
+    htab_pair_t *in_func;
+    htab_pair_t *in_assign;
     htab_pair_t *val_returned;
     struct Instruction *in_while;
     struct Instruction *in_fn;
 } parser_t;
-
-// * float > int, str is always converted
-// / always float
-// + float > int, str is always converted
-// - float > int, str is always converted
-// . always string
 
 #endif // PARSER_H

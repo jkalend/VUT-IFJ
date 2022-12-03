@@ -108,6 +108,6 @@ typedef struct {
 int get_token(Token*, scanner_t*);
 char* convert_string_for_ifjcode(char*, int);
 int convert_esc_to_int(const char*, int);
-int kw_check(char*, Token*);
+int kw_check(const char*, Token*);
 
 #endif	//IFJ_SCANNER_H
