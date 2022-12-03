@@ -186,3 +186,7 @@ workflows:
                 - in_while_hell
     jobs:
       - ifj-22tester
+
+  On_push:
+    jobs:
+      - ifj-22tester
