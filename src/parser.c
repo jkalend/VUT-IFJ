@@ -397,8 +397,11 @@ int reduce(register TStack * restrict stack, register TStack * restrict shelf, T
                 stack_push(reversal, tmp_data);
                 if (last_fn->return_type == D_NONE) {
                     last_fn->params = realloc(last_fn->params, sizeof(DataType) * E);
-                    last_fn->params[last_fn->param_count] = tmp_data->bucket->value_type;
-
+                    for (int j = E - 1; j > 0; j--) {
+                        last_fn->params[j] = last_fn->params[j - 1];
+                    }
+                   // last_fn->params[last_fn->param_count] = tmp_data->bucket->value_type;
+                    last_fn->params[0] = tmp_data->bucket->value_type;
                     last_fn->params_strict = realloc(last_fn->params_strict, sizeof(DataType) * E);
                     last_fn->params_strict[last_fn->param_count] = true;
                     if (tmp_data->bucket->value_type == D_VOID) {
@@ -1206,7 +1209,9 @@ int parse(Generator * restrict gen, scanner_t * restrict scanner) {
                         parser.in_param_def = false;
                     }
                     else if (!parser.in_param_def && token->type == T_TYPE) {
-                        if (parser.in_func->return_type == D_NONE && parser.in_func->param_count != E) exit(BAD_TYPE_OR_RETURN);
+                        if (parser.in_func->return_type == D_NONE && parser.in_func->param_count != E) {
+                            exit(BAD_TYPE_OR_RETURN);
+                        }
                         switch (token->value.keyword) {
                             case KW_INT:
                                 parser.in_func->return_type = D_INT;
@@ -1259,7 +1264,9 @@ int parse(Generator * restrict gen, scanner_t * restrict scanner) {
                         else {
                             if (E >= parser.in_func->param_count) exit(BAD_TYPE_OR_RETURN);
                             if (parser.in_func->params[E] != type && (parser.in_func->params_strict[E] || parser.in_func->params[E] != D_VOID))
+                            {
                                 exit (BAD_TYPE_OR_RETURN);
+                            }    
                             E++;
                         }
 
@@ -1280,7 +1287,7 @@ int parse(Generator * restrict gen, scanner_t * restrict scanner) {
 
                             parser.in_func->param_names = realloc(parser.in_func->param_names, sizeof(char *) * (idx + 1));
                             if (parser.in_func->param_names == NULL) exit(BAD_INTERNAL);
-                            parser.in_func->param_names[idx] = malloc(sizeof(char) * strlen(token->value.identifier));
+                            parser.in_func->param_names[idx] = malloc(sizeof(char) * (strlen(token->value.identifier)) + 1);
                             if (parser.in_func->param_names[idx] == NULL) exit(BAD_INTERNAL);
                             strcpy(parser.in_func->param_names[idx], token->value.identifier);
                         }
@@ -1378,20 +1385,25 @@ int parse(Generator * restrict gen, scanner_t * restrict scanner) {
 
                     /* check if the function is not already defined */
                     parser.in_func = htab_find(parser.temporary_tab, id);
-                    /* redefinition of function -> exit */
-                    if (parser.in_func != NULL && parser.in_func->return_type != D_NONE) {
-                        exit(BAD_DEFINITION);
-                    }
-                    else if (parser.in_func == NULL){
+                    
+                    if (parser.in_func == NULL){
                         /* else insert to tab */
                         parser.in_func = htab_insert(parser.temporary_tab, token, id);
+                        parser.in_func->return_type = D_UNDEF;
                     }
-                    parser.in_func->param_count = 0;
-                    parser.in_func->params = NULL;
-                    parser.in_func->return_type = D_UNDEF;
-                    parser.in_func->param_names = NULL;
-                    parser.in_func->params_strict = NULL;
-                    parser.in_func->strict_return = true;
+                    /* redefinition of function -> exit */
+                    else if (parser.in_func != NULL && parser.in_func->return_type != D_NONE) {
+                        exit(BAD_DEFINITION);
+                    }
+                    else {
+                        free(id);
+                    }
+                    //parser.in_func->param_count = 0;
+                    //parser.in_func->params = NULL;
+                    
+                    //parser.in_func->param_names = NULL;
+                   // parser.in_func->params_strict = NULL;
+                   // parser.in_func->strict_return = true;
                     parser.in_param_def = true;
 
                     /* create new frame for current function call */
@@ -1663,7 +1675,7 @@ void htab_check(const htab_pair_t * restrict pair) {
 int main(void) {
     stream = stdin;
     //stream = fopen("test.php", "r");
-    //if (stream == NULL) exit(BAD_INTERNAL);
+    if (stream == NULL) exit(BAD_INTERNAL);
 
     register Generator * restrict gen = malloc(sizeof(Generator));
     generator_init(gen);
@@ -1708,6 +1720,6 @@ int main(void) {
     stack_free(parser.local_tabs);
     htab_free(parser.glob_tab);
     free(parser.builtins);
-
+    fclose(stream);
     return 0;
 }

@@ -34,9 +34,15 @@ void htab_clear(htab_t * restrict t) {
                 head = t->arr_ptr[i];
                 continue;
             } else {
+                /* inbuilt functions don't keep track of param names */
+                if (head->item.param_names != NULL) {
+                    for (int j = 0; j < head->item.param_count; j++) {
+                        free(head->item.param_names[j]);
+                    }
+                }
                 free(head->item.identifier);
                 free(head->item.params);
-                free(head->item.params_strict);
+                free(head->item.params_strict);             
                 free(head->item.param_names);
                 free(head);
                 head = t->arr_ptr[i];
@@ -172,6 +178,7 @@ htab_pair_t * htab_insert(htab_t * restrict t, const Token * restrict token, cha
     new->item.params = NULL;
     new->item.params_strict = NULL;
     new->item.param_names = NULL;
+    new->item.param_count = 0;
     new->next = NULL;
     
     if (token == NULL) {
