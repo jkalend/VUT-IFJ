@@ -180,18 +180,9 @@ workflows:
     when: always
     jobs:
       - ifj-22tester
-#   Tests:
-#     jobs:
-#       - stack_test_cmake
-#       - scanner_test_granular_cmake
-#       - all_scanner_tests_cmake
   Overall:
     triggers:
       - schedule:
           cron: "0 0 0/6 ? * * *"
-          filters:
-            branches:
-              only:
-                - in_while_hell
     jobs:
       - ifj-22tester

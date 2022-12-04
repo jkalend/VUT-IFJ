@@ -305,7 +305,7 @@ int reduce(register TStack * restrict stack, register TStack * restrict shelf, T
         stack_push(shelf, stack_pop(stack));
         if (stack_top(stack)->value == P_END) {
             stack_push(stack, stack_pop(shelf));
-            return -1; //empty expr
+            return -1; //empty expression
         }
     }
     unsigned int res = 0;
