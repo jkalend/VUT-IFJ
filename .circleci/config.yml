@@ -159,8 +159,7 @@ jobs:
             cd IFJ22_Tester && echo "FUNEXP" > extensions
       - run:
           name: "Run tests"
-          command: "python3 test.py ../build/IFJ ../ic22int"
-          # command: "cd build && ctest -C Debug -T test -R IFJ"
+          command: "cd IFJ22_Tester && python3 test.py ../build/IFJ ../ic22int"
       - run:
           name: "Get Coverage"
           command: |
