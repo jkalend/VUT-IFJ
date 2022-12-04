@@ -90,10 +90,10 @@ void gen_strlen(Instruction * restrict instruction, register Generator * restric
     printf("MOVE GF@%%check1 LF@%s\n", instruction->params[0]->identifier);
 
     printf("TYPE GF@%%check0 LF@%s\n", instruction->params[0]->identifier);
-    printf("JUMPIFEQ $!!EXIT_4 GF@%%bool GF@%%check0\n");
-    printf("JUMPIFEQ $!!EXIT_4 GF@%%float GF@%%check0\n");
-    printf("JUMPIFEQ $!!EXIT_4 GF@%%int GF@%%check0\n");
-    printf("JUMPIFEQ !!%d GF@%%string GF@%%check0\n", generator->label_count);
+    printf("JUMPIFEQ $!!EXIT_4 string@bool GF@%%check0\n");
+    printf("JUMPIFEQ $!!EXIT_4 string@float GF@%%check0\n");
+    printf("JUMPIFEQ $!!EXIT_4 string@int GF@%%check0\n");
+    printf("JUMPIFEQ !!%d string@string GF@%%check0\n", generator->label_count);
     printf("MOVE GF@%%check1 string@\n");
 
     printf("LABEL !!%d\n", generator->label_count++);
@@ -105,19 +105,19 @@ void gen_strlen(Instruction * restrict instruction, register Generator * restric
 /// \param generator Instance of the generator
 void gen_substring(register Instruction * restrict instruction, register Generator * restrict generator) {
 	printf("TYPE GF@%%check0 LF@%s\n", instruction->params[0]->identifier);
-    printf("JUMPIFEQ $!!EXIT_4 GF@%%bool GF@%%check0\n");
-    printf("JUMPIFEQ $!!EXIT_4 GF@%%float GF@%%check0\n");
-    printf("JUMPIFEQ $!!EXIT_4 GF@%%int GF@%%check0\n");
-	printf("JUMPIFEQ !!%d GF@%%string GF@%%check0\n", generator->label_count);
+    printf("JUMPIFEQ $!!EXIT_4 string@bool GF@%%check0\n");
+    printf("JUMPIFEQ $!!EXIT_4 string@float GF@%%check0\n");
+    printf("JUMPIFEQ $!!EXIT_4 string@int GF@%%check0\n");
+	printf("JUMPIFEQ !!%d string@string GF@%%check0\n", generator->label_count);
 	printf("JUMP $!!EXIT_4\n");
 
 	printf("LABEL !!%d\n", generator->label_count);
 	//string checked
 	printf("TYPE GF@%%check0 LF@%s\n", instruction->params[1]->identifier);
-    printf("JUMPIFEQ $!!EXIT_4 GF@%%bool GF@%%check0\n");
-    printf("JUMPIFEQ $!!EXIT_4 GF@%%string GF@%%check0\n");
-	printf("JUMPIFEQ !!%d GF@%%int GF@%%check0\n", generator->label_count + 1);
-	printf("JUMPIFEQ !!%d GF@%%float GF@%%check0\n", generator->label_count + 2);
+    printf("JUMPIFEQ $!!EXIT_4 string@bool GF@%%check0\n");
+    printf("JUMPIFEQ $!!EXIT_4 string@string GF@%%check0\n");
+	printf("JUMPIFEQ !!%d string@int GF@%%check0\n", generator->label_count + 1);
+	printf("JUMPIFEQ !!%d string@float GF@%%check0\n", generator->label_count + 2);
 	printf("JUMP $!!EXIT_4\n");
 
 	printf("LABEL !!%d\n", generator->label_count + 2);
@@ -130,10 +130,10 @@ void gen_substring(register Instruction * restrict instruction, register Generat
 
 	printf("LABEL !!%d\n", generator->label_count + 9);
 	printf("TYPE GF@%%check0 LF@%s\n", instruction->params[2]->identifier);
-    printf("JUMPIFEQ $!!EXIT_4 GF@%%bool GF@%%check0\n");
-    printf("JUMPIFEQ $!!EXIT_4 GF@%%string GF@%%check0\n");
-	printf("JUMPIFEQ !!%d GF@%%int GF@%%check0\n", generator->label_count + 6);
-	printf("JUMPIFEQ !!%d GF@%%float GF@%%check0\n", generator->label_count + 3);
+    printf("JUMPIFEQ $!!EXIT_4 string@bool GF@%%check0\n");
+    printf("JUMPIFEQ $!!EXIT_4 string@string GF@%%check0\n");
+	printf("JUMPIFEQ !!%d string@int GF@%%check0\n", generator->label_count + 6);
+	printf("JUMPIFEQ !!%d string@float GF@%%check0\n", generator->label_count + 3);
 	printf("JUMP $!!EXIT_4\n");
 
 	printf("LABEL !!%d\n", generator->label_count + 3);
@@ -185,10 +185,10 @@ void gen_substring(register Instruction * restrict instruction, register Generat
 /// \param generator Instance of the generator
 void gen_floatval(register Instruction * restrict instruction, register Generator * restrict generator){
 	printf("TYPE GF@%%check0 LF@%s\n", instruction->params[0]->identifier);
-    printf("JUMPIFEQ $!!EXIT_4 GF@%%bool GF@%%check0\n");
-    printf("JUMPIFEQ $!!EXIT_4 GF@%%string GF@%%check0\n");
-	printf("JUMPIFEQ !!%d GF@%%float GF@%%check0\n", generator->label_count);
-	printf("JUMPIFEQ !!%d GF@%%int GF@%%check0\n", generator->label_count + 1);
+    printf("JUMPIFEQ $!!EXIT_4 string@bool GF@%%check0\n");
+    printf("JUMPIFEQ $!!EXIT_4 string@string GF@%%check0\n");
+	printf("JUMPIFEQ !!%d string@float GF@%%check0\n", generator->label_count);
+	printf("JUMPIFEQ !!%d string@int GF@%%check0\n", generator->label_count + 1);
 	printf("MOVE LF@%s float@0x0.0p+0\n", instruction->id);
 	printf("JUMP !!%d\n", generator->label_count + 2);
 
@@ -208,10 +208,10 @@ void gen_floatval(register Instruction * restrict instruction, register Generato
 /// \param generator
 void gen_intval(register Instruction * restrict instruction, register Generator * restrict generator) {
 	printf("TYPE GF@%%check0 LF@%s\n", instruction->params[0]->identifier);
-    printf("JUMPIFEQ $!!EXIT_4 GF@%%bool GF@%%check0\n");
-    printf("JUMPIFEQ $!!EXIT_4 GF@%%string GF@%%check0\n");
-	printf("JUMPIFEQ !!%d GF@%%int GF@%%check0\n", generator->label_count);
-	printf("JUMPIFEQ !!%d GF@%%float GF@%%check0\n", generator->label_count + 1);
+    printf("JUMPIFEQ $!!EXIT_4 string@bool GF@%%check0\n");
+    printf("JUMPIFEQ $!!EXIT_4 string@string GF@%%check0\n");
+	printf("JUMPIFEQ !!%d string@int GF@%%check0\n", generator->label_count);
+	printf("JUMPIFEQ !!%d string@float GF@%%check0\n", generator->label_count + 1);
 	printf("MOVE LF@%s int@0\n", instruction->id);
 	printf("JUMP !!%d\n", generator->label_count + 2);
 
@@ -231,10 +231,10 @@ void gen_intval(register Instruction * restrict instruction, register Generator 
 /// \param generator Instance of the generator
 void gen_strval(register Instruction * restrict instruction, register Generator * restrict generator){
 	printf("TYPE GF@%%check0 LF@%s\n", instruction->params[0]->identifier);
-    printf("JUMPIFEQ $!!EXIT_4 GF@%%float GF@%%check0\n");
-    printf("JUMPIFEQ $!!EXIT_4 GF@%%int GF@%%check0\n");
-    printf("JUMPIFEQ $!!EXIT_4 GF@%%bool GF@%%check0\n");
-	printf("JUMPIFEQ !!%d GF@%%string GF@%%check0\n", generator->label_count);
+    printf("JUMPIFEQ $!!EXIT_4 string@float GF@%%check0\n");
+    printf("JUMPIFEQ $!!EXIT_4 string@int GF@%%check0\n");
+    printf("JUMPIFEQ $!!EXIT_4 string@bool GF@%%check0\n");
+	printf("JUMPIFEQ !!%d string@string GF@%%check0\n", generator->label_count);
 	printf("MOVE LF@%s string@\n", instruction->id);
 	printf("JUMP !!%d\n", generator->label_count + 1);
 
@@ -250,10 +250,10 @@ void gen_strval(register Instruction * restrict instruction, register Generator 
 /// \param generator Instance of the generator
 void gen_ord(register Instruction * restrict instruction, register Generator * restrict generator) {
 	printf("TYPE GF@%%check0 LF@%s\n", instruction->params[0]->identifier);
-    printf("JUMPIFEQ $!!EXIT_4 GF@%%float GF@%%check0\n");
-    printf("JUMPIFEQ $!!EXIT_4 GF@%%int GF@%%check0\n");
-    printf("JUMPIFEQ $!!EXIT_4 GF@%%bool GF@%%check0\n");
-	printf("JUMPIFEQ !!%d GF@%%string GF@%%check0\n", generator->label_count);
+    printf("JUMPIFEQ $!!EXIT_4 string@float GF@%%check0\n");
+    printf("JUMPIFEQ $!!EXIT_4 string@int GF@%%check0\n");
+    printf("JUMPIFEQ $!!EXIT_4 string@bool GF@%%check0\n");
+	printf("JUMPIFEQ !!%d string@string GF@%%check0\n", generator->label_count);
 
 	printf("LABEL !!%d\n", generator->label_count + 2);
 	printf("MOVE LF@%s int@0\n", instruction->id);
@@ -273,10 +273,10 @@ void gen_ord(register Instruction * restrict instruction, register Generator * r
 /// \param generator Instance of the generator
 void gen_chr(register Instruction * restrict instruction, register Generator * restrict generator) {
 	printf("TYPE GF@%%check0 LF@%s\n", instruction->params[0]->identifier);
-    printf("JUMPIFEQ $!!EXIT_4 GF@%%string GF@%%check0\n");
-    printf("JUMPIFEQ $!!EXIT_4 GF@%%bool GF@%%check0\n");
-	printf("JUMPIFEQ !!%d GF@%%int GF@%%check0\n", generator->label_count);
-	printf("JUMPIFEQ !!%d GF@%%float GF@%%check0\n", generator->label_count + 1);
+    printf("JUMPIFEQ $!!EXIT_4 string@string GF@%%check0\n");
+    printf("JUMPIFEQ $!!EXIT_4 string@bool GF@%%check0\n");
+	printf("JUMPIFEQ !!%d string@int GF@%%check0\n", generator->label_count);
+	printf("JUMPIFEQ !!%d string@float GF@%%check0\n", generator->label_count + 1);
 	printf("INT2CHAR LF@%s int@0\n", instruction->id);
 	printf("JUMP !!%d\n", generator->label_count + 2);
 
@@ -346,19 +346,21 @@ void gen_add(register Instruction * restrict instruction, register Generator * r
     printf("MOVE GF@%%check2 LF@%s\n", instruction->operands[1]->identifier);
 
     printf("TYPE GF@%%check0 LF@%s\n", instruction->operands[0]->identifier);
-    printf("JUMPIFEQ $!!EXIT_7 GF@%%string GF@%%check0\n");
-    printf("JUMPIFEQ $!!EXIT_7 GF@%%bool GF@%%check0\n");
-    printf("JUMPIFEQ !!%d GF@%%float GF@%%check0\n", generator->label_count);
-    printf("JUMPIFEQ !!%d GF@%%int GF@%%check0\n", generator->label_count + 2);
+    printf("JUMPIFEQ $!!EXIT_7 string@string GF@%%check0\n");
+    printf("JUMPIFEQ $!!EXIT_7 string@bool GF@%%check0\n");
+    printf("JUMPIFEQ !!%d string@float GF@%%check0\n", generator->label_count);
+    printf("JUMPIFEQ !!%d string@int GF@%%check0\n", generator->label_count + 2);
     printf("MOVE GF@%%check1 int@0\n");
+
     printf("JUMP !!%d\n", generator->label_count + 2);
 
     printf("LABEL !!%d\n", generator->label_count++); // if op1 float
     printf("TYPE GF@%%check0 LF@%s\n", instruction->operands[1]->identifier);
-    printf("JUMPIFEQ $!!EXIT_7 GF@%%string GF@%%check0\n");
-    printf("JUMPIFEQ $!!EXIT_7 GF@%%bool GF@%%check0\n");
-    printf("JUMPIFEQ !!%d GF@%%float GF@%%check0\n", generator->label_count + 3); // both floats done here
-    printf("JUMPIFEQ !!%d GF@%%int GF@%%check0\n", generator->label_count);
+    printf("JUMPIFEQ $!!EXIT_7 string@string GF@%%check0\n");
+    printf("JUMPIFEQ $!!EXIT_7 string@bool GF@%%check0\n");
+    printf("JUMPIFEQ !!%d string@float GF@%%check0\n", generator->label_count + 3); // both floats done here
+    printf("JUMPIFEQ !!%d string@int GF@%%check0\n", generator->label_count);
+
     printf("MOVE GF@%%check2 float@%a\n", 0.0);
     printf("JUMP !!%d\n", generator->label_count + 3);
 
@@ -368,16 +370,15 @@ void gen_add(register Instruction * restrict instruction, register Generator * r
 
     printf("LABEL !!%d\n", generator->label_count++); // if op1 int or null
     printf("TYPE GF@%%check0 LF@%s\n", instruction->operands[1]->identifier);
-    printf("JUMPIFEQ $!!EXIT_7 GF@%%string GF@%%check0\n");
-    printf("JUMPIFEQ $!!EXIT_7 GF@%%bool GF@%%check0\n");
-    printf("JUMPIFEQ !!%d GF@%%int GF@%%check0\n", generator->label_count + 1); // both ints done here
-    printf("JUMPIFEQ !!%d GF@%%float GF@%%check0\n", generator->label_count);
+    printf("JUMPIFEQ $!!EXIT_7 string@string GF@%%check0\n");
+    printf("JUMPIFEQ $!!EXIT_7 string@bool GF@%%check0\n");
+    printf("JUMPIFEQ !!%d string@int GF@%%check0\n", generator->label_count + 1); // both ints done here
+    printf("JUMPIFEQ !!%d string@float GF@%%check0\n", generator->label_count);
     printf("MOVE GF@%%check2 int@0\n");
     printf("JUMP !!%d\n", generator->label_count + 1);
 
     printf("LABEL !!%d\n", generator->label_count++); // op1 int op2 float
     printf("INT2FLOAT GF@%%check1 LF@%s\n", instruction->operands[0]->identifier);
-
 
     printf("LABEL !!%d\n", generator->label_count++); // both floats or ints
     printf("ADD LF@%s GF@%%check1 GF@%%check2\n", instruction->id);
@@ -391,19 +392,19 @@ void gen_sub(register Instruction * restrict instruction, register Generator * r
     printf("MOVE GF@%%check2 LF@%s\n", instruction->operands[1]->identifier);
 
     printf("TYPE GF@%%check0 LF@%s\n", instruction->operands[0]->identifier);
-    printf("JUMPIFEQ $!!EXIT_7 GF@%%string GF@%%check0\n");
-    printf("JUMPIFEQ $!!EXIT_7 GF@%%bool GF@%%check0\n");
-    printf("JUMPIFEQ !!%d GF@%%float GF@%%check0\n", generator->label_count);
-    printf("JUMPIFEQ !!%d GF@%%int GF@%%check0\n", generator->label_count + 2);
+    printf("JUMPIFEQ $!!EXIT_7 string@string GF@%%check0\n");
+    printf("JUMPIFEQ $!!EXIT_7 string@bool GF@%%check0\n");
+    printf("JUMPIFEQ !!%d string@float GF@%%check0\n", generator->label_count);
+    printf("JUMPIFEQ !!%d string@int GF@%%check0\n", generator->label_count + 2);
     printf("MOVE GF@%%check1 int@0\n");
     printf("JUMP !!%d\n", generator->label_count + 2);
 
     printf("LABEL !!%d\n", generator->label_count++); //if op1 float
     printf("TYPE GF@%%check0 LF@%s\n", instruction->operands[1]->identifier);
-    printf("JUMPIFEQ $!!EXIT_7 GF@%%string GF@%%check0\n");
-    printf("JUMPIFEQ $!!EXIT_7 GF@%%bool GF@%%check0\n");
-    printf("JUMPIFEQ !!%d GF@%%float GF@%%check0\n", generator->label_count + 3); //both floats done here
-    printf("JUMPIFEQ !!%d GF@%%int GF@%%check0\n", generator->label_count);
+    printf("JUMPIFEQ $!!EXIT_7 string@string GF@%%check0\n");
+    printf("JUMPIFEQ $!!EXIT_7 string@bool GF@%%check0\n");
+    printf("JUMPIFEQ !!%d string@float GF@%%check0\n", generator->label_count + 3); //both floats done here
+    printf("JUMPIFEQ !!%d string@int GF@%%check0\n", generator->label_count);
     printf("MOVE GF@%%check2 float@%a\n", 0.0);
     printf("JUMP !!%d\n", generator->label_count + 3);
 
@@ -415,10 +416,10 @@ void gen_sub(register Instruction * restrict instruction, register Generator * r
 
     printf("LABEL !!%d\n", generator->label_count++); //if op1 int or null
     printf("TYPE GF@%%check0 LF@%s\n", instruction->operands[1]->identifier);
-    printf("JUMPIFEQ $!!EXIT_7 GF@%%string GF@%%check0\n");
-    printf("JUMPIFEQ $!!EXIT_7 GF@%%bool GF@%%check0\n");
-    printf("JUMPIFEQ !!%d GF@%%int GF@%%check0\n", generator->label_count + 1); //both ints done here
-    printf("JUMPIFEQ !!%d GF@%%float GF@%%check0\n", generator->label_count);
+    printf("JUMPIFEQ $!!EXIT_7 string@string GF@%%check0\n");
+    printf("JUMPIFEQ $!!EXIT_7 string@bool GF@%%check0\n");
+    printf("JUMPIFEQ !!%d string@int GF@%%check0\n", generator->label_count + 1); //both ints done here
+    printf("JUMPIFEQ !!%d string@float GF@%%check0\n", generator->label_count);
     printf("MOVE GF@%%check2 int@0\n");
     printf("JUMP !!%d\n", generator->label_count + 1);
 
@@ -437,19 +438,19 @@ void gen_mul(register Instruction * restrict instruction, register Generator * r
     printf("MOVE GF@%%check2 LF@%s\n", instruction->operands[1]->identifier);
 
     printf("TYPE GF@%%check0 LF@%s\n", instruction->operands[0]->identifier);
-    printf("JUMPIFEQ $!!EXIT_7 GF@%%string GF@%%check0\n");
-    printf("JUMPIFEQ $!!EXIT_7 GF@%%bool GF@%%check0\n");
-    printf("JUMPIFEQ !!%d GF@%%float GF@%%check0\n", generator->label_count);
-    printf("JUMPIFEQ !!%d GF@%%int GF@%%check0\n", generator->label_count + 2);
+    printf("JUMPIFEQ $!!EXIT_7 string@string GF@%%check0\n");
+    printf("JUMPIFEQ $!!EXIT_7 string@bool GF@%%check0\n");
+    printf("JUMPIFEQ !!%d string@float GF@%%check0\n", generator->label_count);
+    printf("JUMPIFEQ !!%d string@int GF@%%check0\n", generator->label_count + 2);
     printf("MOVE GF@%%check1 int@0\n");
     printf("JUMP !!%d\n", generator->label_count + 2);
 
     printf("LABEL !!%d\n", generator->label_count++); //if op1 float
     printf("TYPE GF@%%check0 LF@%s\n", instruction->operands[1]->identifier);
-    printf("JUMPIFEQ $!!EXIT_7 GF@%%string GF@%%check0\n");
-    printf("JUMPIFEQ $!!EXIT_7 GF@%%bool GF@%%check0\n");
-    printf("JUMPIFEQ !!%d GF@%%float GF@%%check0\n", generator->label_count + 3); //both floats done here
-    printf("JUMPIFEQ !!%d GF@%%int GF@%%check0\n", generator->label_count);
+    printf("JUMPIFEQ $!!EXIT_7 string@string GF@%%check0\n");
+    printf("JUMPIFEQ $!!EXIT_7 string@bool GF@%%check0\n");
+    printf("JUMPIFEQ !!%d string@float GF@%%check0\n", generator->label_count + 3); //both floats done here
+    printf("JUMPIFEQ !!%d string@int GF@%%check0\n", generator->label_count);
     printf("MOVE GF@%%check2 float@%a\n", 0.0);
     printf("JUMP !!%d\n", generator->label_count + 3);
 
@@ -461,10 +462,10 @@ void gen_mul(register Instruction * restrict instruction, register Generator * r
 
     printf("LABEL !!%d\n", generator->label_count++); //if op1 int or null
     printf("TYPE GF@%%check0 LF@%s\n", instruction->operands[1]->identifier);
-    printf("JUMPIFEQ $!!EXIT_7 GF@%%string GF@%%check0\n");
-    printf("JUMPIFEQ $!!EXIT_7 GF@%%bool GF@%%check0\n");
-    printf("JUMPIFEQ !!%d GF@%%int GF@%%check0\n", generator->label_count + 1); //both ints done here
-    printf("JUMPIFEQ !!%d GF@%%float GF@%%check0\n", generator->label_count);
+    printf("JUMPIFEQ $!!EXIT_7 string@string GF@%%check0\n");
+    printf("JUMPIFEQ $!!EXIT_7 string@bool GF@%%check0\n");
+    printf("JUMPIFEQ !!%d string@int GF@%%check0\n", generator->label_count + 1); //both ints done here
+    printf("JUMPIFEQ !!%d string@float GF@%%check0\n", generator->label_count);
     printf("MOVE GF@%%check2 int@0\n"); // if null
     printf("JUMP !!%d\n", generator->label_count + 1);
 
@@ -483,19 +484,19 @@ void gen_div(register Instruction * restrict instruction, register Generator * r
     printf("MOVE GF@%%check2 LF@%s\n", instruction->operands[1]->identifier);
 
     printf("TYPE GF@%%check0 LF@%s\n", instruction->operands[0]->identifier);
-    printf("JUMPIFEQ $!!EXIT_7 GF@%%string GF@%%check0\n");
-    printf("JUMPIFEQ $!!EXIT_7 GF@%%bool GF@%%check0\n");
-    printf("JUMPIFEQ !!%d GF@%%float GF@%%check0\n", generator->label_count);
-    printf("JUMPIFEQ !!%d GF@%%int GF@%%check0\n", generator->label_count + 2);
+    printf("JUMPIFEQ $!!EXIT_7 string@string GF@%%check0\n");
+    printf("JUMPIFEQ $!!EXIT_7 string@bool GF@%%check0\n");
+    printf("JUMPIFEQ !!%d string@float GF@%%check0\n", generator->label_count);
+    printf("JUMPIFEQ !!%d string@int GF@%%check0\n", generator->label_count + 2);
     printf("MOVE GF@%%check1 float@%a\n", 0.0);
     printf("JUMP !!%d\n", generator->label_count);
 
     printf("LABEL !!%d\n", generator->label_count++); //if op1 float
     printf("TYPE GF@%%check0 LF@%s\n", instruction->operands[1]->identifier);
-    printf("JUMPIFEQ $!!EXIT_7 GF@%%string GF@%%check0\n");
-    printf("JUMPIFEQ $!!EXIT_7 GF@%%bool GF@%%check0\n");
-    printf("JUMPIFEQ !!%d GF@%%float GF@%%check0\n", generator->label_count + 2); //both floats done here
-    printf("JUMPIFEQ !!%d GF@%%int GF@%%check0\n", generator->label_count);
+    printf("JUMPIFEQ $!!EXIT_7 string@string GF@%%check0\n");
+    printf("JUMPIFEQ $!!EXIT_7 string@bool GF@%%check0\n");
+    printf("JUMPIFEQ !!%d string@float GF@%%check0\n", generator->label_count + 2); //both floats done here
+    printf("JUMPIFEQ !!%d string@int GF@%%check0\n", generator->label_count);
     printf("MOVE GF@%%check2 float@%a\n", 0.0);
     printf("JUMP !!%d\n", generator->label_count + 2);
 
@@ -506,10 +507,10 @@ void gen_div(register Instruction * restrict instruction, register Generator * r
     printf("LABEL !!%d\n", generator->label_count++); //if op1 int
     printf("INT2FLOAT GF@%%check1 LF@%s\n", instruction->operands[0]->identifier);
     printf("TYPE GF@%%check0 LF@%s\n", instruction->operands[1]->identifier);
-    printf("JUMPIFEQ $!!EXIT_7 GF@%%string GF@%%check0\n");
-    printf("JUMPIFEQ $!!EXIT_7 GF@%%bool GF@%%check0\n");
-    printf("JUMPIFEQ !!%d GF@%%int GF@%%check0\n", generator->label_count - 2); // convert to float
-    printf("JUMPIFEQ !!%d GF@%%float GF@%%check0\n", generator->label_count);
+    printf("JUMPIFEQ $!!EXIT_7 string@string GF@%%check0\n");
+    printf("JUMPIFEQ $!!EXIT_7 string@bool GF@%%check0\n");
+    printf("JUMPIFEQ !!%d string@int GF@%%check0\n", generator->label_count - 2); // convert to float
+    printf("JUMPIFEQ !!%d string@float GF@%%check0\n", generator->label_count);
     printf("MOVE GF@%%check2 float@%a\n", 0.0);
     printf("JUMP !!%d\n", generator->label_count);
 
@@ -525,19 +526,19 @@ void gen_concat(register Instruction * restrict instruction, register Generator 
     printf("MOVE GF@%%check2 LF@%s\n", instruction->operands[1]->identifier);
 
     printf("TYPE GF@%%check0 LF@%s\n", instruction->operands[0]->identifier);
-    printf("JUMPIFEQ $!!EXIT_7 GF@%%float GF@%%check0\n");
-    printf("JUMPIFEQ $!!EXIT_7 GF@%%int GF@%%check0\n");
-    printf("JUMPIFEQ $!!EXIT_7 GF@%%bool GF@%%check0\n");
-    printf("JUMPIFEQ !!%d GF@%%string GF@%%check0\n", generator->label_count);
+    printf("JUMPIFEQ $!!EXIT_7 string@float GF@%%check0\n");
+    printf("JUMPIFEQ $!!EXIT_7 string@int GF@%%check0\n");
+    printf("JUMPIFEQ $!!EXIT_7 string@bool GF@%%check0\n");
+    printf("JUMPIFEQ !!%d string@string GF@%%check0\n", generator->label_count);
     printf("MOVE GF@%%check1 string@\n");
 
     printf("LABEL !!%d\n", generator->label_count++);
 
     printf("TYPE GF@%%check0 LF@%s\n", instruction->operands[1]->identifier);
-    printf("JUMPIFEQ $!!EXIT_7 GF@%%float GF@%%check0\n");
-    printf("JUMPIFEQ $!!EXIT_7 GF@%%int GF@%%check0\n");
-    printf("JUMPIFEQ $!!EXIT_7 GF@%%bool GF@%%check0\n");
-    printf("JUMPIFEQ !!%d GF@%%string GF@%%check0\n", generator->label_count);
+    printf("JUMPIFEQ $!!EXIT_7 string@float GF@%%check0\n");
+    printf("JUMPIFEQ $!!EXIT_7 string@int GF@%%check0\n");
+    printf("JUMPIFEQ $!!EXIT_7 string@bool GF@%%check0\n");
+    printf("JUMPIFEQ !!%d string@string GF@%%check0\n", generator->label_count);
     printf("MOVE GF@%%check2 string@\n");
 
     printf("LABEL !!%d\n", generator->label_count++);
@@ -553,27 +554,27 @@ void gen_call(Instruction * restrict instruction) {
         switch (instruction->operands[0]->params[i]) {
             case D_FLOAT:
                 printf("TYPE GF@%%check0 LF@%s\n", instruction->params[i]->identifier);
-                printf("JUMPIFEQ $!!EXIT_4 GF@%%string GF@%%check0\n");
-                printf("JUMPIFEQ $!!EXIT_4 GF@%%int GF@%%check0\n");
-                printf("JUMPIFEQ $!!EXIT_4 GF@%%bool GF@%%check0\n");
+                printf("JUMPIFEQ $!!EXIT_4 string@string GF@%%check0\n");
+                printf("JUMPIFEQ $!!EXIT_4 string@int GF@%%check0\n");
+                printf("JUMPIFEQ $!!EXIT_4 string@bool GF@%%check0\n");
                 break;
             case D_INT:
                 printf("TYPE GF@%%check0 LF@%s\n", instruction->params[i]->identifier);
-                printf("JUMPIFEQ $!!EXIT_4 GF@%%string GF@%%check0\n");
-                printf("JUMPIFEQ $!!EXIT_4 GF@%%float GF@%%check0\n");
-                printf("JUMPIFEQ $!!EXIT_4 GF@%%bool GF@%%check0\n");
+                printf("JUMPIFEQ $!!EXIT_4 string@string GF@%%check0\n");
+                printf("JUMPIFEQ $!!EXIT_4 string@float GF@%%check0\n");
+                printf("JUMPIFEQ $!!EXIT_4 string@bool GF@%%check0\n");
                 break;
             case D_STRING:
                 printf("TYPE GF@%%check0 LF@%s\n", instruction->params[i]->identifier);
-                printf("JUMPIFEQ $!!EXIT_4 GF@%%int GF@%%check0\n");
-                printf("JUMPIFEQ $!!EXIT_4 GF@%%float GF@%%check0\n");
-                printf("JUMPIFEQ $!!EXIT_4 GF@%%bool GF@%%check0\n");
+                printf("JUMPIFEQ $!!EXIT_4 string@int GF@%%check0\n");
+                printf("JUMPIFEQ $!!EXIT_4 string@float GF@%%check0\n");
+                printf("JUMPIFEQ $!!EXIT_4 string@bool GF@%%check0\n");
                 break;
             default:
                 break;
         }
         if (instruction->operands[0]->params_strict[i]) 
-            printf("JUMPIFEQ $!!EXIT_4 GF@%%nil GF@%%check0\n");
+            printf("JUMPIFEQ $!!EXIT_4 string@nil GF@%%check0\n");
 
         printf("MOVE TF@%%%d LF@%s\n", i, instruction->params[i]->identifier);
     }
@@ -586,11 +587,11 @@ void gen_call(Instruction * restrict instruction) {
 /// \param generator Instance of the generator
 void gen_eq(register Instruction * restrict instruction, Generator * restrict generator) {
     printf("TYPE GF@%%check0 LF@%s\n", instruction->operands[0]->identifier);
-    printf("JUMPIFEQ $!!EXIT_7 GF@%%bool GF@%%check0\n");
+    printf("JUMPIFEQ $!!EXIT_7 string@bool GF@%%check0\n");
     printf("TYPE GF@%%check1 LF@%s\n", instruction->operands[1]->identifier);
-    printf("JUMPIFEQ $!!EXIT_7 GF@%%bool GF@%%check1\n");
+    printf("JUMPIFEQ $!!EXIT_7 string@bool GF@%%check1\n");
     printf("EQ LF@%s GF@%%check0 GF@%%check1\n", instruction->id);
-    printf("JUMPIFNEQ !!%d GF@%%true LF@%s\n", generator->label_count, instruction->id);
+    printf("JUMPIFNEQ !!%d bool@true LF@%s\n", generator->label_count, instruction->id);
     printf("EQ LF@%s LF@%s LF@%s\n", instruction->id, instruction->operands[0]->identifier, instruction->operands[1]->identifier);
     printf("LABEL !!%d\n", generator->label_count++);
 }
@@ -606,8 +607,8 @@ void gen_gt(register Instruction * restrict instruction, register Generator * re
 
     printf("TYPE GF@%%check0 LF@%s\n", instruction->operands[0]->identifier);
     printf("TYPE GF@%%check3 LF@%s\n", instruction->operands[1]->identifier);
-    printf("JUMPIFEQ $!!EXIT_7 GF@%%bool GF@%%check0\n");
-    printf("JUMPIFEQ $!!EXIT_7 GF@%%bool GF@%%check3\n");
+    printf("JUMPIFEQ $!!EXIT_7 string@bool GF@%%check0\n");
+    printf("JUMPIFEQ $!!EXIT_7 string@bool GF@%%check3\n");
 
     printf("JUMPIFNEQ !!%d GF@%%check0 GF@%%check3\n", generator->label_count + 1);
     printf("JUMPIFEQ !!%d LF@%s nil@nil\n", generator->label_count + 6, instruction->operands[0]->identifier); /* jump to end of false */
@@ -822,10 +823,10 @@ void gen_while_defs(register const Instruction * restrict instruction, Generator
 /// \param generator Instance of the generator
 void gen_while_start(register Instruction * restrict instruction, register Generator * restrict generator) {
     printf("TYPE GF@%%check0 LF@%s\n", instruction->id);
-    printf("JUMPIFEQ !!%d GF@%%check0 GF@%%string\n", generator->label_count);
-    printf("JUMPIFEQ !!%d GF@%%check0 GF@%%int\n", generator->label_count + 1);
-    printf("JUMPIFEQ !!%d GF@%%check0 GF@%%float\n", generator->label_count + 2);
-    printf("JUMPIFEQ !!%d GF@%%check0 GF@%%bool\n", generator->label_count + 3);
+    printf("JUMPIFEQ !!%d GF@%%check0 string@string\n", generator->label_count);
+    printf("JUMPIFEQ !!%d GF@%%check0 string@int\n", generator->label_count + 1);
+    printf("JUMPIFEQ !!%d GF@%%check0 string@float\n", generator->label_count + 2);
+    printf("JUMPIFEQ !!%d GF@%%check0 string@bool\n", generator->label_count + 3);
     printf("JUMP !!%d\n", stack_top(generator->label_stack)->value);
 
     /* string conversion */
@@ -891,10 +892,10 @@ void gen_if_start(const Instruction * restrict instruction, Generator * restrict
 /// \param generator Instance of the generator
 void gen_if_(register const Instruction * restrict instruction, register Generator * restrict generator) {
     printf("TYPE GF@%%check0 LF@%s\n", instruction->id);
-    printf("JUMPIFEQ !!%d GF@%%check0 GF@%%string\n", generator->label_count);
-    printf("JUMPIFEQ !!%d GF@%%check0 GF@%%int\n", generator->label_count + 1);
-    printf("JUMPIFEQ !!%d GF@%%check0 GF@%%float\n", generator->label_count + 2);
-    printf("JUMPIFEQ !!%d GF@%%check0 GF@%%bool\n", generator->label_count + 3);
+    printf("JUMPIFEQ !!%d GF@%%check0 string@string\n", generator->label_count);
+    printf("JUMPIFEQ !!%d GF@%%check0 string@int\n", generator->label_count + 1);
+    printf("JUMPIFEQ !!%d GF@%%check0 string@float\n", generator->label_count + 2);
+    printf("JUMPIFEQ !!%d GF@%%check0 string@bool\n", generator->label_count + 3);
     printf("JUMP !!%d\n", stack_top(generator->label_stack)->value);
 
     /* string conversion */
@@ -933,25 +934,11 @@ void gen_else_(const Generator *generator) {
 void generate(register Generator * restrict generator, register struct parser_t * restrict parser) {
     const TData *data = NULL;
     printf(".IFJcode22\n");
-    printf("DEFVAR GF@%%bool\n");
-    printf("DEFVAR GF@%%int\n");
-    printf("DEFVAR GF@%%float\n");
-    printf("DEFVAR GF@%%string\n");
-    printf("DEFVAR GF@%%nil\n");
     printf("DEFVAR GF@%%check0\n");
     printf("DEFVAR GF@%%check1\n");
     printf("DEFVAR GF@%%check2\n");
     printf("DEFVAR GF@%%check3\n");
     printf("DEFVAR GF@%%index\n");
-    printf("DEFVAR GF@%%true\n");
-    printf("DEFVAR GF@%%false\n");
-    printf("MOVE GF@%%bool string@bool\n");
-    printf("MOVE GF@%%int string@int\n");
-    printf("MOVE GF@%%float string@float\n");
-    printf("MOVE GF@%%string string@string\n");
-    printf("MOVE GF@%%nil string@nil\n");
-    printf("MOVE GF@%%true bool@true\n");
-    printf("MOVE GF@%%false bool@false\n");
     printf("CREATEFRAME\n");
     printf("PUSHFRAME\n");
 

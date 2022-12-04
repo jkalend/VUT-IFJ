@@ -154,8 +154,12 @@ jobs:
           name: "Get tests"
           command: "git clone https://github.com/galloj/IFJ22_Tester.git"
       - run:
+          name: "Prepare extensions"
+          command: |
+            cd IFJ22_Tester && echo "FUNEXP" > extensions
+      - run:
           name: "Run tests"
-          command: "cd IFJ22_Tester && python3 test.py ../build/IFJ ../ic22int"
+          command: "python3 test.py ../build/IFJ ../ic22int"
           # command: "cd build && ctest -C Debug -T test -R IFJ"
       - run:
           name: "Get Coverage"
@@ -181,13 +185,13 @@ workflows:
 #       - stack_test_cmake
 #       - scanner_test_granular_cmake
 #       - all_scanner_tests_cmake
-#   Overall:
-#     triggers:
-#       - schedule:
-#           cron: "0 0 0/6 ? * * *"
-#           filters:
-#             branches:
-#               only:
-#                 - in_while_hell
-#     jobs:
-#       - ifj-22tester
+  Overall:
+    triggers:
+      - schedule:
+          cron: "0 0 0/6 ? * * *"
+          filters:
+            branches:
+              only:
+                - in_while_hell
+    jobs:
+      - ifj-22tester
