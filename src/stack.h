@@ -1,8 +1,9 @@
-// stack.h
-// Řešení: IFJ projekt
-// Autor: Jan Vacula xvacul40, FIT
-// Vytvořeno: 28.09.2022
-// Přeloženo: gcc 9.4.0
+// Compiler of IFJ22 language
+// Faculty of Information Technology Brno University of Technology
+// Authors:
+// Jan Vacula (xvacul40)
+// Tereza Kubincová (xkubin27)
+
 #ifndef __STACK_H__
 #define __STACK_H__
 #include <stdbool.h>
@@ -14,7 +15,7 @@ typedef struct tdata {
 	unsigned int value;
 	unsigned int type;
 	htab_t * htab;
-    htab_pair_t *bucket;
+    htab_data_t *bucket;
 } TData;
 
 typedef struct telement {

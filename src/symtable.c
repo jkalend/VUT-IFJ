@@ -1,29 +1,34 @@
+// Compiler of IFJ22 language
+// Faculty of Information Technology Brno University of Technology
+// Authors:
+// Tereza Kubincová (xkubin27)
+// Jan Kalenda (xkalen07)
+
+/// \file symtable.c
 #include "symtable.h"
+#include "error.h"
+#include <stdint.h>
 
+/// \brief Hash function
+/// \param str Hashed string
+/// \return Hash value
 size_t htab_hash_function(htab_key_t str) {
-    unsigned int h = 0;     // musí mít 32 bitů
-    const unsigned char *p;
+    uint32_t h = 0;
 
-    for(p = (const unsigned char*)str; *p != '\0'; p++)
+    for(const unsigned char *p = (const unsigned char*)str; *p != '\0'; p++)
         h = 65599 * h + *p;
         
     return h;
 }
 
-
-//size_t htab_bucket_count(const htab_t * t) {
-//    return t->arr_size;
-//}
-
+/// \brief Clears the table
+/// \param t Hash table
 void htab_clear(htab_t * restrict t) {
     // iterate over all table elements and remove them
-    for (size_t i = 0; i < t->arr_size; i++)
-    {
+    for (size_t i = 0; i < t->arr_size; i++) {
         htab_item_t *head = t->arr_ptr[i];
-        while (head != NULL)
-        {
+        while (head != NULL) {
             t->arr_ptr[i] = head->next;
-            //head->item.identifier[0] = '\0';
             if (head->item.type == H_CONSTANT && head->item.value_type == D_STRING && head->item.value.string[0] != '\0') {
                 free(head->item.identifier);
                 free(head->item.value.string);
@@ -53,52 +58,17 @@ void htab_clear(htab_t * restrict t) {
     t->size = 0;
 }
 
-bool htab_erase(htab_t * restrict t, htab_key_t identifier) {
-    size_t hash = htab_hash_function(identifier) % t->arr_size;
-
-    htab_item_t *head = t->arr_ptr[hash];
-
-    if (head == NULL) return false;
-    else if (strcmp(head->item.identifier, identifier) == 0)
-    {
-        t->arr_ptr[hash] = head->next;
-        free((void *)head->item.identifier);
-        free(head);
-
-        t->size--;
-        return true;
-    }
-    else 
-    {
-        htab_item_t *delete = NULL;
-        while (head->next != NULL)
-        {
-            if (strcmp(head->next->item.identifier, identifier) == 0)
-            {
-                delete = head->next;
-                head->next = head->next->next;
-                free((void *)delete->item.identifier);
-                free(delete);
-
-                t->size--;
-                return true;
-            }
-            head = head->next;
-        }
-    }
-
-    return false;
-}
-
-htab_pair_t * htab_find(const htab_t * restrict t, htab_key_t identifier) {
+/// \brief Finds an item in the table
+/// \param t Hash table
+/// \param identifier Identifier to be found
+/// \return Pointer to the item or NULL if not found
+htab_data_t * htab_find(const htab_t * restrict t, htab_key_t identifier) {
     size_t hash = htab_hash_function(identifier) % t->arr_size;
 
     // iterate over all table elements
     htab_item_t *head = t->arr_ptr[hash];
-    while (head != NULL)
-    {
-        if (strcmp(head->item.identifier, identifier) == 0)
-        {
+    while (head != NULL) {
+        if (strcmp(head->item.identifier, identifier) == 0) {
             // the identifier was found
             return &head->item;
         }
@@ -108,13 +78,14 @@ htab_pair_t * htab_find(const htab_t * restrict t, htab_key_t identifier) {
     return NULL;
 }
 
-void htab_for_each(const htab_t * t, void (*f)(htab_pair_t *data)) {
+/// \brief Executes a function on each item in the table
+/// \param t Hash table
+/// \param f Function to be executed
+void htab_for_each(const htab_t * t, void (*f)(htab_data_t *data)) {
     // iterate over all table items
-    for (size_t i = 0; i < t->arr_size; i++)
-    {
+    for (size_t i = 0; i < t->arr_size; i++) {
         htab_item_t *head = t->arr_ptr[i];
-        while (head != NULL)
-        {
+        while (head != NULL) {
             // apply given function
             f(&head->item);
             head = head->next;
@@ -122,7 +93,8 @@ void htab_for_each(const htab_t * t, void (*f)(htab_pair_t *data)) {
     }
 }
 
-
+/// \brief Clears the table and frees the memory
+/// \param t Hash table
 void htab_free(htab_t * restrict t) {
     // remove all items and free all dynamic memory
     htab_clear(t);
@@ -130,37 +102,40 @@ void htab_free(htab_t * restrict t) {
     free(t);
 }
 
+/// \brief Initializes the table
+/// \param n Size of the table
 htab_t *htab_init(size_t n) {
     // dynamically allocate the hash table
     htab_t *tab = malloc(sizeof(htab_t));
-    if (tab == NULL)
-    {
-        return NULL;
+    if (tab == NULL) {
+        exit(INTERNAL_ERROR);
     }
 
     // dynamically allocate the hash table's array
     tab->arr_ptr = malloc(n * sizeof(htab_item_t *));
-    if (tab->arr_ptr == NULL)
-    {
+    if (tab->arr_ptr == NULL) {
         free(tab);
-        return NULL;
+        exit(INTERNAL_ERROR);
     }
     tab->arr_size = n;
     tab->size = 0;
 
     // initialize all array items to NULL
-    for (size_t i = 0; i < n; i++)
-    {
+    for (size_t i = 0; i < n; i++) {
         tab->arr_ptr[i] = NULL;
     }
     return tab;
 }
 
-
-htab_pair_t * htab_insert(htab_t * restrict t, const Token * restrict token, char* key) {
+/// \brief Inserts an item into the table
+/// \param t Hash table
+/// \param token Token structure
+/// \param key Identifier for hash table
+/// \return Pointer to the item or NULL if not found
+htab_data_t * htab_insert(htab_t * restrict t, const Token * restrict token, char* key) {
     // check if the identifier exists in the table
     if (token != NULL && (token->type == T_VAR || token->type == T_IDENTIFIER)) {
-        htab_pair_t *tmp = htab_find(t, key);
+        htab_data_t *tmp = htab_find(t, key);
         if (tmp != NULL) {
             return tmp;
         }
@@ -168,9 +143,8 @@ htab_pair_t * htab_insert(htab_t * restrict t, const Token * restrict token, cha
         
     //  dynamically allocate a new node
     htab_item_t *new = malloc(sizeof(htab_item_t));
-    if (new == NULL)
-    {
-        return NULL;
+    if (new == NULL) {
+        exit(INTERNAL_ERROR);
     }
 
     // initialize the new node
@@ -197,7 +171,7 @@ htab_pair_t * htab_insert(htab_t * restrict t, const Token * restrict token, cha
                 new->item.type = H_CONSTANT;
                 break;
             default:
-                exit(1); // token of unknown type (not fit for symtab)
+                exit(SYNTAX_ERROR);
         }
     }
 
@@ -209,8 +183,3 @@ htab_pair_t * htab_insert(htab_t * restrict t, const Token * restrict token, cha
     t->size++;
     return &new->item;
 }
-
-
-//size_t htab_size(const htab_t * restrict t) {
-//    return t->size;
-//}
