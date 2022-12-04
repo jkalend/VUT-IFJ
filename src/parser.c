@@ -1334,6 +1334,8 @@ int parse(Generator * restrict gen, scanner_t * restrict scanner) {
                     TData *data = malloc(sizeof(TData));
                     data->value = parser.bracket_counter;
                     data->type = KW_WHILE;
+                    data->htab = NULL;
+                    data->bucket = NULL;
                     stack_push(brackets, data);
 
                     if (parser.in_while == NULL) {
@@ -1349,6 +1351,8 @@ int parse(Generator * restrict gen, scanner_t * restrict scanner) {
                     TData *data = malloc(sizeof(TData));
                     data->value = parser.bracket_counter;
                     data->type = KW_IF;
+                    data->htab = NULL;
+                    data->bucket = NULL;
                     stack_push(brackets, data);
                 }
 
