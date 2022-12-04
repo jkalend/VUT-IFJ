@@ -19,7 +19,7 @@ extern const unsigned int PREC_TABLE[14][14];
 #define TEMP_VAR_PREFIX "$!!$tmp" // prefix for temporary variables
 #define TEMP_LENGTH 8 // length of the prefix
 #define EPS 14 // eps has column index 14 in ll table
-#define GLOBTAB_SIZE 4003 // num of buckets to allocate for global symtab
+#define GLOBTAB_SIZE 3011 // num of buckets to allocate for global symtab
 #define LOCALTAB_SIZE 1103 // num of buckets to allocate for local symtabs
 
 typedef enum {

@@ -507,6 +507,8 @@ int reduce(register TStack * restrict stack, register TStack * restrict shelf, T
                 htab_data->value_type = D_INT;
             } else if (op_one->bucket->value_type == D_VOID && op_two->bucket->value_type == D_VOID) {
                 htab_data->value_type = D_INT;
+            } else {
+	            htab_data->value_type = D_VOID;
             }
 
             defvar_order(tmp, htab_data, gen, parser);
@@ -571,7 +573,9 @@ int reduce(register TStack * restrict stack, register TStack * restrict shelf, T
                 htab_data->value_type = D_INT;
             } else if (op_one->bucket->value_type == D_VOID && op_two->bucket->value_type == D_VOID) {
                 htab_data->value_type = D_INT;
-            }
+            } else {
+				htab_data->value_type = D_VOID;
+			}
 
             defvar_order(tmp, htab_data, gen, parser);
 
@@ -607,6 +611,8 @@ int reduce(register TStack * restrict stack, register TStack * restrict shelf, T
                 htab_data->value_type = D_INT;
             } else if (op_one->bucket->value_type == D_VOID && op_two->bucket->value_type == D_VOID) {
                 htab_data->value_type = D_INT;
+            } else {
+	            htab_data->value_type = D_VOID;
             }
 
             defvar_order(tmp, htab_data, gen, parser);
