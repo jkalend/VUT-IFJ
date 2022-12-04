@@ -884,10 +884,10 @@ int precedence(register TStack *stack, register Token * token, bool *keep_token,
 
         if (!end) {
             long long number_size = (long long) ((ceil(log10(parser.tmp_counter)) + 1) * sizeof(char));
-            size_t alloc_num = snprintf(NULL, 0, "%d", parser.tmp_counter) + 1;
+            size_t alloc_num = snprintf(NULL, 0, "%lld", parser.tmp_counter) + 1;
             char *number = malloc(alloc_num);
             if (number == NULL) exit(BAD_INTERNAL);
-            snprintf(number, number_size, "%d", parser.tmp_counter);
+            snprintf(number, alloc_num, "%d", parser.tmp_counter);
 
             char *tmp = malloc(sizeof(char) * (TEMP_LENGTH + alloc_num));
             if (tmp == NULL) exit(BAD_INTERNAL);

@@ -624,8 +624,8 @@ void gen_gt(register Instruction * restrict instruction, register Generator * re
 
     printf("JUMPIFEQ !!%d LF@%s nil@nil\n", generator->label_count + 1, instruction->operands[1]->identifier);
 
-    //printf("JUMPIFEQ $!!EXIT_666 GF@%%check0 string@string\n");
-    //printf("JUMPIFEQ $!!EXIT_666 GF@%%check3 string@string\n");
+    printf("JUMPIFEQ $!!EXIT_7 GF@%%check0 string@string\n");
+    printf("JUMPIFEQ $!!EXIT_7 GF@%%check3 string@string\n");
 
     printf("JUMPIFNEQ !!%d GF@%%check0 string@int\n", generator->label_count);
     printf("INT2FLOAT GF@%%check1 LF@%s\n", instruction->operands[0]->identifier);
@@ -1096,8 +1096,6 @@ void generate(register Generator * restrict generator, register struct parser_t 
                 printf("EXIT int@6\n");
                 printf("LABEL $!!EXIT_5\n");
                 printf("EXIT int@5\n");
-                //printf("LABEL $!!EXIT_666\n");
-                //printf("EXIT int@666\n");
                 break;
 
             case start_fn:
