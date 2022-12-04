@@ -1,17 +1,21 @@
-// stack.h
-// Řešení: IFJ projekt
-// Autor: Jan Vacula xvacul40, FIT
-// Vytvořeno: 28.09.2022
-// Přeloženo: gcc 9.4.0
+// Compiler of IFJ22 language
+// Faculty of Information Technology Brno University of Technology
+// Authors:
+// Jan Vacula (xvacul40)
+// Tereza Kubincová (xkubin27)
+
 #ifndef __STACK_H__
 #define __STACK_H__
 #include <stdbool.h>
 #include <stdlib.h>
+#include "symtable.h"
 
-//PLACEHOLDER DATA STRUCT
+
 typedef struct tdata {
-	int x;
-	bool y;
+	unsigned int value;
+	unsigned int type;
+	htab_t * htab;
+    htab_data_t *bucket;
 } TData;
 
 typedef struct telement {
@@ -30,15 +34,17 @@ TStack *stack_init(TStack *stack);
 void stack_free(TStack *stack);
 
 //frees all allocated elements
-void stack_dispose(TStack *stack);
+void stack_dispose(register TStack *stack);
 
 //adds new element to stack
-void stack_push(TStack *stack, TData *data);
+void stack_push(register TStack *stack, const TData *data);
 
 //remove element from stack and returns its value
-TData *stack_pop(TStack *stack);
+TData *stack_pop(register TStack *stack);
 
 //returns state of stack
-bool stack_isEmpty(TStack *stack);
+bool stack_isEmpty(const TStack *stack);
+
+TData *stack_top(const TStack *stack);
 
 #endif	// __STACK_H__
