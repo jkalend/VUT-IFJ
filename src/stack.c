@@ -1,13 +1,13 @@
+// Compiler of IFJ22 language
+// Faculty of Information Technology Brno University of Technology
+// Authors:
+// Jan Vacula (xvacul40)
+// Jan Kalenda (xkalen07)
 
-// stack.c
-// Řešení: IFJ projekt
-// Autor: Jan Vacula xvacul40, FIT
-// Vytvořeno: 28.09.2022
-// Přeloženo: gcc 9.4.0
-
+/// \file stack.c
 #include "stack.h"
 
-/// @brief Initialises a new stack
+/// \brief Initialises a new stack
 /// \param stack New stack
 /// \return pointer to the new stack
 TStack *stack_init(TStack *stack) {
@@ -16,14 +16,14 @@ TStack *stack_init(TStack *stack) {
 	return stack;
 }
 
-/// @brief Frees the stack
+/// \brief Frees the stack
 /// \param stack Stack to be freed
 void stack_free(TStack *stack) {
     stack_dispose(stack);
 	free(stack);
 }
 
-/// @brief Empties the stack and frees all its items
+/// \brief Empties the stack and frees all its items
 /// \param stack Stack to be emptied
 void stack_dispose(register TStack *stack) {
 	register TElement temp = {.data = NULL, .nextPtr = NULL};
@@ -40,7 +40,7 @@ void stack_dispose(register TStack *stack) {
 	}
 }
 
-/// @brief Pushes a new item to the stack
+/// \brief Pushes a new item to the stack
 /// \param stack Stack to be pushed to
 /// \param data Data to be pushed
 void stack_push(register TStack *stack, const TData *data) {
@@ -54,7 +54,7 @@ void stack_push(register TStack *stack, const TData *data) {
 	stack->topPtr = newElement;
 }
 
-/// @brief Pops the top item from the stack
+/// \brief Pops the top item from the stack
 /// \param stack Stack to be popped from
 /// \return pointer to the popped data or NULL if the stack is empty
 TData *stack_pop(register TStack *stack) {
@@ -68,7 +68,7 @@ TData *stack_pop(register TStack *stack) {
 	return NULL;
 }
 
-/// @brief Tells if the stack is empty
+/// \brief Tells if the stack is empty
 /// \param stack Stack to be checked
 /// \return true if the stack is empty, false otherwise
 bool stack_isEmpty(const TStack *stack) {
@@ -78,7 +78,7 @@ bool stack_isEmpty(const TStack *stack) {
 	return false;
 }
 
-/// @brief Returns the top item from the stack
+/// \brief Returns the top item from the stack
 /// \param stack Stack to be checked
 /// \return pointer to the top item or NULL if the stack is empty
 TData *stack_top(const TStack *stack) {

@@ -1,6 +1,8 @@
-//
-// Created by Kalenda, Jan on 18.11.2022.
-//
+// Compiler of IFJ22 language
+// Faculty of Information Technology Brno University of Technology
+// Authors:
+// Tereza Kubincová (xkubin27)
+// Jan Kalenda (xkalen07)
 
 #ifndef IFJ_GENERATOR_H
 #define IFJ_GENERATOR_H
@@ -11,6 +13,7 @@
 #include "scanner.h"
 #include "parser.h"
 
+/* Inbuilt functions should not be moved */
 typedef enum {
     reads,
     readi,
@@ -23,7 +26,6 @@ typedef enum {
     floatval,
     intval,
     write,
-    // do NOT move anything above this comment
     concat,
     assign,
     defvar,
@@ -63,10 +65,10 @@ typedef struct Instruction {
     int operands_count;
     int params_count;
     InstructionType instruct;
-    char *id; // for call and defvar
-    htab_pair_t **operands; // for call op0 will be the label
+    char *id;
+    htab_data_t **operands;
     DataType *types;
-    htab_pair_t **params;
+    htab_data_t **params;
 } Instruction;
 
 typedef struct Generator {
@@ -78,7 +80,7 @@ typedef struct Generator {
 
 void generator_init(Generator *);
 
-void generate(Generator *, struct parser_t *);
+void generate(Generator *, Parser *);
 
 void generator_add_instruction(Generator *, Instruction *);
 
@@ -86,10 +88,10 @@ void generator_free(Generator *);
 
 Instruction *gen_instruction_constructor(InstructionType instruct,
                                          char *id,
-                                         htab_pair_t **operands,
+                                         htab_data_t **operands,
                                          DataType *types,
                                          int operands_count,
-                                         htab_pair_t **params,
+                                         htab_data_t **params,
                                          int params_count);
 
 

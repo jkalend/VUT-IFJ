@@ -1,7 +1,11 @@
-//
-// Created by Kalenda, Jan on 18.11.2022.
-//
+// Compiler of IFJ22 language
+// Faculty of Information Technology Brno University of Technology
+// Authors:
+// Tereza Kubincová (xkubin27)
+// Jaroslav Streit (xstrei06)
+// Jan Kalenda (xkalen07)
 
+/// \file generator.c
 #include "generator.h"
 #include <stdio.h>
 
@@ -11,7 +15,7 @@ void generator_init(Generator * restrict generator) {
     generator->label_count = 0;
     generator->instructions = malloc(sizeof(Instruction *) * 200);
     if (generator->instructions == NULL) {
-        exit(BAD_INTERNAL);
+        exit(INTERNAL_ERROR);
     }
     generator->instruction_count = 0;
     generator->label_stack = stack_init(generator->label_stack);
@@ -38,7 +42,6 @@ void generator_free(register Generator *generator) {
     free(generator->instructions);
     generator->instructions = NULL;
     stack_free(generator->label_stack);
-    free(generator);
 }
 
 /// \brief Creates a new instruction
@@ -52,10 +55,10 @@ void generator_free(register Generator *generator) {
 /// \return Pointer to the instruction
 Instruction *gen_instruction_constructor(InstructionType instruct,
                                          char *id,
-                                         htab_pair_t **operands,
+                                         htab_data_t **operands,
                                          DataType *types,
                                          int operands_count,
-                                         htab_pair_t **params,
+                                         htab_data_t **params,
                                          int params_count) {
     Instruction *instruction = malloc(sizeof(Instruction));
     instruction->instruct = instruct;
@@ -76,7 +79,7 @@ void generator_add_instruction(Generator * restrict generator, Instruction *inst
         generator->instructions = realloc(
                 generator->instructions, sizeof(Instruction*) * (generator->instruction_count + 200));
         if (generator->instructions == NULL) {
-            exit(BAD_INTERNAL);
+            exit(INTERNAL_ERROR);
         }
     }
     generator->instructions[generator->instruction_count] = instruction;
@@ -596,7 +599,7 @@ void gen_eq(register Instruction * restrict instruction, Generator * restrict ge
     printf("LABEL !!%d\n", generator->label_count++);
 }
 
-/// \brief > < >= <= operations for IFJcode22
+/// \brief Lesser Greater Greater or equal and Lesser or equal operations for IFJcode22
 /// \param instruction Instruction to be printed
 /// \param generator Instance of the generator
 /// \param op Which operation to print
@@ -708,7 +711,7 @@ void gen_start_fn(register const Instruction * restrict instruction, Generator *
 /// \param instruction Instruction to be printed
 /// \param generator Instance of the generator
 /// \param parser Instance of the parser
-void gen_fn_defs(register const Instruction * restrict instruction, Generator * restrict generator, parser_t * restrict parser) {
+void gen_fn_defs(register const Instruction * restrict instruction, Generator * restrict generator, Parser * restrict parser) {
     const TData *data = stack_pop(generator->label_stack);
     printf("JUMP !!%d\n", generator->label_count);
     printf("LABEL !!%d\n", data->value);
@@ -806,7 +809,7 @@ void gen_while_(const Instruction * restrict instruction, Generator * restrict g
 /// \param instruction Instruction to be printed
 /// \param generator Instance of the generator
 /// \param parser Instance of the parser
-void gen_while_defs(register const Instruction * restrict instruction, Generator * restrict generator, parser_t * restrict parser) {
+void gen_while_defs(register const Instruction * restrict instruction, Generator * restrict generator, Parser * restrict parser) {
     const TData *data = stack_pop(generator->label_stack);
     printf("JUMP !!%d\n", generator->label_count);
     printf("LABEL !!%d\n", data->value);
@@ -856,7 +859,7 @@ void gen_while_start(register Instruction * restrict instruction, register Gener
 /// \brief End of a while loop
 /// \param generator Instance of the generator
 /// \param parser Instance of the parser
-void gen_while_end(Generator * restrict generator, parser_t * restrict parser) {
+void gen_while_end(Generator * restrict generator, Parser * restrict parser) {
     const TData *data = stack_pop(generator->label_stack);
     printf("JUMP !!%d\n", data->type);
     printf("LABEL !!%d\n", data->value);
@@ -931,7 +934,7 @@ void gen_else_(const Generator *generator) {
 /// \brief Main function of the generator
 /// \param generator Instance of the generator
 /// \param parser Instance of the parser
-void generate(register Generator * restrict generator, register struct parser_t * restrict parser) {
+void generate(register Generator * restrict generator, register Parser * restrict parser) {
     const TData *data = NULL;
     printf(".IFJcode22\n");
     printf("DEFVAR GF@%%check0\n");

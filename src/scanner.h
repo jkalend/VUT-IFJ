@@ -1,6 +1,9 @@
-//
-// Created by Kalenda, Jan on 02.10.2022.
-//
+// Compiler of IFJ22 language
+// Faculty of Information Technology Brno University of Technology
+// Authors:
+// Tereza Kubincová (xkubin27)
+// Jaroslav Streit (xstrei06)
+// Jan Kalenda (xkalen07)
 
 #ifndef IFJ_SCANNER_H
 #define IFJ_SCANNER_H
@@ -12,30 +15,23 @@
 #include <ctype.h>
 #include <stdbool.h>
 
-FILE *stream;
-
+/* Order of keywords is important,and should not be changed */
 typedef enum {
     KW_ELSE,
     KW_FLOAT,
-    // please do not reorder
     KW_IF,
     KW_WHILE,
     KW_RETURN,
     KW_FUNCTION,
     KW_GLOBAL,
-    
     KW_INT,
     KW_NULL,
-    
     KW_STRING,
     KW_VOID,
-    
-    //KW_FOR,
-    
     KW_BOOLEAN,
     KW_TRUE,
     KW_FALSE,
-}Keyword;
+} Keyword;
 
 typedef union {
 	Keyword keyword;
@@ -49,13 +45,10 @@ typedef enum {
     T_VALID,
     T_IDENTIFIER,
     T_KEYWORD,
-
     T_DOUBLE_DOT,
     T_LEFT_BRACE,
     T_RIGHT_BRACE,
-    
     T_DIVIDE,
-    
     T_VAR,
     T_TYPE,
     T_SEMICOLON,
@@ -63,14 +56,11 @@ typedef enum {
     T_COMMA,
     T_EOF,
     T_END,
-
     T_RIGHT_BRACKET,
-
     T_STRING,
     T_INT,
     T_FLOAT,
     T_LEFT_BRACKET,
-
     T_PLUS,
     T_MINUS,
     T_MULTIPLY,
@@ -81,14 +71,8 @@ typedef enum {
     T_EQUAL,
     T_NOT_EQUAL,
     T_CONCATENATE,
-    T_AND,
-    T_OR,
-    T_NOT,
-    
-    
     T_ERROR,
-    
-}Type;
+} Type;
 
 //int strict_type = true
 //?int strict_type = false
@@ -103,9 +87,10 @@ typedef struct {
 	int line;
 	int first_read;
 	int prologue_r;
-}scanner_t;
+    FILE *stream;
+} Scanner;
 
-int get_token(Token*, scanner_t*);
+int get_token(Token*, Scanner*);
 char* convert_string_for_ifjcode(char*, int);
 int convert_esc_to_int(const char*, int);
 int kw_check(const char*, Token*);

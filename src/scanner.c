@@ -1,16 +1,20 @@
+// Compiler of IFJ22 language
+// Faculty of Information Technology Brno University of Technology
+// Authors:
+// Jaroslav Streit (xstrei06)
+
+/// \file scanner.c
 #include "scanner.h"
 #define LEX_OK 0
 
-/**
- * @brief function of lexical analyzator, modifies tokens
- * @param token token allocated by syntax analyzator, modified by scanner
- * @param scanner scanner structure to hold flags
- * @return returns 0 if everything is ok, otherwise returns 1
- */
-int get_token(Token * restrict token, scanner_t * restrict scanner) {
+/// \brief Function of lexical analyzator, modifies tokens
+/// \param token Token allocated by syntax analyzator, modified by scanner
+/// \param scanner Scanner structure to hold flags and data stream
+/// \return Returns 0 if everything is ok, otherwise returns 1
+int get_token(Token * restrict token, Scanner * restrict scanner) {
 	token->strict_type = true;
     if (scanner->first_read == 0){ //checking if there are no characters before prologue
-        int c = fgetc(stream);
+        int c = fgetc(scanner->stream);
 		if(c == EOF){ //empty file
 			token->type = T_EOF;
 			token->line = scanner->line;
@@ -18,13 +22,13 @@ int get_token(Token * restrict token, scanner_t * restrict scanner) {
 		}else if (c != '<'){
             token->type = T_ERROR;
             token->line = scanner->line;
-            return BAD_LEXEM;
+            return LEXEME_ERROR;
         }
 	scanner->first_read = 1;
-	ungetc(c, stream);
+	ungetc(c, scanner->stream);
     }
     while(true) {
-		register int c = fgetc(stream);
+		register int c = fgetc(scanner->stream);
         if(c == '\n') { //line increment
             scanner->line += 1;
             continue;
@@ -37,7 +41,7 @@ int get_token(Token * restrict token, scanner_t * restrict scanner) {
             int i = 0;
             char *identifier = malloc(size * sizeof(char));
 			if(identifier == NULL){
-				exit(BAD_INTERNAL);
+				exit(INTERNAL_ERROR);
 			}
 			//read identifier and save as string variable
             while(c != EOF && (isalnum(c) || c == '_')) {
@@ -46,15 +50,15 @@ int get_token(Token * restrict token, scanner_t * restrict scanner) {
 					char *tmp = realloc(identifier, size * sizeof(char));
 					if(tmp == NULL){
 						free(identifier);
-						exit(BAD_INTERNAL);
+						exit(INTERNAL_ERROR);
 					}
 					identifier = tmp;
                 }
                 identifier[i] = (char) c;
                 i++;
-                c = fgetc(stream);
+                c = fgetc(scanner->stream);
             }
-            ungetc(c, stream);
+            ungetc(c, scanner->stream);
             identifier[i] = '\0';
             if (kw_check(identifier, token) != 1){ //token is keyword
                 token->line = scanner->line;
@@ -70,7 +74,7 @@ int get_token(Token * restrict token, scanner_t * restrict scanner) {
             int size = 40;
             char *str = malloc(size);
 			if(str == NULL){
-				exit(BAD_INTERNAL);
+				exit(INTERNAL_ERROR);
 			}
             register int i = 0;
             int e = 0;
@@ -83,13 +87,13 @@ int get_token(Token * restrict token, scanner_t * restrict scanner) {
                     char *tmp = realloc(str, size);
 					if(tmp == NULL){
 						free(str);
-						exit(BAD_INTERNAL);
+						exit(INTERNAL_ERROR);
 					}
 					str = tmp;
                 }
                 str[i] = (char) c;
                 i++;
-                c = fgetc(stream);
+                c = fgetc(scanner->stream);
 				//if there is sign following a number, reading ends
 				if((str[i-1] >= '0' && str[i-1] <= '9') && (c == '+' || c == '-')){
 					break;
@@ -99,16 +103,16 @@ int get_token(Token * restrict token, scanner_t * restrict scanner) {
 					token->type = T_ERROR;
 					token->line = scanner->line;
 					free(str);
-					return BAD_LEXEM;
+					return LEXEME_ERROR;
 				}
             }
-            ungetc(c, stream);
+            ungetc(c, scanner->stream);
             str[i] = '\0';
 			if(str[i-1] < '0' || str[i-1] > '9'){ //if last character isn't number, error occurs
 				token->type = T_ERROR;
 				token->line = scanner->line;
 				free(str);
-				return BAD_LEXEM;
+				return LEXEME_ERROR;
 			}
             i = 0;
             while (str[i] != '\0'){
@@ -117,7 +121,7 @@ int get_token(Token * restrict token, scanner_t * restrict scanner) {
 						token->type = T_ERROR;
 						token->line = scanner->line;
 						free(str);
-						return BAD_LEXEM;
+						return LEXEME_ERROR;
 					}
                     dot++;
                 }
@@ -152,7 +156,7 @@ int get_token(Token * restrict token, scanner_t * restrict scanner) {
                 token->type = T_ERROR;
                 token->line = scanner->line;
                 free(str);
-                return BAD_LEXEM;
+                return LEXEME_ERROR;
             }
         }
         switch (c) {
@@ -161,10 +165,10 @@ int get_token(Token * restrict token, scanner_t * restrict scanner) {
                 return LEX_OK;
             }
             case '/': { //either token is divide or comment starts
-                register int c2 = fgetc(stream);
+                register int c2 = fgetc(scanner->stream);
                 if (c2 == '/') {
                     while (c2 != '\n') {
-                        c2 = fgetc(stream);
+                        c2 = fgetc(scanner->stream);
                         if (c2 == EOF) {
                             token->type = T_EOF;
                             token->line = scanner->line;
@@ -173,20 +177,20 @@ int get_token(Token * restrict token, scanner_t * restrict scanner) {
                     }
                     break;
                 } else if (c2 == '*') {
-                    c2 = fgetc(stream);
+                    c2 = fgetc(scanner->stream);
                     commentary:
                     while (c2 != '*') {
-                        c2 = fgetc(stream);
+                        c2 = fgetc(scanner->stream);
                         if(c2 == '\n') {
                             scanner->line += 1;
                         }
                         if (c2 == EOF) { //unterminated comment
-                            exit(BAD_LEXEM);
+                            exit(LEXEME_ERROR);
                         }
                     }
-                    c2 = fgetc(stream);
+                    c2 = fgetc(scanner->stream);
                     if (c2 == EOF) { //unterminated comment
-                        exit(BAD_LEXEM);
+                        exit(LEXEME_ERROR);
                     }else if (c2 == '/') {
                         break;
                     } else { //* was found but / not, so go back
@@ -197,7 +201,7 @@ int get_token(Token * restrict token, scanner_t * restrict scanner) {
                         goto commentary;
                     }
                 } else { //token is divide
-                    ungetc(c2, stream);
+                    ungetc(c2, scanner->stream);
                     token->type = T_DIVIDE;
                     token->line = scanner->line;
                     return LEX_OK;
@@ -219,31 +223,31 @@ int get_token(Token * restrict token, scanner_t * restrict scanner) {
                 return LEX_OK;
             }
             case '<': { //token is less, less equal or valid
-                register int c2 = fgetc(stream);
+                register int c2 = fgetc(scanner->stream);
                 if (c2 == '=') { //less equal
                     token->type = T_LESS_EQUAL;
                     token->line = scanner->line;
                     return LEX_OK;
                 } else if (c2 == '?'){ //prologue
-                    c2 = fgetc(stream);
+                    c2 = fgetc(scanner->stream);
                     if (c2 == 'p'){
-                        c2 = fgetc(stream);
+                        c2 = fgetc(scanner->stream);
                         if (c2 == 'h'){
-                            c2 = fgetc(stream);
+                            c2 = fgetc(scanner->stream);
                             if (c2 == 'p'){
 								if(scanner->prologue_r == 1){ //repeating prologue
-									exit(BAD_SYNTAX);
+									exit(SYNTAX_ERROR);
 								}
 								scanner->prologue_r = 1;
 								int ok = 0;
 								char *arr = malloc(24);
 								if(arr == NULL){
-									exit(BAD_INTERNAL);
+									exit(INTERNAL_ERROR);
 								}
 								char *slider = arr;
 								while (true) { //this loop checks for "declare(strict_types=1); with
 											   //possible whitespaces and/or comments in between
-									c2 = fgetc(stream);
+									c2 = fgetc(scanner->stream);
 									if (c2 == '\n') {
 										scanner->line += 1;
 										ok = 1;
@@ -255,35 +259,35 @@ int get_token(Token * restrict token, scanner_t * restrict scanner) {
 									}
 									switch (c2) {
 										case '/': { //comment somewhere inside declare
-											c2 = fgetc(stream);
+											c2 = fgetc(scanner->stream);
 											if (c2 == '/') {
 												ok = 1;
 												while (c2 != '\n') {
-													c2 = fgetc(stream);
+													c2 = fgetc(scanner->stream);
 													if (c2 == EOF) { //incomplete declare
 														token->type = T_ERROR;
 														token->line = scanner->line;
-														return BAD_LEXEM;
+														return LEXEME_ERROR;
 													}
 												}
 												break;
 											} else if (c2 == '*') {
 												ok = 1;
-												c2 = fgetc(stream);
+												c2 = fgetc(scanner->stream);
 											loop:
 												while (c2 != '*') {
-													c2 = fgetc(stream);
+													c2 = fgetc(scanner->stream);
 
 													if (c2 == '\n') {
 														scanner->line += 1;
 													}
 													if (c2 == EOF) { //incomplete declare
-														exit(BAD_LEXEM);
+														exit(LEXEME_ERROR);
 													}
 												}
-												c2 = fgetc(stream);
+												c2 = fgetc(scanner->stream);
 												if (c2 == EOF) {
-													exit(BAD_LEXEM); //incomplete declare
+													exit(LEXEME_ERROR); //incomplete declare
 												} else if (c2 == '/') { //end of comment
 													break;
 												} else { //* was found but / not, so go back
@@ -296,7 +300,7 @@ int get_token(Token * restrict token, scanner_t * restrict scanner) {
 											} else {
 												token->type = T_ERROR;
 												token->line = scanner->line;
-												return BAD_LEXEM;
+												return LEXEME_ERROR;
 											}
 										}
 										case 'd': {
@@ -304,15 +308,15 @@ int get_token(Token * restrict token, scanner_t * restrict scanner) {
 														 //between <?php and declare, error occurs
 												token->type = T_ERROR;
 												token->line = scanner->line;
-												return BAD_LEXEM;
+												return LEXEME_ERROR;
 											}
-											ungetc(c2, stream);
-											fgets(arr, 8, stream);
+											ungetc(c2, scanner->stream);
+											fgets(arr, 8, scanner->stream);
 											slider = slider + 7;
 											if (strcmp(arr, "declare") != 0) {
 												token->type = T_ERROR;
 												token->line = scanner->line;
-												return BAD_LEXEM;
+												return LEXEME_ERROR;
 											}
 											break;
 										}
@@ -324,12 +328,12 @@ int get_token(Token * restrict token, scanner_t * restrict scanner) {
 											break;
 										}
 										case 's': {
-											ungetc(c2, stream);
-											fgets(slider, 13, stream);
+											ungetc(c2, scanner->stream);
+											fgets(slider, 13, scanner->stream);
 											if (strcmp(slider, "strict_types") != 0) {
 												token->type = T_ERROR;
 												token->line = scanner->line;
-												return BAD_LEXEM;
+												return LEXEME_ERROR;
 											}
 											slider = slider + 12;
 											break;
@@ -350,93 +354,93 @@ int get_token(Token * restrict token, scanner_t * restrict scanner) {
 												token->type = T_ERROR;
 												token->line = scanner->line;
 												free(arr);
-												return BAD_LEXEM;
+												return LEXEME_ERROR;
 											}
 										}
 										default: {
 											token->type = T_ERROR;
 											token->line = scanner->line;
-											return BAD_LEXEM;
+											return LEXEME_ERROR;
 										}
 									}
 								}
                             }else{ //faulty prologue
                                 token->type = T_ERROR;
                                 token->line = scanner->line;
-                                return BAD_LEXEM;
+                                return LEXEME_ERROR;
                             }
                         }else{ //faulty prologue
                             token->type = T_ERROR;
                             token->line = scanner->line;
-                            return BAD_LEXEM;
+                            return LEXEME_ERROR;
                         }
                     }else{ //faulty prologue
                         token->type = T_ERROR;
                         token->line = scanner->line;
-                        return BAD_LEXEM;
+                        return LEXEME_ERROR;
                     }
                 }
                 else { //token is less
-                    ungetc(c2, stream);
+                    ungetc(c2, scanner->stream);
                     token->type = T_LESS;
                     token->line = scanner->line;
                     return LEX_OK;
                 }
             }
             case '>': { //token can be greater or greater equal
-                int c2 = fgetc(stream);
+                int c2 = fgetc(scanner->stream);
                 if (c2 == '=') {
                     token->type = T_GREATER_EQUAL;
                     token->line = scanner->line;
                     return LEX_OK;
                 }
                 else {
-                    ungetc(c2, stream);
+                    ungetc(c2, scanner->stream);
                     token->type = T_GREATER;
                     token->line = scanner->line;
                     return LEX_OK;
                 }
             }
             case '=': { //token can be assignment or equal
-                int c2 = fgetc(stream);
+                int c2 = fgetc(scanner->stream);
                 if(c2 == '=') {
-                    c2 = fgetc(stream);
+                    c2 = fgetc(scanner->stream);
                     if (c2 == '=') { // !== is matched, token is equal
                         token->type = T_EQUAL;
                         token->line = scanner->line;
                         return LEX_OK;
                     }else{ // != doesn't match any allowed format, hence error occurs
-						ungetc(c2, stream);
+						ungetc(c2, scanner->stream);
                         token->type = T_ERROR;
                         token->line = scanner->line;
-                        return BAD_LEXEM;
+                        return LEXEME_ERROR;
                     }
                 } else { //if only one = is matched, token is assignment
-                    ungetc(c2, stream);
+                    ungetc(c2, scanner->stream);
                     token->type = T_ASSIGN;
                     token->line = scanner->line;
                     return LEX_OK;
                 }
             }
             case '!': { //token can be not equal
-                int c2 = fgetc(stream);
+                int c2 = fgetc(scanner->stream);
                 if(c2 == '=') {
-                    c2 = fgetc(stream);
+                    c2 = fgetc(scanner->stream);
                     if (c2 == '=') { //either !== is matched or error occurs
                         token->type = T_NOT_EQUAL;
                         token->line = scanner->line;
                         return LEX_OK;
                     }else{
-						ungetc(c2, stream);
+						ungetc(c2, scanner->stream);
                         token->type = T_ERROR;
                         token->line = scanner->line;
-                        return BAD_LEXEM;
+                        return LEXEME_ERROR;
                     }
                 } else {
-					ungetc(c2, stream);
+					ungetc(c2, scanner->stream);
                     token->type = T_ERROR;
                     token->line = scanner->line;
-                    return BAD_LEXEM;
+                    return LEXEME_ERROR;
                 }
             }
             case '(': { //token is opening parenthesis
@@ -482,16 +486,16 @@ int get_token(Token * restrict token, scanner_t * restrict scanner) {
             case '$':{ //token is variable
                 token->type = T_VAR;
                 token->line = scanner->line;
-                register int c2 = fgetc(stream);
+                register int c2 = fgetc(scanner->stream);
                 if(c2 != '_' && (c2 <'A' || (c2 > 'Z' && c2 < 'a') || c2 > 'z')){
                     token->type = T_ERROR;
                     token->line = scanner->line;
-                    return BAD_LEXEM;
+                    return LEXEME_ERROR;
                 }
                 int size = 40;
                 char *str = malloc(40);
 				if(str == NULL){
-					exit(BAD_INTERNAL);
+					exit(INTERNAL_ERROR);
 				}
                 int i = 0;
                 while((c2 == '_') || (c2 >= '0' && c2 <= '9') || (c2 >= 'A' && c2 <= 'Z') || (c2 >= 'a' && c2 <= 'z')){
@@ -500,25 +504,25 @@ int get_token(Token * restrict token, scanner_t * restrict scanner) {
                         char *tmp = realloc(str, size);
 						if(tmp == NULL){
 							free(str);
-							exit(BAD_INTERNAL);
+							exit(INTERNAL_ERROR);
 						}
 						str = tmp;
                     }
                     str[i] = (char) c2;
                     i++;
-                    c2 = fgetc(stream);
+                    c2 = fgetc(scanner->stream);
                 }
-                ungetc(c2, stream);
+                ungetc(c2, scanner->stream);
                 str[i] = '\0';
                 token->value.identifier = str;
                 return LEX_OK;
             }
             case '?': { //token can be type or ending sequence
-                register int c2 = fgetc(stream);
+                register int c2 = fgetc(scanner->stream);
                 if (c2 == '>') { //ending sequence
-					c2 = fgetc(stream);
+					c2 = fgetc(scanner->stream);
 					if(c2 != EOF){
-						exit(BAD_SYNTAX);
+						exit(SYNTAX_ERROR);
 					}
                     token->type = T_END;
                     token->line = scanner->line;
@@ -526,7 +530,7 @@ int get_token(Token * restrict token, scanner_t * restrict scanner) {
                 } else if (c2 >= 'a' && c2 <= 'z') {
                     char *str = malloc(40);
 					if(str == NULL){
-						exit(BAD_INTERNAL);
+						exit(INTERNAL_ERROR);
 					}
                     int size = 40;
                     int i = 0;
@@ -538,15 +542,15 @@ int get_token(Token * restrict token, scanner_t * restrict scanner) {
                             char *tmp = realloc(str, size);
 							if(tmp == NULL){
 								free(str);
-								exit(BAD_INTERNAL);
+								exit(INTERNAL_ERROR);
 							}
 							str = tmp;
                         }
                         str[i] = (char) c2;
                         i++;
-                        c2 = fgetc(stream);
+                        c2 = fgetc(scanner->stream);
                     }
-                    ungetc(c2, stream);
+                    ungetc(c2, scanner->stream);
                     str[i] = '\0';
                     if (kw_check(str, token) != 2) { //check for keyword, if the identifier
 														//doesn't match any type except void,
@@ -554,22 +558,23 @@ int get_token(Token * restrict token, scanner_t * restrict scanner) {
                         token->type = T_ERROR;
                         token->line = scanner->line;
                         free(str);
-                        return BAD_LEXEM;
+                        return LEXEME_ERROR;
                     }
                     token->line = scanner->line;
 					token->strict_type = false; //variable of this type can contain null
+                    free(str);
                     return LEX_OK;
 
                 } else { //anything else causes an error
                     token->type = T_ERROR;
                     token->line = scanner->line;
-                    return BAD_LEXEM;
+                    return LEXEME_ERROR;
                 }
             }
             case '"': { //token is string
                 token->type = T_STRING;
                 token->line = scanner->line;
-                int c2 = fgetc(stream);
+                int c2 = fgetc(scanner->stream);
                 if(c2 == '"'){ //empty string
                     token->value.string = "";
                     return LEX_OK;
@@ -577,7 +582,7 @@ int get_token(Token * restrict token, scanner_t * restrict scanner) {
 				int size = 40;
                 char *str = malloc(size);
 				if(str == NULL){
-					exit(BAD_INTERNAL);
+					exit(INTERNAL_ERROR);
 				}
                 int i = 0;
                 while (true) { //iterating through file until the ending quotation mark is found
@@ -587,7 +592,7 @@ int get_token(Token * restrict token, scanner_t * restrict scanner) {
                         char *tmp = realloc(str, size);
 						if(tmp == NULL){
 							free(str);
-							exit(BAD_INTERNAL);
+							exit(INTERNAL_ERROR);
 						}
 						str = tmp;
                     }
@@ -597,10 +602,10 @@ int get_token(Token * restrict token, scanner_t * restrict scanner) {
 						token->type = T_ERROR;
 						token->line = scanner->line;
 						free(str);
-						return BAD_LEXEM;
+						return LEXEME_ERROR;
 					}
                     if(c2 == '\\'){
-                        c2 = fgetc(stream);
+                        c2 = fgetc(scanner->stream);
                         str[i] = (char) c2;
                         i++;
                     }
@@ -609,9 +614,9 @@ int get_token(Token * restrict token, scanner_t * restrict scanner) {
 						token->type = T_ERROR;
 						token->line = scanner->line;
 						free(str);
-						return BAD_LEXEM;
+						return LEXEME_ERROR;
 					}
-                    c2 = fgetc(stream);
+                    c2 = fgetc(scanner->stream);
                     if (c2 == '"') { //ending quotation mark found, insert terminating null
 									 //and break out of loop
                         str[i] = '\0';
@@ -621,7 +626,7 @@ int get_token(Token * restrict token, scanner_t * restrict scanner) {
                         token->type = T_ERROR;
                         token->line = scanner->line;
                         free(str);
-                        return BAD_LEXEM;
+                        return LEXEME_ERROR;
                     }
                 }
 				//passing the converted string to token
@@ -631,18 +636,16 @@ int get_token(Token * restrict token, scanner_t * restrict scanner) {
             default: { //any unknown character causes an error
                 token->type = T_ERROR;
                 token->line = scanner->line;
-                return BAD_LEXEM;
+                return LEXEME_ERROR;
             }
         }
     }
 }
 
-/**
- * @brief function to convert strings from IFJ22 to IFJcode22
- * @param str string to be converted
- * @param size current allocated size for the string in bytes
- * @return returns converted string
- */
+/// \brief Function to convert strings from IFJ22 to IFJcode22
+/// \param str String to be converted
+/// \param size Current allocated size for the string in bytes
+/// \return Returns converted string
 char* convert_string_for_ifjcode(register char *str, int size) {
     register int i = 0;
     char hex[3];
@@ -864,7 +867,7 @@ char* convert_string_for_ifjcode(register char *str, int size) {
 			char *tmp = realloc(str, size);
 			if(tmp == NULL){
 				free(str);
-				exit(BAD_INTERNAL);
+				exit(INTERNAL_ERROR);
 			}
 			str = tmp;
 		}
@@ -872,12 +875,10 @@ char* convert_string_for_ifjcode(register char *str, int size) {
     return str;
 }
 
-/**
- * @brief function to convert octal or hexadecimal number from escape sequence to decimal integer
- * @param str escape sequence as string
- * @param len length of escape sequence - 2 for hexadecimal, 3 for octal
- * @return returns the converted integer or -1 if the sequence is out of bounds or $
- */
+/// \brief Function to convert octal or hexadecimal number from escape sequence to decimal integer
+/// \param str Escape sequence as string
+/// \param len Length of escape sequence - 2 for hexadecimal, 3 for octal
+/// \return Returns the converted integer or -1 if the sequence is out of bounds or $
 int convert_esc_to_int(const char* str, int len) {
     int result = 0;
     if (len == 3) {
@@ -900,12 +901,10 @@ int convert_esc_to_int(const char* str, int len) {
     return result;
 }
 
-/**
- * @brief function to check if the passed string is a keyword
- * @param s string to be checked for keyword
- * @param token current token
- * @return returns 0 if no keyword is found, 2 for types except void, 1 for other keywords
- */
+/// \brief Function to check if the passed string is a keyword
+/// \param s String to be checked for keyword
+/// \param token Current token
+/// \return Returns 0 if no keyword is found, 2 for types except void, 1 for other keywords
 int kw_check(const char * restrict s, Token * restrict token){
     if (strcmp(s, "else") == 0) {
         token->type = T_KEYWORD;
@@ -977,5 +976,5 @@ int kw_check(const char * restrict s, Token * restrict token){
         token->value.keyword = KW_FALSE;
         return LEX_OK;
     }
-    return BAD_LEXEM;
+    return LEXEME_ERROR;
 }

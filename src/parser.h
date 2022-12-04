@@ -1,3 +1,9 @@
+// Compiler of IFJ22 language
+// Faculty of Information Technology Brno University of Technology
+// Authors:
+// Tereza Kubincová (xkubin27)
+// Jan Kalenda (xkalen07)
+
 #ifndef PARSER_H
 #define PARSER_H
 
@@ -10,11 +16,11 @@ extern const unsigned int LL_TABLE[8][33];
 
 extern const unsigned int PREC_TABLE[14][14];
 
-#define TEMP_VAR_PREFIX "$!!$tmp"
-#define TEMP_LENGTH 8
+#define TEMP_VAR_PREFIX "$!!$tmp" // prefix for temporary variables
+#define TEMP_LENGTH 8 // length of the prefix
 #define EPS 14 // eps has column index 14 in ll table
-#define GLOBTAB_SIZE 2003 // num of buckets to allocate for global symtab
-#define LOCALTAB_SIZE 557 // num of buckets to allocate for local symtabs
+#define GLOBTAB_SIZE 4003 // num of buckets to allocate for global symtab
+#define LOCALTAB_SIZE 1103 // num of buckets to allocate for local symtabs
 
 typedef enum {
     N_PROG,
@@ -73,11 +79,11 @@ typedef struct parser_t {
     htab_t *temporary_tab;
     TStack *local_tabs;
     TStack *garbage_bin;
-    htab_pair_t *in_func;
-    htab_pair_t *in_assign;
-    htab_pair_t *val_returned;
+    htab_data_t *in_func;
+    htab_data_t *in_assign;
+    htab_data_t *val_returned;
     struct Instruction *in_while;
     struct Instruction *in_fn;
-} parser_t;
+} Parser;
 
 #endif // PARSER_H
