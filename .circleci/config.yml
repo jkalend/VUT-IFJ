@@ -180,9 +180,3 @@ workflows:
     when: always
     jobs:
       - ifj-22tester
-  Overall:
-    triggers:
-      - schedule:
-          cron: "0 0 0/6 ? * * *"
-    jobs:
-      - ifj-22tester
