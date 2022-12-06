@@ -808,6 +808,7 @@ int precedence(register TStack *stack, register Token * token, bool *keep_token,
     parser->empty_expr = false;
     unsigned int row = 0;
     unsigned int column = 0;
+	unsigned int brackets = 0;
     register TStack * restrict shelf = NULL;
     TStack * restrict temps = NULL;
     shelf = stack_init(shelf);
@@ -1062,6 +1063,12 @@ int precedence(register TStack *stack, register Token * token, bool *keep_token,
                 stack_push(stack, stack_data(P_I, P_I));
             } else {
                 free(tmp);
+				if (lookahead->type == T_LEFT_BRACKET) {
+					brackets++;
+				} else if (lookahead->type == T_RIGHT_BRACKET) {
+					brackets--;
+				}
+				if ((parser->if_eval || parser->while_eval) && lookahead->type == T_RIGHT_BRACKET && brackets == 0) end = true;
                 stack_push(stack, stack_data((int) column, (int) column));
             }
         } else {
@@ -1313,7 +1320,6 @@ int parse(Generator * restrict gen, Scanner * restrict scanner, Parser * restric
                 }
             }
             else {
-                fprintf(stderr, "terms not matching\n");
                 exit(SYNTAX_ERROR);
             }
         }
