@@ -1,4 +1,4 @@
-CFLAGS:= -g -O0 -pedantic -Wall -Wextra
+CFLAGS:= -O0
 
 default: parser
 

@@ -140,9 +140,11 @@ int apply_rule(register TStack * restrict stack, unsigned int val) {
             stack_push(stack, stack_data(KW_FUNCTION, T_KW));
             break;
         case 6:
-            stack_push(stack, stack_data(N_SMALL_ST, T_NONTERM));
-            stack_push(stack, stack_data(T_VAR, T_TERM));
-            stack_push(stack, stack_data(KW_GLOBAL, T_KW));
+	        exit(SYNTAX_ERROR);
+			/* incomplete global variable feature */
+//            stack_push(stack, stack_data(N_SMALL_ST, T_NONTERM));
+//            stack_push(stack, stack_data(T_VAR, T_TERM));
+//            stack_push(stack, stack_data(KW_GLOBAL, T_KW));
             break;
         case 7:
             stack_push(stack, stack_data(T_SEMICOLON, T_TERM));
@@ -1675,8 +1677,6 @@ int main(void) {
 	scanner.first_read = 0;
 	scanner.prologue_r = 0;
     scanner.stream = stdin;
-
-    //scanner.stream = fopen("test.php", "r");
 
     static Parser parser;
 
