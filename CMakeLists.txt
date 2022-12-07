@@ -6,7 +6,7 @@ find_package(codecov)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_COMPILER gcc)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -fprofile-arcs -ftest-coverage -O2 -pedantic -Wall -Wextra")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -fprofile-arcs -ftest-coverage -O0 -pedantic -Wall -Wextra")
 
 include_directories(.)
 include_directories(src)

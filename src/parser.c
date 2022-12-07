@@ -507,6 +507,8 @@ int reduce(register TStack * restrict stack, register TStack * restrict shelf, T
                 htab_data->value_type = D_INT;
             } else if (op_one->bucket->value_type == D_VOID && op_two->bucket->value_type == D_VOID) {
                 htab_data->value_type = D_INT;
+            } else {
+	            htab_data->value_type = D_VOID;
             }
 
             defvar_order(tmp, htab_data, gen, parser);
@@ -571,7 +573,9 @@ int reduce(register TStack * restrict stack, register TStack * restrict shelf, T
                 htab_data->value_type = D_INT;
             } else if (op_one->bucket->value_type == D_VOID && op_two->bucket->value_type == D_VOID) {
                 htab_data->value_type = D_INT;
-            }
+            } else {
+				htab_data->value_type = D_VOID;
+			}
 
             defvar_order(tmp, htab_data, gen, parser);
 
@@ -607,6 +611,8 @@ int reduce(register TStack * restrict stack, register TStack * restrict shelf, T
                 htab_data->value_type = D_INT;
             } else if (op_one->bucket->value_type == D_VOID && op_two->bucket->value_type == D_VOID) {
                 htab_data->value_type = D_INT;
+            } else {
+	            htab_data->value_type = D_VOID;
             }
 
             defvar_order(tmp, htab_data, gen, parser);
@@ -802,6 +808,7 @@ int precedence(register TStack *stack, register Token * token, bool *keep_token,
     parser->empty_expr = false;
     unsigned int row = 0;
     unsigned int column = 0;
+	unsigned int brackets = 0;
     register TStack * restrict shelf = NULL;
     TStack * restrict temps = NULL;
     shelf = stack_init(shelf);
@@ -1056,6 +1063,12 @@ int precedence(register TStack *stack, register Token * token, bool *keep_token,
                 stack_push(stack, stack_data(P_I, P_I));
             } else {
                 free(tmp);
+				if (lookahead->type == T_LEFT_BRACKET) {
+					brackets++;
+				} else if (lookahead->type == T_RIGHT_BRACKET) {
+					brackets--;
+				}
+				if ((parser->if_eval || parser->while_eval) && lookahead->type == T_RIGHT_BRACKET && brackets == 0) end = true;
                 stack_push(stack, stack_data((int) column, (int) column));
             }
         } else {
@@ -1307,7 +1320,6 @@ int parse(Generator * restrict gen, Scanner * restrict scanner, Parser * restric
                 }
             }
             else {
-                fprintf(stderr, "terms not matching\n");
                 exit(SYNTAX_ERROR);
             }
         }

@@ -984,10 +984,6 @@ void generate(register Generator * restrict generator, register Parser * restric
                 gen_div(generator->instructions[i], generator);
                 break;
 
-            case idiv: //never happens
-                gen_div(generator->instructions[i], generator);
-                break;
-
             case lt:
                 gen_check(generator->instructions[i], true);
                 gen_gt(generator->instructions[i], generator, "LT", false);
