@@ -32,10 +32,10 @@ const unsigned int LL_TABLE[8][33] = {{1},
                                       {0, 2, 2, 2, 2, 2, 2, 2, 0, 2, 0, 0, 3, 4, [15] =  2, 2, 2, 2},
                                       {0, 7, 11, 12, 10, 5, 6, 9, 0, 0, [15] =  7, 7, 7, 7},
                                       {[9] = 15, 14, [19] = 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15},
-                                      {[8] = 16, [14] = 22},
+                                      {[8] = 16, [14] = 8},
                                       {[7] = 17},
                                       {[11] = 19, [14] = 18},
-                                      {0, 20, 20, 20, 20, 0, 20, 20, 0, 0, 0, 0, 0, 0, 21, [15] =  20, 20, 20, 20} };
+                                      {0, 20, 20, 20, 20, 0, 20, 20, 0, 0, 0, 0, 0, 0, 13, [15] =  20, 20, 20, 20} };
 
 /// \brief Allocates memory for data for stack and initializes it
 /// \param value unsigned int value
@@ -148,9 +148,6 @@ int apply_rule(register TStack * restrict stack, unsigned int val) {
             stack_push(stack, stack_data(T_SEMICOLON, T_TERM));
             stack_push(stack, stack_data(N_EXPR, T_NONTERM));
             break;
-        case 8:
-            stack_push(stack, stack_data(T_SEMICOLON, T_TERM));
-            break;
         case 9:
             stack_push(stack, stack_data(N_SMALL_ST, T_NONTERM));
             stack_push(stack, stack_data(T_VAR, T_TERM));
@@ -178,9 +175,6 @@ int apply_rule(register TStack * restrict stack, unsigned int val) {
             stack_push(stack, stack_data(N_EXPR, T_NONTERM));
             stack_push(stack, stack_data(KW_WHILE, T_KW));
             break;
-        case 13:
-            stack_push(stack, stack_data(T_SEMICOLON, T_TERM));
-            break;
         case 14:
             stack_push(stack, stack_data(T_SEMICOLON, T_TERM));
             stack_push(stack, stack_data(N_EXPR, T_NONTERM));
@@ -198,9 +192,6 @@ int apply_rule(register TStack * restrict stack, unsigned int val) {
         case 17:
             stack_push(stack, stack_data(T_VAR, T_TERM));
             break;
-        case 18:
-            /* eps */
-            break;
         case 19:
             stack_push(stack, stack_data(N_PARAM_DEF, T_NONTERM));
             stack_push(stack, stack_data(T_COMMA, T_TERM));
@@ -209,9 +200,9 @@ int apply_rule(register TStack * restrict stack, unsigned int val) {
             stack_push(stack, stack_data(N_BODY, T_NONTERM));
             stack_push(stack, stack_data(N_ST, T_NONTERM));
             break;
-
-        case 21:
-        case 22:
+        case 18:
+        case 13:
+        case 8:
             /* epsilon */
             break;
         default: /* no rule found */
