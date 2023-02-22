@@ -106,13 +106,13 @@ int test3(TStack *S, TData *a, TData *b, TData *c) {
 }
 
 int main(void) {
-	TStack *S;	//= malloc(sizeof(TStack));
+	TStack *S = NULL;
 	TData *a = malloc(sizeof(TData));
 	TData *b = malloc(sizeof(TData));
 	TData *c = malloc(sizeof(TData));
-	a->x = 5;
-	b->x = 6;
-	c->x = 7;
+	a->value = 5;
+	b->value = 6;
+	c->value = 7;
 	S = stack_init(S);
 	test1(S, a, b, c);
 	test2(S, a, b, c);

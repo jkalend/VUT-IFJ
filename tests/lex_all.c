@@ -8,7 +8,7 @@
 #include <stdlib.h>
 
 int write_file(const char *filename, const char *content) {
-	stream = fopen(filename, "w");
+	FILE *stream = fopen(filename, "w");
 	if (stream == NULL) {
 		return 1;
 	}
@@ -36,7 +36,7 @@ int main(void) {
 	tests_failed +=
 		test_only_prologue_with_newline_and_block_comments_and_newline_and_spaces_and_comment();
 	tests_failed += test_only_prologue_with_multiline_block_comment();
-	tests_failed += test_only_prologue_with_declare();	//TODO SIGSEGVs as of now due to strcmp
+	tests_failed += test_only_prologue_with_declare();
 	tests_failed += test_prologue_declare_variable_string();
 	tests_failed += test_prologue_declare_variable_int();
 	tests_failed += test_prologue_declare_variable_float();

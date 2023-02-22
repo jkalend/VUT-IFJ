@@ -1668,6 +1668,7 @@ void htab_check(const htab_data_t * restrict htab_data) {
     }
 }
 
+#ifndef TESTS
 int main(void) {
     static Generator gen;
     generator_init(&gen);
@@ -1700,3 +1701,4 @@ int main(void) {
     free(parser.builtins);
     return 0;
 }
+#endif
