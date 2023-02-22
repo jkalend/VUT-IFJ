@@ -6,12 +6,17 @@
 #define IFJ_LEX_ALL_H
 
 #include <string.h>
+#include "scanner.h"
+#include "stack.h"
+
+
+static Scanner scanner;
 
 #define TEST(NAME, DESCRIPTION)                                                \
 int NAME() {                                                                   \
     int STATUS = 0;                                                            \
-    line = 1;                                                                  \
-    first_read = 0;                                                            \
+    scanner.line = 1;                                                                  \
+    scanner.first_read = 0;                                                            \
     printf("\n[%s] %s\n\n", #NAME, DESCRIPTION);                               \
 
 #define TEST_ASSERT(CONDITION)                                                 \
